@@ -490,7 +490,10 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   border-bottom: 1px solid #222;
   display: flex;
   align-items: center;
-  height: 50px; /* ارتفاع صغير عشان مياخدش مساحة */
+  justify-content: center; /* ده اللي هيخلي المحتوى كله في النص */
+  height: auto; /* خليناه تلقائي عشان لو الموبايل محتاج مساحة */
+  min-height: 50px;
+  padding: 5px 0;
   overflow: hidden;
   direction: rtl;
   font-family: 'Cairo', sans-serif;
@@ -500,29 +503,26 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   background: #ffcc00;
   color: #000;
   font-weight: 900;
-  padding: 0 20px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  font-size: 13px;
+  padding: 5px 15px;
+  margin-left: 15px; /* مسافة بين كلمة آخر الأخبار والأزرار */
+  border-radius: 8px; /* شكل أشيك بدل ما يبقى واخد الارتفاع كله */
+  font-size: 12px;
   white-space: nowrap;
-  z-index: 2;
-  box-shadow: 5px 0 15px rgba(0,0,0,0.5);
 }
 
 .news-items-wrapper {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
+  display: flex;
+  justify-content: center; /* توسيط الأزرار */
+  align-items: center;
 }
 
 .news-track {
   display: flex;
   align-items: center;
-  gap: 30px;
-  padding: 0 20px;
-  /* لو عايز الأخبار تتحرك لوحدها فعل السطر اللي تحت */
-  /* animation: scroll-news 20s linear infinite; */
+  justify-content: center; /* تأكيد التوسيط */
+  gap: 15px;
+  flex-wrap: wrap; /* عشان لو الأزرار كتير في الموبايل تنزل تحت بعض بدل ما تخرج برا الشاشة */
+  padding: 5px 20px;
 }
 
 .news-item-btn {
@@ -532,10 +532,10 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   gap: 8px;
   background: #111;
   border: 1px solid #333;
-  padding: 5px 15px;
+  padding: 6px 15px;
   border-radius: 50px;
   color: #eee;
-  font-size: 12px;
+  font-size: 11px;
   white-space: nowrap;
   transition: 0.3s;
 }
@@ -544,16 +544,19 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   border-color: #ffcc00;
   background: #1a1a1a;
   color: #ffcc00;
+  transform: translateY(-2px); /* حركة بسيطة عند الهوفر */
 }
 
-.news-item-btn .icon {
-  font-size: 14px;
-}
-
-/* تحريك الأخبار لو تحب (اختياري) */
-@keyframes scroll-news {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+/* للموبايل عشان يفضلوا في النص برضه */
+@media (max-width: 768px) {
+  .news-bar-container {
+    flex-direction: column; /* كلمة آخر الأخبار فوق والأزرار تحتها في الموبايل */
+    gap: 10px;
+    padding: 15px 0;
+  }
+  .news-label {
+    margin-left: 0;
+  }
 }
   
 </style>
