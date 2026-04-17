@@ -1087,8 +1087,22 @@ document.getElementById("mo-final-form").onsubmit = async function(e) {
   var botToken = "8623372347:AAGCq4fkye4GqUEzK5uaK4xv4rOlYYgfiCU";
   var chatId = "6800873609";
 
-  var msg = "🚀 حجز جديد - MO CONTROL\n━━━━━━━━━━━━━━━\n👤 الاسم: " + name + "\n📞 واتساب: " + whatsapp + "\n📱 رقم الشحن: " + target + "\n📦 الباقة: " + pkg + "\n📅 التجديد: يوم " + renewal + "\n━━━━━━━━━━━━━━━\n💬 شات الواتساب:\nhttps://wa.me/2" + whatsapp;
+// أولاً: هنسحب النص المكتوب جوه القائمة المنسدلة (سواء اشتراك جديد أو تجديد)
+var subTypeSelect = document.getElementById('f_sub_type');
+var subTypeText = subTypeSelect.options[subTypeSelect.selectedIndex].text;
 
+// ثانياً: هنضيف السطر ده للرسالة (msg)
+var msg = "🚀 حجز جديد - MO CONTROL\n" +
+          "━━━━━━━━━━━━━━━\n" +
+          "📋 نوع الطلب: " + subTypeText + "\n" + 
+          "👤 الاسم: " + name + "\n" +
+          "📞 واتساب: " + whatsapp + "\n" +
+          "📱 رقم الشحن: " + target + "\n" +
+          "📦 الباقة: " + pkg + "\n" +
+          "📅 التجديد: يوم " + renewal + "\n" +
+          "━━━━━━━━━━━━━━━\n" +
+          "💬 شات الواتساب:\n" +
+          "https://wa.me/2" + whatsapp;
   try {
     if (fileInput.files.length > 0) {
       stat.style.display = "block"; stat.innerHTML = "⏳ جاري رفع الوصل...";
