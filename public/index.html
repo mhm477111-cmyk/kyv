@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="msapplication-navbutton-color" content="#000000">
+<meta name="apple-mobile-web-app-status-bar-style" content="#000000">
+<title>MO CONTROL | BLACK GOLD - VIP Services</title>
+<link rel="icon" href="https://i.top4top.io/p_3751ryoix1.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<script type="text/javascript">
+var uri = window.location.toString();
+if (uri.indexOf("?m=1") > 0) {
+  var clean_uri = uri.substring(0, uri.indexOf("?m=1"));
+  window.history.replaceState({}, document.title, clean_uri);
+}
+</script>
+
+<style>
+#navbar-iframe, .navbar, .Header, .sidebar-wrapper, .footer-outer { display:none !important; }
+
+:root {
+  --gold-bright: #f9e29d; 
+  --gold-dark: #d4af37;
+  --black: #000000;
+  --card-bg: #0d0d0d;
+  --whatsapp-green: #25d366;
+}
+
+body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-family: 'Cairo', sans-serif; direction: rtl; overflow-x: hidden; }
+
+.top-bar { background: linear-gradient(90deg, #d4af37, #f9e29d, #d4af37); background-size: 200% auto; animation: shine 3s linear infinite; color: #000; padding: 12px; font-size: 1rem; font-weight: 900; text-align: center; position: sticky; top: 0; z-index: 1001; overflow: hidden; white-space: nowrap; }
+.scroll-text { display: inline-block; animation: scroll-left 15s linear infinite; padding-right: 50px; }
+@keyframes scroll-left { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@keyframes shine { to { background-position: 200% center; } }
+
+.hex-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 100 100'%3E%3Cpath d='M50 20 L70 30 L70 50 L50 60 L30 50 L30 30 Z' fill='none' stroke='%23d4af37' stroke-width='0.5'/%3E%3C/svg%3E"); }
+
+.main-content { max-width: 1200px; margin: 0 auto; padding: 5px 15px; text-align: center; }
+
+.brand-header { margin: 15px 0 10px; }
+.brand-header h1 { font-size: clamp(2.2rem, 8vw, 4rem); font-weight: 900; margin: 0; background: linear-gradient(135deg, #fff, var(--gold-bright), var(--gold-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.brand-tagline { color: var(--gold-dark); letter-spacing: 5px; font-size: 0.8rem; font-weight: bold; }
+
+.network-status-bar { background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); padding: 8px 15px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; margin-bottom: 20px; }
+.status-dot { width: 8px; height: 8px; background-color: #25d366; border-radius: 50%; box-shadow: 0 0 8px #25d366; animation: blink 1.5s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.feature-item { background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)); backdrop-filter: blur(8px); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 12px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; }
+.feature-item i { font-size: 1.4rem; color: var(--gold-bright); margin-bottom: 5px; }
+.feature-item .main-text { font-size: 1.1rem; font-weight: 900; color: #fff; line-height: 1.1; }
+.feature-item .sub-text { font-size: 0.7rem; color: var(--gold-dark); font-weight: 700; }
+
+.section-title { font-size: 1.8rem; font-weight: 800; margin: 10px 0 5px !important; color: var(--gold-bright); display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 !important; }
+.provider-logo { width: 45px; height: auto; border-radius: 8px; }
+.quota-badge { background: rgba(248, 113, 113, 0.1); color: #f87171; padding: 6px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; border: 1px solid #f87171; margin-bottom: 10px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+
+.card { 
+  background: var(--card-bg); 
+  border: 1px solid rgba(249, 226, 157, 0.2); 
+  border-radius: 15px; 
+  padding: 15px; 
+  transition: all 0.4s ease; 
+  display: flex; 
+  flex-direction: column; 
+  text-align: center; 
+  position: relative;
+  overflow: hidden;
+}
+.card:hover { 
+  transform: translateY(-8px); 
+  border-color: var(--gold-bright); 
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4), inset 0 0 10px rgba(212, 175, 55, 0.1);
+}
+
+.price { font-size: 2.2rem; font-weight: 900; color: var(--gold-bright); margin: 5px 0; }
+.price span { font-size: 0.9rem; color: #fff; }
+.details { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; line-height: 1.5; color: #ccc; }
+.btn { background: linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color: #000 !important; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: 900; font-size: 0.9rem; transition: 0.3s; }
+
+.payment-section { background: #050505; border: 1px solid var(--gold-dark); border-radius: 20px; padding: 15px; margin: 20px 0; }
+.faq-item { background: #0d0d0d; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px; padding: 12px; margin-bottom: 10px; text-align: right; }
+.faq-item h4 { color: var(--gold-bright); margin: 0 0 5px; font-size: 1rem; }
+.faq-item p { color: #ccc; font-size: 0.85rem; margin: 0; border-right: 2px solid var(--gold-dark); padding-right: 10px; }
+
+@media (max-width: 768px) {
+  .grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+}
+
+.pay-chip {
+  background: #0d0d0d;
+  border: 1px solid #d4af37;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.pay-chip:hover {
+  background: #f9e29d;
+  color: #000;
+  box-shadow: 0 0 15px #d4af37;
+  transform: translateY(-2px);
+}
+
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #d4af37 !important;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  z-index: 10;
+}
+.prev-btn { right: -15px; }
+.next-btn { left: -15px; }
+
+@media (max-width: 600px) {
+  .pay-chip {
+    font-size: 0.7rem;
+    padding: 6px 10px;
+  }
+}
+
+@keyframes glow-move {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+.features-grid div[style*="background"]:hover {
+  transform: translateY(-8px) !important;
+  transition: 0.3s ease-in-out !important;
+  box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2) !important;
+  border-color: #d4af37 !important;
+  cursor: pointer;
+}
+
+.old-price {
+  color: #ff4d4d !important;
+  text-decoration: line-through !important;
+  font-size: 0.85em !important;
+  margin-left: 8px !important;
+  opacity: 0.7;
+  font-weight: normal !important;
+}
+
+.sale-badge {
+  position: absolute;
+  top: 12px;
+  right: -32px;
+  background: linear-gradient(45deg, #ff0000, #ff5555);
+  color: #fff !important;
+  padding: 4px 35px;
+  transform: rotate(45deg);
+  font-size: 10px;
+  font-weight: 900;
+  font-family: 'Cairo', sans-serif;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  z-index: 5;
+  text-align: center;
+}
+
+.card-discount {
+  border: 1px solid #d4af37 !important;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2) !important;
+}
+
+.mo-ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: #ffcc00;
+  padding: 10px 0;
+  border-bottom: 2px solid #000;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 999999;
+  direction: rtl;
+}
+
+.mo-ticker {
+  display: flex;
+  white-space: nowrap;
+  width: max-content;
+  animation: mo-ticker-scrolling 35s linear infinite;
+}
+
+.mo-ticker-item {
+  display: inline-block;
+  padding: 0 40px;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+  color: #000;
+}
+
+@keyframes mo-ticker-scrolling {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(33.33%); }
+}
+
+@media screen and (max-width: 768px) {
+  .mo-ticker-item { font-size: 13px; padding: 0 25px; }
+  .mo-ticker-wrap { padding: 8px 0; }
+}
+
+@keyframes status-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+
+.fas { display: inline-block; }
+
+.details div { margin: 5px 0; line-height: 1.4; }
+
+.pay-chip-final {
+  background: #0d0d0d;
+  border: 1px solid #d4af37;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+}
+
+.pay-chip-final:hover {
+  border-color: #f9e29d;
+  background: #111;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+  transform: translateY(-3px);
+}
+
+.faq-card-final {
+  background: #0d0d0d;
+  border-right: 4px solid #d4af37;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  text-align: right;
+  transition: 0.3s;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.faq-card-final:hover {
+  border-color: #f9e29d;
+  transform: scale(1.01);
+}
+
+@media (max-width: 480px) {
+  .pay-chip-final {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+}
+
+@keyframes handSwipe {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(8px); }
+  100% { transform: translateX(0); }
+}
+
+@media (min-width: 1024px) {
+  .reviews-scroll-box::-webkit-scrollbar {
+    display: block !important;
+    height: 8px !important;
+  }
+  .reviews-scroll-box::-webkit-scrollbar-thumb {
+    background: #d4af37 !important;
+    border-radius: 10px !important;
+  }
+  .reviews-scroll-box::-webkit-scrollbar-track {
+    background: #1a1a1a !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .reviews-scroll-box::-webkit-scrollbar {
+    display: none !important;
+  }
+}
+
+.whatsapp-float {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  bottom: 20px;
+  right: 20px;
+  background-color: #25d366;
+  color: #FFF !important;
+  border-radius: 50px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+  animation: pulse-green 2s infinite;
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.1);
+  background-color: #128c7e;
+}
+
+.tooltip-text {
+  position: absolute;
+  width: 130px;
+  background-color: #d4af37;
+  color: #000;
+  text-align: center;
+  border-radius: 8px;
+  padding: 6px 0;
+  bottom: 75px;
+  right: 0;
+  font-size: 13px;
+  font-weight: bold;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.whatsapp-float:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+
+.features-grid > div {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.features-grid > div:hover {
+  transform: translateY(-12px) !important;
+  border-color: #d4af37 !important;
+  box-shadow: 0 15px 35px rgba(212, 175, 55, 0.4) !important;
+  z-index: 10;
+}
+
+.mo-floating-btn { position: fixed; bottom: 20px; left: 20px; background: #ffcc00; color: #000; padding: 12px 20px; border-radius: 50px; cursor: pointer; z-index: 999999; font-family: 'Cairo'; font-weight: 900; border: 2px solid #000; box-shadow: 0 5px 15px rgba(255,204,0,0.4); animation: moPulse 1s infinite !important; }
+.mo-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000000; padding: 15px; box-sizing: border-box; }
+.mo-form-card { max-width: 380px; width: 95%; background: #0c0c0c; border: 1px solid #ffcc00; padding: 12px 15px; border-radius: 20px; position: relative; direction: rtl; font-family: 'Cairo'; max-height: 90vh; overflow-y: auto; }
+.close-btn { 
+  position: absolute; 
+  top: 20px !important;
+  left: 15px !important; 
+  color: #fff; 
+  font-size: 24px; 
+  cursor: pointer; 
+  z-index: 100;
+  line-height: 1;
+}
+
+@keyframes moPulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+.mo-form-card::-webkit-scrollbar { width: 6px; }
+.mo-form-card::-webkit-scrollbar-track { background: #111; border-radius: 10px; }
+.mo-form-card::-webkit-scrollbar-thumb { background: #ffcc00; border-radius: 10px; border: 1px solid #111; }
+
+.mo-input-row { margin-bottom: 5px; text-align: right; }
+.mo-input-row label { display: block; color: #eee; font-size: 14px; margin-bottom: 2px; }
+.mo-input-row input, .mo-premium-select { width: 100%; padding: 7px; background: #111; border: 1px solid #333; color: #fff; border-radius: 10px; font-family: 'Cairo'; font-size: 11px; outline: none; box-sizing: border-box; }
+.mo-file-input { background: #0d0d0d; color: #f9e29d; padding: 8px; border: 1px dashed #d4af37; border-radius: 10px; width: 100%; cursor: pointer; }
+.mo-btn-submit { width: 100%; padding: 10px; background: #ffcc00; color: #000; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; font-family: 'Cairo'; margin-top: 5px; }
+.mo-btn-close { background:#ffcc00; border:none; padding:10px 25px; border-radius:10px; cursor:pointer; font-weight:bold; font-family: Cairo; margin-top:15px; }
+
+.mo-cash-box { display: flex; align-items: center; justify-content: space-between; background: #111; padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #333; cursor: pointer; transition: 0.3s; }
+.mo-instapay-box { display: flex; align-items: center; justify-content: space-between; background: #000; padding: 12px 15px; border-radius: 8px; border: 1px solid #ffcc00; transition: 0.3s; }
+.mo-copy-badge { background: #ffcc00; color: #000; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 900; }
+
+#form-content-area h2 {
+  font-size: 28px !important;
+}
+
+#mo-elite-preloader {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #000;
+  background-image: 
+    linear-gradient(rgba(255, 204, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 204, 0, 0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000000;
+  transition: 0.4s cubic-bezier(0.8, 0, 0.2, 1);
+}
+
+.graphic-container { position: relative; display: flex; flex-direction: column; align-items: center; }
+.tech-circles { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.circle-outer { width: 250px; height: 250px; border: 2px dashed rgba(255, 204, 0, 0.2); border-radius: 50%; animation: rotate 5s linear infinite; }
+.circle-inner { position: absolute; top: 25px; left: 25px; width: 200px; height: 200px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; border-top: 2px solid #ffcc00; animation: rotate 1s reverse linear infinite; }
+
+.logo-wrapper { position: relative; text-align: center; }
+.glitch-text { 
+  font-family: 'Cairo', sans-serif; 
+  font-size: 3.2rem; font-weight: 900; 
+  color: #fff; letter-spacing: 8px; 
+  text-shadow: 0 0 20px rgba(255, 204, 0, 0.5); 
+  margin: 0;
+}
+
+.scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #ffcc00; box-shadow: 0 0 15px #ffcc00; animation: scan 0.8s linear infinite; }
+
+.loading-data { width: 280px; margin-top: 40px; }
+.data-bar { height: 4px; background: rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+.data-progress { height: 100%; width: 0%; background: #ffcc00; box-shadow: 0 0 10px #ffcc00; animation: fill-bar 0.5s ease-in-out forwards; }
+.status-container { display: flex; justify-content: space-between; margin-top: 10px; color: #ffcc00; font-family: monospace; font-size: 10px; }
+
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+@keyframes fill-bar { to { width: 100%; } }
+
+.mo-elite-hidden {
+  opacity: 0;
+  transform: scale(1.2);
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+@keyframes particle_float { 0%, 100% { transform: translateY(0); opacity: 0.3; } 50% { transform: translateY(-10px); opacity: 0.6; } }
+@keyframes core_pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.15; } 50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.25; } }
+@keyframes sweep_animation { 0% { left: -110%; opacity: 0; } 50% { opacity: 0.6; } 100% { left: 110%; opacity: 0; } }
+@keyframes border_glow { 0%, 100% { border-color: rgba(224, 199, 112, 0.1); box-shadow: none; } 50% { border-color: rgba(224, 199, 112, 0.3); box-shadow: 0 0 10px rgba(224, 199, 112, 0.1); } }
+@keyframes laser_move { 0% { top: 0%; opacity: 0; } 50% { opacity: 0.5; } 100% { top: 100%; opacity: 0; } }
+
+@media (max-width: 768px) {
+  .brand-header { padding: 25px 0 0 0 !important; }
+  .brand-header h1 { font-size: 2.1rem !important; letter-spacing: 3px !important; }
+}
+
+.mo-notification {
+  position: fixed;
+  bottom: 95px; 
+  right: -380px;
+  background: #0a0a0a;
+  border-right: 4px solid #d4af37;
+  border-radius: 15px;
+  padding: 12px 18px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-family: 'Cairo', sans-serif;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+.mo-notification.show { right: 20px; }
+.mo-notif-text { color: #fff; font-size: 13px; direction: rtl; line-height: 1.5; }
+.mo-notif-text b { color: #d4af37; font-weight: 800; }
+.mo-notif-icon { background: #d4af37; color: #000; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
+
+.mo-scroll-gold::-webkit-scrollbar { width: 6px; }
+.mo-scroll-gold::-webkit-scrollbar-track { background: #111; border-radius: 10px; }
+.mo-scroll-gold::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<!-- Preloader -->
+<div id="mo-elite-preloader">
+  <div class="graphic-container">
+    <div class="tech-circles">
+      <div class="circle-outer"></div>
+      <div class="circle-inner"></div>
+    </div>
+    <div class="logo-wrapper">
+      <h1 class="glitch-text">MO CONTROL</h1>
+      <div class="scan-line"></div>
+    </div>
+    <div class="loading-data">
+      <div class="data-bar">
+        <div class="data-progress"></div>
+      </div>
+      <div class="status-container">
+        <span class="loading-status">SYSTEM READY</span>
+        <span class="percent-val" id="load-perc">0%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ticker -->
+<div class="mo-ticker-wrap">
+  <div class="mo-ticker">
+    <div class="mo-ticker-item">&#9889; أهلاً بك في MO CONTROL | BLACK GOLD - التفعيل أولاً والدفع لاحقاً - أسرع خدمة تفعيل باقات في مصر &#9889;</div>
+    <div class="mo-ticker-item">&#9889; أهلاً بك في MO CONTROL | BLACK GOLD - التفعيل أولاً والدفع لاحقاً - أسرع خدمة تفعيل باقات في مصر &#9889;</div>
+    <div class="mo-ticker-item">&#9889; أهلاً بك في MO CONTROL | BLACK GOLD - التفعيل أولاً والدفع لاحقاً - أسرع خدمة تفعيل باقات في مصر &#9889;</div>
+  </div>
+</div>
+
+<div class="hex-bg"></div>
+
+<div class="main-content">
+
+  <!-- Header -->
+  <header class="brand-header" style="background: #000; padding: 30px 0 0 0; text-align: center; position: relative; overflow: hidden; font-family: 'Cairo', sans-serif; direction: ltr; --primary-gold: #e0c770;">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+      <div style="position: absolute; width: 3px; height: 3px; background: rgba(224, 199, 112, 0.4); border-radius: 50%; top: 10%; left: 20%; animation: particle_float 6s infinite;"></div>
+      <div style="position: absolute; width: 2px; height: 2px; background: rgba(224, 199, 112, 0.3); border-radius: 50%; top: 40%; left: 70%; animation: particle_float 8s infinite;"></div>
+      <div style="position: absolute; width: 4px; height: 4px; background: rgba(224, 199, 112, 0.5); border-radius: 50%; top: 80%; left: 30%; animation: particle_float 7s infinite;"></div>
+    </div>
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 90px; background: rgba(224, 199, 112, 0.15); filter: blur(45px); border-radius: 50%; animation: core_pulse 4s ease-in-out infinite;"></div>
+    <div style="position: relative; z-index: 10;">
+      <div style="display: inline-block; position: relative; margin-bottom: 15px;">
+        <h1 style="margin: 0; font-size: 3.2rem; font-weight: 900; color: #fff; letter-spacing: 5px; text-transform: uppercase; line-height: 1.1; filter: drop-shadow(0 0 10px rgba(224, 199, 112, 0.2));">
+          MO <span style="color: #e0c770;">CONTROL</span>
+        </h1>
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: sweep_animation 3.5s infinite; transform: skewX(-25deg);"></div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <div style="height: 1px; width: 180px; background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);"></div>
+        <div style="display: flex; gap: 18px; font-weight: 700; font-size: 0.85rem; color: #fff; direction: rtl; flex-wrap: wrap; justify-content: center;">
+          <div style="display: flex; align-items: center; gap: 8px; border: 1px solid rgba(224, 199, 112, 0.1); padding: 5px 12px; border-radius: 10px; background: rgba(224, 199, 112, 0.03); animation: border_glow 3s infinite;">
+            <span style="color: #e0c770; font-size: 1rem;">&#9889;</span>
+            <span style="text-shadow: 0 0 5px rgba(224, 199, 112, 0.3);">تفعيل فوري</span>
+          </div>
+          <span style="color: #fff; opacity: 0.2;">&#8226;</span>
+          <div style="display: flex; align-items: center; gap: 8px; border: 1px solid rgba(224, 199, 112, 0.1); padding: 5px 12px; border-radius: 10px; background: rgba(224, 199, 112, 0.03); animation: border_glow 3s infinite;">
+            <span style="color: #e0c770; font-size: 1rem;">🛡️</span>
+            <span style="text-shadow: 0 0 5px rgba(224, 199, 112, 0.3);">حماية فائقة</span>
+          </div>
+          <span style="color: #fff; opacity: 0.2;">&#8226;</span>
+          <span style="color: #e0c770; text-shadow: 0 0 5px rgba(224, 199, 112, 0.3);">إصدار 2026</span>
+        </div>
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #e0c770, transparent); opacity: 0.4; animation: laser_move 4s linear infinite; z-index: 5;"></div>
+        <div style="width: 100%; height: 3px; background: linear-gradient(90deg, transparent, #e0c770, transparent); box-shadow: 0px 5px 20px rgba(224, 199, 112, 0.5); margin-top: 20px; position: relative; z-index: 20;"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Status Container -->
+  <div class="status-container" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0; direction: rtl; flex-wrap: wrap; text-align: center;">
+    <div style="display: flex; align-items: center; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.4); white-space: nowrap; margin: 5px;">
+      <div style="display: flex; align-items: center; gap: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 12px; margin-left: 12px; direction: ltr;">
+        <div style="position: relative; width: 8px; height: 8px;">
+          <span style="position: absolute; width: 100%; height: 100%; background: #7eba27; border-radius: 50%; z-index: 2;"></span>
+          <span style="position: absolute; width: 100%; height: 100%; background: #7eba27; border-radius: 50%; animation: status-pulse 2s infinite; opacity: 0.6; z-index: 1;"></span>
+        </div>
+        <span style="color: rgba(255,255,255,0.6); font-family: 'Poppins', sans-serif; font-size: 0.7rem; letter-spacing: 1px; font-weight: 600;">SYSTEM LIVE</span>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <span style="color: #fff; font-family: 'Cairo', sans-serif; font-size: 0.95rem; font-weight: 800;">
+          التفعيل متاح وفوري الآن <span style="filter: drop-shadow(0 0 5px #ff4500);">🔥</span>
+        </span>
+      </div>
+    </div>
+    <div id="welcome-card" style="display:none; align-items: center; background: rgba(212, 175, 55, 0.1); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 100px; border: 1px solid #d4af37; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); direction: rtl; margin: 5px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-crown" style="color: #d4af37; font-size: 0.9rem;"></i>
+        <span id="welcome-user-text" style="color: #fff; font-family: 'Cairo', sans-serif; font-size: 0.9rem; font-weight: 700; border-left: 1px solid rgba(212,175,55,0.3); padding-left: 10px; margin-left: 5px;">
+          منور يا بطل 💎✨
+        </span>
+        <div onclick="handleLogout()" style="cursor: pointer; color: #ff4444; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+          <i class="fas fa-power-off"></i>
+          <span style="font-weight: 800; font-size: 0.7rem;">خروج</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Grid -->
+  <div class="features-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; direction: rtl; font-family: 'Cairo', sans-serif;">
+    <div style="background: linear-gradient(145deg, #111, #000); border: 1px solid rgba(212, 175, 55, 0.3); padding: 15px 5px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+      <div style="color: #d4af37; font-size: 1.2rem; font-weight: 900; text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);">+5000</div>
+      <div style="color: #aaa; font-size: 0.7rem; margin-top: 5px; letter-spacing: 0.5px;">تفعيل ناجح</div>
+    </div>
+    <div style="background: linear-gradient(145deg, #111, #000); border: 1px solid rgba(212, 175, 55, 0.3); padding: 15px 5px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+      <div style="color: #d4af37; font-size: 1.2rem; font-weight: 900; text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);">+1200</div>
+      <div style="color: #aaa; font-size: 0.7rem; margin-top: 5px; letter-spacing: 0.5px;">عميل دائم</div>
+    </div>
+    <div style="background: linear-gradient(145deg, #111, #000); border: 1px solid rgba(212, 175, 55, 0.3); padding: 15px 5px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+      <div style="color: #d4af37; font-size: 1.2rem; font-weight: 900; text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);">100%</div>
+      <div style="color: #aaa; font-size: 0.7rem; margin-top: 5px; letter-spacing: 0.5px;">ضمان أمان</div>
+    </div>
+    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.2); padding: 18px 5px; border-radius: 15px; text-align: center; transition: 0.3s;">
+      <div style="background: rgba(212, 175, 55, 0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+        <svg fill="none" height="22" stroke="#d4af37" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="22">
+          <line x1="22" x2="11" y1="2" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </div>
+      <div style="color: #fff; font-size: 0.75rem; font-weight: 600;">اطلب التفعيل</div>
+    </div>
+    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.2); padding: 18px 5px; border-radius: 15px; text-align: center;">
+      <div style="background: rgba(212, 175, 55, 0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+        <svg fill="none" height="22" stroke="#d4af37" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="22">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+      </div>
+      <div style="color: #fff; font-size: 0.75rem; font-weight: 600;">تأكد من الخدمه</div>
+    </div>
+    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.2); padding: 18px 5px; border-radius: 15px; text-align: center;">
+      <div style="background: rgba(212, 175, 55, 0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+        <svg fill="none" height="22" stroke="#d4af37" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="22">
+          <rect height="14" rx="2" width="20" x="2" y="5"></rect>
+          <line x1="2" x2="22" y1="10" y2="10"></line>
+        </svg>
+      </div>
+      <div style="color: #fff; font-size: 0.75rem; font-weight: 600;">حول المبلغ</div>
+    </div>
+  </div>
+
+  <!-- Etisalat Emerald Section -->
+  <div style="display: flex; justify-content: center; align-items: center; margin-top: 60px; margin-bottom: 20px; padding: 0 5px;">
+    <div style="position: relative; padding: 3px; border-radius: 50px; background: linear-gradient(90deg, #008a00, #a2d400, #fff, #a2d400, #008a00); background-size: 200% auto; animation: glow-move 3s linear infinite; box-shadow: 0 0 40px rgba(0, 138, 0, 0.5);">
+      <div style="background: #000; padding: 12px 30px; border-radius: 50px; display: flex; align-items: center; gap: 15px; white-space: nowrap;">
+        <img src="https://h.top4top.io/p_3751ywlpc1.jpeg" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #a2d400; flex-shrink: 0;" alt="Etisalat Logo">
+        <h3 style="margin: 0; font-family: 'Cairo', sans-serif; font-size: clamp(1.2rem, 5vw, 2.2rem); font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 20px rgba(255,255,255,0.4);">
+          Etisalat <span style="color: #a2d400; text-shadow: 0 0 15px rgba(162, 212, 0, 0.9);">Emerald</span>
+        </h3>
+      </div>
+    </div>
+  </div>
+
+  <div onclick="openFeat('eti')" style="cursor: pointer; width: 100%; background: #000; border-top: 1px solid #a2d400; border-bottom: 1px solid #a2d400; padding: 12px 0; text-align: center; box-shadow: 0 0 20px rgba(162, 212, 0, 0.3); margin: 25px 0;">
+    <span style="color: #fff; font-family: 'Cairo'; font-weight: 700; font-size: 13px; white-space: nowrap; text-shadow: 0 0 5px #a2d400;">
+      اضغط هنا لمعرفة مميزات وشروط الاشتراك (اميرالد) 💡
+    </span>
+  </div>
+
+  <div class="grid">
+    <div class="card card-discount" style="border-color: #ff3131; box-shadow: 0 0 15px rgba(255, 49, 49, 0.2);">
+      <div class="sale-badge" style="background: linear-gradient(45deg, #8b0000, #ff3131);">أقوى توفير</div>
+      <h3 style="color: #ff3131;">20 جيجا 🌐</h3>
+      <div class="price"><span class="old-price">310ج</span>260<span>ج.م</span></div>
+      <div class="details">📞 1500 دقيقة <div>📩 250 رسالة</div>🌍 10 دقائق دولي</div>
+      <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Eti_20GB_260')" style="background: #ff3131; color: #fff;">اشترك الآن</a>
+    </div>
+    <div class="card card-discount" style="border-color: #a2d400; box-shadow: 0 0 15px rgba(162, 212, 0, 0.2);">
+      <div class="sale-badge" style="background: linear-gradient(45deg, #008a00, #a2d400);">توفير إضافي</div>
+      <h3 style="color: #a2d400;">25 جيجا 🌐</h3>
+      <div class="price"><span class="old-price">360ج</span>300<span>ج.م</span></div>
+      <div class="details">📞 1500 دقيقة <div>📩 250 رسالة</div>🌍 10 دقائق دولي</div>
+      <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Eti_25GB_300')" style="background: #a2d400; color: #000;">اشترك الآن</a>
+    </div>
+    <div class="card card-discount" style="border-color: #00d2ff; box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);">
+      <div class="sale-badge" style="background: linear-gradient(45deg, #0052d4, #00d2ff);">الأكثر طلباً</div>
+      <h3 style="color: #00d2ff;">30 جيجا 🌐</h3>
+      <div class="price"><span class="old-price">400ج</span>340<span>ج.م</span></div>
+      <div class="details">📞 1500 دقيقة <div>📩 250 رسالة</div>🌍 10 دقائق دولي</div>
+      <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Eti_30GB_340')" style="background: #00d2ff; color: #000;">اشترك الآن</a>
+    </div>
+    <div class="card card-discount" style="border-color: #9b51e0; box-shadow: 0 0 15px rgba(155, 81, 224, 0.2);">
+      <div class="sale-badge" style="background: linear-gradient(45deg, #4a148c, #9b51e0);">العرض المميز</div>
+      <h3 style="color: #9b51e0;">40 جيجا 🌐</h3>
+      <div class="price"><span class="old-price">500ج</span>420<span>ج.م</span></div>
+      <div class="details">📞 1500 دقيقة <div>📩 250 رسالة</div>🌍 10 دقائق دولي</div>
+      <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Eti_40GB_420')" style="background: #9b51e0; color: #fff;">اشترك الآن</a>
+    </div>
+    <div class="card card-discount" style="border-color: #ff6600; box-shadow: 0 0 15px rgba(255, 102, 0, 0.2);">
+      <div class="sale-badge" style="background: linear-gradient(45deg, #ff4500, #ff6600);">سعر حصري</div>
+      <h3 style="color: #ff6600;">50 جيجا 🌐</h3>
+      <div class="price"><span class="old-price">610ج</span>500<span>ج.م</span></div>
+      <div class="details">📞 1500 دقيقة <div>📩 250 رسالة</div>🌍 10 دقائق دولي</div>
+      <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Eti_50GB_500')" style="background: #ff6600; color: #fff;">اشترك الآن</a>
+    </div>
+    <div class="card card-discount" style="border-color: #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);">
+      <div class="sale-badge" style="background: linear-gradient(45deg, #b8860b, #f9e29d); color: #000 !important;">عرض الـ VIP</div>
+      <h3 style="color: #f9e29d; text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);">60 جيجا 🌐</h3>
+      <div class="price"><span class="old-price">720ج</span>640<span>ج.م</span></div>
+      <div class="details">📞 1500 دقيقة <div>📩 250 رسالة</div>🌍 10 دقائق دولي</div>
+      <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Eti_60GB_640')" style="background: linear-gradient(45deg, #d4af37, #f9e29d); color: #000;">اشترك الآن</a>
+    </div>
+  </div>
+
+  <div style="margin: 10px auto; max-width: 400px; padding: 10px; background: rgba(255, 204, 0, 0.05); border-right: 4px solid #ffcc00; direction: rtl;">
+    <p style="margin: 0; color: #ffcc00; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 600; line-height: 1.6;">
+      ⚠️ تنبيه: يضاف مبلغ 14 جنيه ضريبة قيمة مضافة شهرياً على جميع باقات اتصالات الموضحة أعلاه.
+    </p>
+  </div>
+
+  <!-- Vodafone Red Section -->
+  <div style="display: flex; justify-content: center; align-items: center; margin-top: 60px; margin-bottom: 20px;">
+    <div style="position: relative; padding: 3px; border-radius: 50px; background: linear-gradient(90deg, #ff0000, #fff, #ff0000); background-size: 200% auto; animation: glow-move 3s linear infinite; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);">
+      <div style="background: #000; padding: 12px 35px; border-radius: 50px; display: flex; align-items: center; gap: 15px;">
+        <img src="https://h.top4top.io/p_37514ag8k1.jpg" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid #ff0000;" alt="Vodafone Logo">
+        <h3 style="margin: 0; font-family: 'Cairo', sans-serif; font-size: 1.8rem; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255,0.5);">
+          Vodafone <span style="color: #ff0000;">Red</span>
+        </h3>
+      </div>
+    </div>
+  </div>
+
+  <div onclick="openFeat('voda')" style="cursor: pointer; width: 100%; background: #000; border-top: 1px solid #ff0000; border-bottom: 1px solid #ff0000; padding: 12px 0; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); margin: 25px 0;">
+    <span style="color: #fff; font-family: 'Cairo'; font-weight: 700; font-size: 13px; white-space: nowrap; text-shadow: 0 0 5px #ff0000;">
+      اضغط هنا لمعرفة مميزات وشروط الاشتراك (فودافون) 📜
+    </span>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>20 جيجا 🔴</h3><div class="price">300<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_20GB_300')">اشترك الآن</a></div>
+    <div class="card"><h3>25 جيجا 🔴</h3><div class="price">340<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_25GB_340')">اشترك الآن</a></div>
+    <div class="card"><h3>30 جيجا 🔴</h3><div class="price">380<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_30GB_380')">اشترك الآن</a></div>
+    <div class="card"><h3>40 جيجا 🔴</h3><div class="price">460<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_40GB_460')">اشترك الآن</a></div>
+    <div class="card"><h3>50 جيجا 🔴</h3><div class="price">520<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_50GB_520')">اشترك الآن</a></div>
+    <div class="card"><h3>60 جيجا 🔴</h3><div class="price">580<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_60GB_580')">اشترك الآن</a></div>
+  </div>
+
+  <div style="margin: 15px auto; max-width: 420px; padding: 12px; background: rgba(211, 47, 47, 0.05); border-right: 4px solid #d32f2f; border-radius: 0 10px 10px 0; direction: rtl;">
+    <p style="margin: 0; color: #d32f2f; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; line-height: 1.6;">
+      🔴 <span style="color: #fff;">ملحوظة هامة:</span> سعر باقة <span style="color: #fff;">فودافون</span> الموضح لا يشمل الضريبة؛ يضاف مبلغ الضريبة المقررة شهرياً عند التجديد.
+    </p>
+  </div>
+
+  <!-- WE Gold Section -->
+  <div style="display: flex; justify-content: center; align-items: center; margin-top: 60px; margin-bottom: 20px;">
+    <div style="position: relative; padding: 3px; border-radius: 50px; background: linear-gradient(90deg, #9b51e0, #fff, #9b51e0); background-size: 200% auto; animation: glow-move 3s linear infinite; box-shadow: 0 0 30px rgba(155, 81, 224, 0.4);">
+      <div style="background: #000; padding: 12px 35px; border-radius: 50px; display: flex; align-items: center; gap: 15px;">
+        <img src="https://c.top4top.io/p_375086zx91.png" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid #9b51e0;" alt="WE Logo">
+        <h3 style="margin: 0; font-family: 'Cairo', sans-serif; font-size: 1.8rem; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255,0.5);">
+          WE <span style="color: #FFD700; text-shadow: 0 0 10px #FFD700;">GOLD</span>
+        </h3>
+      </div>
+    </div>
+  </div>
+
+  <div onclick="openFeat('we')" style="cursor: pointer; width: 100%; background: #000; border-top: 1px solid #8e44ad; border-bottom: 1px solid #8e44ad; padding: 12px 0; text-align: center; box-shadow: 0 0 20px rgba(142, 68, 173, 0.3); margin: 25px 0;">
+    <span style="color: #fff; font-family: 'Cairo'; font-weight: 700; font-size: 13px; white-space: nowrap; text-shadow: 0 0 5px #8e44ad;">
+      اضغط هنا لمعرفة مميزات وشروط الاشتراك (وي جولد) ✨
+    </span>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>20 جيجا ✨</h3><div class="price">260<span>ج.م</span></div><div class="details">⭐ 1500 وحدة شاملة</div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('WE_20GB_260')">اشترك الآن</a></div>
+    <div class="card"><h3>25 جيجا ✨</h3><div class="price">300<span>ج.م</span></div><div class="details">⭐ 1500 وحدة شاملة</div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('WE_25GB_300')">اشترك الآن</a></div>
+    <div class="card"><h3>30 جيجا ✨</h3><div class="price">330<span>ج.م</span></div><div class="details">⭐ 1500 وحدة شاملة</div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('WE_30GB_330')">اشترك الآن</a></div>
+    <div class="card"><h3>40 جيجا ✨</h3><div class="price">390<span>ج.م</span></div><div class="details">⭐ 1500 وحدة شاملة</div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('WE_40GB_390')">اشترك الآن</a></div>
+    <div class="card"><h3>50 جيجا ✨</h3><div class="price">450<span>ج.م</span></div><div class="details">⭐ 1500 وحدة شاملة</div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('WE_50GB_450')">اشترك الآن</a></div>
+    <div class="card"><h3>60 جيجا ✨</h3><div class="price">530<span>ج.م</span></div><div class="details">⭐ 1500 وحدة شاملة</div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('WE_60GB_530')">اشترك الآن</a></div>
+  </div>
+
+  <!-- Footer Combined Section -->
+  <div class="footer-combined-section" style="padding: 40px 15px; background: #000; border-top: 2px solid rgba(212, 175, 55, 0.2); font-family: 'Cairo', sans-serif;">
+    <div style="display: flex; flex-wrap: wrap; gap: 25px; max-width: 1100px; margin: 0 auto; justify-content: center; align-items: stretch;">
+      <div style="flex: 1; min-width: 300px; background: #000; padding: 30px; border-radius: 20px; border: 1.5px solid #d4af37; text-align: center; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 0 25px rgba(212, 175, 55, 0.1);">
+        <div style="font-size: 1.4rem; color: #f9e29d; margin-bottom: 10px; font-weight: 900; text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);">🚀 شارك العروض مع صحابك!</div>
+        <p style="color: #bbb; font-size: 13px; margin-bottom: 25px; line-height: 1.6;">عجبتك باقات MO CONTROL؟ متبخلش على حبايبك وخليهم يستفيدوا بأقوى التخفيضات والدفع بعد التفعيل.</p>
+        <button onclick="shareSite()" style="background: linear-gradient(45deg, #d4af37, #f9e29d); color: #000; border: none; padding: 14px 40px; border-radius: 50px; font-weight: 900; font-family: 'Cairo'; cursor: pointer; transition: 0.4s; font-size: 16px; box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3); display: inline-flex; align-items: center; gap: 10px; justify-content: center;">
+          <span style="font-size: 20px;">🔗</span> شارك الموقع الآن
+        </button>
+      </div>
+      <div style="flex: 1; min-width: 300px; background: #000; padding: 30px; border-radius: 20px; border: 1.5px solid #d4af37; text-align: center; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 0 25px rgba(212, 175, 55, 0.1);">
+        <div style="font-size: 1.2rem; color: #f9e29d; margin-bottom: 5px; font-weight: 800;">💳 طرق الدفع المعتمدة</div>
+        <p style="color: #888; font-size: 11px; margin-bottom: 20px;">اضغط على أي وسيلة لنسخ البيانات والدفع فوراً 👇</p>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; direction: rtl;">
+          <a href="https://ipn.eg/S/hamoibrahim212/instapay/8Waki0" style="text-decoration: none;" target="_blank">
+            <div class="pay-chip-final pulse-btn" style="background: #4a148c; color: #fff; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 13px; border: 1px solid #f9e29d; cursor: pointer;">انستا باي 💸</div>
+          </a>
+          <div class="pay-chip-final pulse-btn" onclick="copyPay('01282608730', 'فودافون كاش')" style="background: #e60000; color: #fff; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 13px; border: 1px solid #f9e29d; cursor: pointer;">فودافون كاش 📱</div>
+          <div class="pay-chip-final pulse-btn" onclick="copyPay('01282608730', 'اتصالات كاش')" style="background: #008130; color: #fff; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 13px; border: 1px solid #f9e29d; cursor: pointer;">اتصالات كاش 💰</div>
+          <div class="pay-chip-final pulse-btn" onclick="copyPay('01282608730', 'أورنج كاش')" style="background: #ff6600; color: #fff; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 13px; border: 1px solid #f9e29d; cursor: pointer;">أورنج كاش 💎</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <div style="display: block !important; clear: both !important; margin: 25px 0 !important; padding: 15px 10px !important; background: #000 !important; border: 1px solid #d4af37 !important; border-radius: 20px !important; direction: rtl !important; box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.1) !important;">
+    <div style="text-align: center !important; color: #f9e29d !important; font-family: 'Cairo', sans-serif !important; font-weight: 900 !important; font-size: 1.3rem !important; margin-bottom: 15px !important;">
+      ⭐ تجارب عملائنا الحقيقية
+    </div>
+    <div style="display: flex !important; overflow-x: auto !important; gap: 12px !important; padding-bottom: 15px !important; -webkit-overflow-scrolling: touch !important; scrollbar-width: none !important;">
+      <div style="min-width: 220px !important; background: #0d0d0d !important; border: 1px solid #ff69b470 !important; padding: 15px !important; border-radius: 15px !important; flex-shrink: 0 !important;">
+        <div style="color: #f9e29d; font-size: 0.8rem;">⭐⭐⭐⭐⭐</div>
+        <p style="color: #fff !important; font-size: 0.85rem !important; margin: 10px 0 !important; font-family: 'Cairo', sans-serif !important; line-height: 1.6 !important;">بصراحة كنت خايفة في الأول بس التفعيل تم في ثواني والباقة حقيقية جداً.. شكراً ليكم ✨</p>
+        <div style="color: #ff69b4 !important; font-size: 0.75rem !important; font-weight: bold !important; text-align: left !important;">- سارة كامل 🌸</div>
+      </div>
+      <div style="min-width: 220px !important; background: #0d0d0d !important; border: 1px solid #ff69b470 !important; padding: 15px !important; border-radius: 15px !important; flex-shrink: 0 !important;">
+        <div style="color: #f9e29d; font-size: 0.8rem;">⭐⭐⭐⭐⭐</div>
+        <p style="color: #fff !important; font-size: 0.85rem !important; margin: 10px 0 !important; font-family: 'Cairo', sans-serif !important; line-height: 1.6 !important;">أحلى حاجة إنهم محترمين جداً في التعامل والنت بقى سريع وموفر معايا أوي 🎀</p>
+        <div style="color: #ff69b4 !important; font-size: 0.75rem !important; font-weight: bold !important; text-align: left !important;">- نور الهدى</div>
+      </div>
+      <div style="min-width: 220px !important; background: #0d0d0d !important; border: 1px solid rgba(212, 175, 55, 0.4) !important; padding: 15px !important; border-radius: 15px !important; flex-shrink: 0 !important;">
+        <div style="color: #f9e29d; font-size: 0.8rem;">⭐⭐⭐⭐⭐</div>
+        <p style="color: #fff !important; font-size: 0.85rem !important; margin: 10px 0 !important; font-family: 'Cairo', sans-serif !important; line-height: 1.6 !important;">أهم حاجة المصداقية، فعلت الأول وبعدين دفعت، شغل عالي يا وحوش ⚡</p>
+        <div style="color: #d4af37 !important; font-size: 0.75rem !important; font-weight: bold !important; text-align: left !important;">- إبراهيم سعد.</div>
+      </div>
+      <div style="min-width: 220px !important; background: #0d0d0d !important; border: 1px solid #ff69b470 !important; padding: 15px !important; border-radius: 15px !important; flex-shrink: 0 !important;">
+        <div style="color: #f9e29d; font-size: 0.8rem;">⭐⭐⭐⭐⭐</div>
+        <p style="color: #fff !important; font-size: 0.85rem !important; margin: 10px 0 !important; font-family: 'Cairo', sans-serif !important; line-height: 1.6 !important;">جربت شركات كتير بس MO CONTROL فعلاً أسرع وأرخص باقات جربتها 💗</p>
+        <div style="color: #ff69b4 !important; font-size: 0.75rem !important; font-weight: bold !important; text-align: left !important;">- مريم محمود</div>
+      </div>
+      <div style="min-width: 220px !important; background: #0d0d0d !important; border: 1px solid rgba(212, 175, 55, 0.4) !important; padding: 15px !important; border-radius: 15px !important; flex-shrink: 0 !important;">
+        <div style="color: #f9e29d; font-size: 0.8rem;">⭐⭐⭐⭐⭐</div>
+        <p style="color: #fff !important; font-size: 0.85rem !important; margin: 10px 0 !important; font-family: 'Cairo', sans-serif !important; line-height: 1.6 !important;">نظام التفعيل أولاً ده بجد يطمن أي حد، تسلم ايديكوا يا رجالة 👍</p>
+        <div style="color: #d4af37 !important; font-size: 0.75rem !important; font-weight: bold !important; text-align: left !important;">- عمر حسن</div>
+      </div>
+    </div>
+    <div style="text-align: center !important; color: #d4af37 !important; font-size: 0.75rem !important; margin-top: 5px !important;">
+      👉 اسحب لمشاهدة المزيد من التجارب 👈
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="faq-section">
+    <div class="section-title">❓ الأسئلة الشائعة</div>
+    <div class="faq-item"><h4>هل التفعيل آمن؟ 🛡️</h4><p>نعم، التفعيل رسمي وآمن تماماً على خطك وضمان MO CONTROL.</p></div>
+    <div class="faq-item"><h4>متى يتم الدفع؟ 💰</h4><p>يتم الدفع بعد التأكد من وصول الباقة وتجربة سرعة الإنترنت بنفسك.</p></div>
+  </div>
+
+  <footer style="padding: 20px; color: rgba(255,255,255,0.2); font-size: 0.7rem;">
+    © 2026 MO CONTROL | PREMIUM SERVICES
+  </footer>
+</div>
+
+<!-- WhatsApp Float Button -->
+<a class="whatsapp-float" href="https://wa.me/201112893086?text=ممكن+أعرف+آخر+العروض+يا+mo control+؟+🤔+🌐+✨" target="_blank">
+  <span class="tooltip-text">اطلب عرضك الآن 🎁</span>
+  <svg fill="white" height="32" viewBox="0 0 448 512" width="32">
+    <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-117zm-157 338.7c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.2-3.2-5.6-.3-8.6 2.5-11.3 2.5-2.5 5.5-6.5 8.3-9.7 2.8-3.2 3.7-5.5 5.5-9.2 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.8 23.5 9.2 31.5 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.5 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+  </svg>
+</a>
+
+<!-- Floating Button -->
+<div class="mo-floating-btn" onclick="openMoFinal()">
+  <span class="btn-text">تفعيل باقة الآن 🚀</span>
+</div>
+
+<!-- Modal Form -->
+<div class="mo-modal-overlay" id="moModalFinal" style="display:none;">
+  <div class="mo-form-card">
+    <span class="close-btn" onclick="closeMoFinal()">X</span>
+    <div id="form-content-area">
+      <div style="text-align:center; margin-bottom:12px;">
+        <h2 style="color:#ffcc00; margin:0; font-weight:900; font-size:35px; font-family: Cairo;">MO CONTROL</h2>
+        <p style="color:#aaa; font-size:10px; font-family: Cairo; margin:2px 0;">عالم من السرعة.. تفعيل باقاتك بالضمان 😊</p>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; direction: rtl;">
+        <div class="mo-cash-box" onclick="copyVodaNum()" style="flex: 1; margin-bottom: 0; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 55px; border-radius: 12px; background: #0a0a0a; border: 1.5px solid #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.1); transition: 0.3s;">
+          <span style="color: #aaa; font-size: 11px; font-family: 'Cairo'; margin-bottom: 2px;">محفظة كاش</span>
+          <b id="voda-num-text" style="color:#f9e29d; font-size: 12px; letter-spacing: 0.5px; font-family: 'Orbitron', sans-serif;">01282608730</b>
+          <span style="font-size: 8px; color: #d4af37; margin-top: 3px; font-weight: bold; letter-spacing: 0.5px;">اضغط لنسخ الرقم ✨</span>
+        </div>
+        <a href="https://ipn.eg/S/hamoibrahim212/instapay/8Waki0" style="flex: 1; text-decoration: none;" target="_blank">
+          <div class="mo-instapay-box" style="height: 55px; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a0a0a; border-radius: 12px; border: 1.5px solid #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.1); transition: 0.3s;">
+            <img src="https://c.top4top.io/p_3752uliqp1.png" style="width: 60px; height: 30px; object-fit: contain; filter: drop-shadow(0px 0px 5px rgba(212, 175, 55, 0.3));" alt="InstaPay">
+            <span style="color: #aaa; font-size: 8px; font-family: 'Cairo'; margin-top: 4px;">دفع سريع آمن</span>
+            <span style="font-size: 8px; color: #d4af37; font-weight: bold; letter-spacing: 0.5px;">اضغط للدفع عبر انستا باي 🔗</span>
+          </div>
+        </a>
+      </div>
+
+      <form id="mo-final-form">
+        <div class="mo-input-row">
+          <label>الاسم بالكامل</label>
+          <input id="f_name" placeholder="اكتب اسمك" required type="text">
+        </div>
+        <div class="mo-input-row">
+          <label>رقم الواتساب للتواصل</label>
+          <input id="f_whatsapp" inputmode="numeric" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');" placeholder="01xxxxxxxxx" required type="tel">
+        </div>
+        <div class="mo-input-row">
+          <label style="color:#ffcc00;">الرقم المراد تفعيله</label>
+          <input id="f_target" inputmode="numeric" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');" placeholder="01xxxxxxxxx" required style="border:1px solid #ffcc00;" type="tel">
+        </div>
+        <div class="mo-input-row">
+          <label>اختر الشبكة والباقة</label>
+          <select class="mo-premium-select" id="f_package" required>
+            <option disabled selected value="">-- اضغط لاختيار باقتك --</option>
+            <optgroup label="🟢 ETISALAT EMERALD">
+              <option value="Eti_20GB_260">EMERALD - 20GB [260 LE]</option>
+              <option value="Eti_25GB_300">EMERALD - 25GB [300 LE]</option>
+              <option value="Eti_30GB_340">EMERALD - 30GB [340 LE]</option>
+              <option value="Eti_40GB_420">EMERALD - 40GB [420 LE]</option>
+              <option value="Eti_50GB_500">EMERALD - 50GB [500 LE]</option>
+              <option value="Eti_60GB_640">EMERALD - 60GB [640 LE]</option>
+            </optgroup>
+            <optgroup label="🔴 VODAFONE RED">
+              <option value="Voda_20GB_300">VODA - 20GB [300 LE]</option>
+              <option value="Voda_25GB_340">VODA - 25GB [340 LE]</option>
+              <option value="Voda_30GB_380">VODA - 30GB [380 LE]</option>
+              <option value="Voda_40GB_460">VODA - 40GB [460 LE]</option>
+              <option value="Voda_50GB_520">VODA - 50GB [520 LE]</option>
+              <option value="Voda_60GB_580">VODA - 60GB [580 LE]</option>
+            </optgroup>
+            <optgroup label="🟣 WE GOLD">
+              <option value="WE_20GB_260">WE GOLD - 20GB [260 LE]</option>
+              <option value="WE_25GB_300">WE GOLD - 25GB [300 LE]</option>
+              <option value="WE_30GB_330">WE GOLD - 30GB [330 LE]</option>
+              <option value="WE_40GB_390">WE GOLD - 40GB [390 LE]</option>
+              <option value="WE_50GB_450">WE GOLD - 50GB [450 LE]</option>
+              <option value="WE_60GB_530">WE GOLD - 60GB [530 LE]</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="mo-input-row">
+          <label>موعد تجديد الباقة شهرياً</label>
+          <select class="mo-premium-select" id="f_renewal_date" required>
+            <option disabled selected value="">-- اختر موعد التجديد --</option>
+            <option value="1">يوم 1 من كل شهر</option>
+            <option value="15">يوم 15 من كل شهر</option>
+          </select>
+        </div>
+        <div class="mo-input-row">
+          <label>إرفاق اسكرين تحويل الفلوس (اختياري)</label>
+          <input accept="image/*" class="mo-file-input" id="f_image" type="file">
+          <p id="f_status" style="color:#ffcc00; font-size:10px; margin:5px 0; display:none;"></p>
+        </div>
+        <button class="mo-btn-submit" id="f_submit" type="submit">تأكيد الطلب</button>
+      </form>
+    </div>
+    <div id="f_success" style="display:none; text-align:center; padding: 20px 0;">
+      <div style="font-size: 50px; color: #ffcc00; margin-bottom: 10px;">✔</div>
+      <h2 style="color:#fff; font-size:18px; font-family: Cairo;">تم استلام طلبك!</h2>
+      <p style="color:#aaa; font-size:12px; font-family: Cairo;">سيتم توجيهك الآن للواتساب لمتابعة العملية فوراً وبشكل آلي 😊</p>
+      <button class="mo-btn-close" onclick="closeMoFinal()" type="button">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- Features Overlay -->
+<div class="overlay-box" id="feat-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000000; justify-content: center; align-items: center; backdrop-filter: blur(10px);">
+  <div class="mo-scroll-gold" style="background: #0a0a0a; border: 1.5px solid #d4af37; width: 90%; max-width: 450px; border-radius: 20px; padding: 20px; position: relative; box-shadow: 0 0 40px rgba(212, 175, 55, 0.2); max-height: 85vh; overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none;">
+    <span onclick="closeFeat()" style="position: absolute; top: 15px; left: 15px; color: #d4af37; cursor: pointer; font-size: 22px; font-weight: bold; z-index: 10;">✕</span>
+
+    <!-- Etisalat Content -->
+    <div class="pop-content" id="pop-eti" style="display: none;">
+      <h3 style="color: #a2d400; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; font-family: Cairo;">Etisalat Emerald</h3>
+      <p style="color: #d4af37; font-weight: bold; font-size: 15px; margin-bottom: 8px; font-family: Cairo;">💎 المميزات:</p>
+      <ul style="list-style: none; padding: 0; color: #eee; font-size: 13px; line-height: 1.8; margin-bottom: 20px; font-family: Cairo; direction: rtl;">
+        <li>✅ مكالمة خدمة العملاء مجاناً (بدون رصيد) 📱</li>
+        <li>✅ 10,000 دقيقة مجانية بين الخطوط المشتركة 🤝</li>
+        <li>✅ لو مشترك معايا بخطين او اكتر هيكلموا بعض ببلاش😉</li>
+        <li>✅ إمكانية اضافة حتي 7 خطوط يكلموا بعض ببلاش.</li>
+      </ul>
+      <p style="color: #ffcc00; font-weight: bold; font-size: 15px; margin-bottom: 8px; font-family: Cairo;">⚠️ شروط الاشتراك:</p>
+      <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; font-size: 12px; color: #aaa; line-height: 1.6; font-family: Cairo; direction: rtl;">
+        <p>• مدة الباقة 28 يوم في حالة عدم التجديد</p>
+        <p>• الخط بيتحول لـ (فاتورة) وللرجوع لكارت تتوجه للفرع بالبطاقة</p>
+        <p>• يفضل أن يكون الخط باسمك لعدم فقدانه 🫡.</p>
+        <p style="color: #fff; margin-top: 10px; border-top: 1px solid #333; padding-top: 10px;">• لازم الخط يبقي علي نظام 15 قرش ولو عليه اي باقه، الغيها وحوله 15 قرش بالكود اللي تحت ده👇🏻 (اضغط عليه للنسخ)</p>
+        <div onclick="copyCode('*339#')" style="background: #111; border: 1px dashed #d4af37; color: #d4af37; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; margin-top: 5px;">
+          <span id="copy-text-eti">*339#</span>
+        </div>
+        <div style="margin: 12px auto; max-width: 95%; background: rgba(162, 212, 0, 0.05); border: 1px dashed #a2d400; padding: 10px; border-radius: 8px; text-align: center; font-family: 'Cairo', sans-serif;">
+          <p style="margin: 0; color: #fff; font-size: 13px; line-height: 1.6;">
+            <span style="color: #a2d400; font-weight: bold;">⚠️ تنبيه هام:</span>
+            يجب توافر <span style="color: #a2d400; font-weight: 900;">5 جنيه رصيد صافي</span> وعدم وجود أي مبالغ مستحقة (سلف) لضمان إتمام عملية تحويل النظام بنجاح.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vodafone Content -->
+    <div class="pop-content" id="pop-voda" style="display: none;">
+      <h3 style="color: #ff0000; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; font-family: Cairo;">Vodafone Red</h3>
+      <p style="color: #d4af37; font-weight: bold; font-size: 15px; margin-bottom: 8px; font-family: Cairo;">💎 المميزات:</p>
+      <ul style="list-style: none; padding: 0; color: #eee; font-size: 13px; line-height: 1.8; margin-bottom: 20px; font-family: Cairo; direction: rtl;">
+        <li>✅ أقوى تغطية إنترنت في مصر (4G/5G).</li>
+        <li>✅ استقرار تام في جودة المكالمات والشبكة.</li>
+        <li>✅ خدمة عملاء VIP مخصصة لعملاء Red.</li>
+      </ul>
+      <p style="color: #ffcc00; font-weight: bold; font-size: 15px; margin-bottom: 8px; font-family: Cairo;">⚠️ شروط الاشتراك:</p>
+      <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; font-size: 12px; color: #aaa; line-height: 1.6; font-family: Cairo; direction: rtl;">
+        <p>• مدة الباقة 28 يوم في حالة عدم التجديد.</p>
+        <p style="color: #fff; font-weight: bold; background: rgba(255,0,0,0.2); padding: 5px; border-radius: 5px;">• يجب تحويل كامل المبلغ المطلوب قبل البدء 💸.</p>
+        <p>• يتم التفعيل بعد إرسال لقطة شاشة (Screenshot) للتحويل.</p>
+      </div>
+    </div>
+
+    <!-- WE Gold Content -->
+    <div class="pop-content" id="pop-we" style="display: none;">
+      <h3 style="color: #8e44ad; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; font-family: Cairo;">WE GOLD</h3>
+      <p style="color: #d4af37; font-weight: bold; font-size: 15px; margin-bottom: 8px; font-family: Cairo;">💎 المميزات:</p>
+      <ul style="list-style: none; padding: 0; color: #eee; font-size: 13px; line-height: 1.8; margin-bottom: 20px; font-family: Cairo; direction: rtl;">
+        <li>✅ أرخص سعر للجيجابايت وباقات توفيرية جداً.</li>
+        <li>✅ نظام وحدات مرن (دقائق وميجابايت).</li>
+        <li>✅ عروض حصرية لعملاء جولد عبر التطبيق.</li>
+      </ul>
+      <p style="color: #ffcc00; font-weight: bold; font-size: 15px; margin-bottom: 8px; font-family: Cairo;">⚠️ شروط الاشتراك:</p>
+      <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; font-size: 12px; color: #aaa; line-height: 1.6; font-family: Cairo; direction: rtl;">
+        <p>• مدة الباقة 28 يوم في حالة عدم التجديد.</p>
+        <p>• متابعة الاستهلاك تتم عبر تطبيق (My WE).</p>
+      </div>
+    </div>
+
+    <button onclick="closeFeat()" style="background: linear-gradient(90deg, #d4af37, #f9e29d); color: #000; border: none; width: 100%; padding: 12px; border-radius: 12px; margin-top: 20px; font-weight: 900; cursor: pointer; font-size: 16px; font-family: Cairo;">موافق</button>
+  </div>
+</div>
+
+<!-- Notification Box -->
+<div class="mo-notification" id="mo-notif-box">
+  <div class="mo-notif-icon">⚡</div>
+  <div class="mo-notif-text" id="mo-notif-msg"></div>
+</div>
+
+<!-- JavaScript -->
+<script type="text/javascript">
+// Preloader
+window.addEventListener('load', function() {
+  let perc = document.getElementById('load-perc');
+  let count = 0;
+  let interval = setInterval(() => {
+    count += 10;
+    if(perc) perc.innerText = count + "%";
+    if(count >= 100) clearInterval(interval);
+  }, 20);
+  setTimeout(function() {
+    var loader = document.getElementById('mo-elite-preloader');
+    if(loader) loader.classList.add('mo-elite-hidden');
+  }, 500);
+});
+
+// Copy Vodafone Number
+function copyVodaNum() {
+  var num = "01282608730";
+  var input = document.createElement("textarea");
+  input.value = num;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("copy");
+  document.body.removeChild(input);
+  alert("تم نسخ الرقم بنجاح ✅\n" + num);
+}
+
+// Open Modal Form
+function openMoFinal(packageName) {
+  var modal = document.getElementById("moModalFinal");
+  if(modal) {
+    modal.style.setProperty("display", "flex", "important");
+    if (packageName) { document.getElementById("f_package").value = packageName; }
+    history.pushState({ modalOpen: true }, "");
+  }
+}
+
+// Close Modal Form
+function closeMoFinal() {
+  var modal = document.getElementById("moModalFinal");
+  if(modal) {
+    modal.style.setProperty("display", "none", "important");
+    if (history.state && history.state.modalOpen) { history.back(); }
+  }
+}
+
+// Form Submit
+document.getElementById("mo-final-form").onsubmit = async function(e) {
+  e.preventDefault();
+  var btn = document.getElementById("f_submit");
+  var stat = document.getElementById("f_status");
+  var fileInput = document.getElementById("f_image");
+
+  var name = document.getElementById("f_name").value;
+  var whatsapp = document.getElementById("f_whatsapp").value;
+  var target = document.getElementById("f_target").value;
+  var pkg = document.getElementById("f_package").value;
+  var renewal = document.getElementById("f_renewal_date").value;
+
+  btn.innerHTML = "جاري الحجز...";
+  btn.disabled = true;
+
+  var botToken = "8623372347:AAGCq4fkye4GqUEzK5uaK4xv4rOlYYgfiCU";
+  var chatId = "6800873609";
+
+  var msg = "🚀 حجز جديد - MO CONTROL\n━━━━━━━━━━━━━━━\n👤 الاسم: " + name + "\n📞 واتساب: " + whatsapp + "\n📱 رقم الشحن: " + target + "\n📦 الباقة: " + pkg + "\n📅 التجديد: يوم " + renewal + "\n━━━━━━━━━━━━━━━\n💬 شات الواتساب:\nhttps://wa.me/2" + whatsapp;
+
+  try {
+    if (fileInput.files.length > 0) {
+      stat.style.display = "block"; stat.innerHTML = "⏳ جاري رفع الوصل...";
+      var fd = new FormData();
+      fd.append("chat_id", chatId); fd.append("caption", msg); fd.append("photo", fileInput.files[0]);
+      await fetch("https://api.telegram.org/bot" + botToken + "/sendPhoto", { method: "POST", body: fd });
+    } else {
+      await fetch("https://api.telegram.org/bot" + botToken + "/sendMessage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat_id: chatId, text: msg }) });
+    }
+    window.open("https://wa.me/201112893086?text=" + encodeURIComponent("أهلاً MO CONTROL، أنا " + name + " طلبت باقة (" + pkg + ") وتجديدي يوم " + renewal + " متاح المراجعه الان☺️"), "_blank");
+    document.getElementById("form-content-area").style.display = "none";
+    document.getElementById("f_success").style.display = "block";
+  } catch (err) { alert("حدث خطأ، حاول مجدداً"); }
+  btn.disabled = false; btn.innerHTML = "تأكيد الطلب";
+};
+
+// Features Functions
+function openFeat(type) {
+  var featOverlay = document.getElementById('feat-overlay');
+  if(featOverlay) {
+    featOverlay.style.setProperty("display", "flex", "important");
+    document.querySelectorAll('.pop-content').forEach(function(c) {
+      c.style.display = 'none';
+    });
+    var content = document.getElementById('pop-' + type);
+    if(content) content.style.display = 'block';
+    history.pushState({ modalOpen: true }, "");
+  }
+}
+
+function closeFeat() {
+  var featOverlay = document.getElementById('feat-overlay');
+  if(featOverlay) {
+    featOverlay.style.setProperty("display", "none", "important");
+    if (history.state && history.state.modalOpen) {
+      history.back();
+    }
+  }
+}
+
+function closeEverything() {
+  var modal = document.getElementById("moModalFinal");
+  var feat = document.getElementById("feat-overlay");
+  if(modal) modal.style.setProperty("display", "none", "important");
+  if(feat) feat.style.setProperty("display", "none", "important");
+}
+
+window.onclick = function(event) {
+  var modal = document.getElementById("moModalFinal");
+  var feat = document.getElementById("feat-overlay");
+  if (event.target === modal || event.target === feat) {
+    closeEverything();
+    if (history.state && history.state.modalOpen) {
+      history.back();
+    }
+  }
+};
+
+window.onpopstate = function(event) {
+  closeEverything();
+};
+
+// Copy Code
+function copyCode(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    var copyBox = document.getElementById('copy-text-eti');
+    if(copyBox) {
+      var oldText = copyBox.innerText;
+      copyBox.innerText = "تم النسخ بنجاح ✅";
+      copyBox.style.color = "#2ecc71";
+      setTimeout(function() {
+        copyBox.innerText = oldText;
+        copyBox.style.color = "#d4af37";
+      }, 2000);
+    }
+  });
+}
+
+// Payment Copy
+function copyPay(text, name) {
+  navigator.clipboard.writeText(text).then(function() {
+    alert("تم نسخ رقم " + name + " بنجاح:\n" + text + "\n\nاستخدم الرقم الآن في تطبيقك لإتمام الدفع.");
+  }, function() {
+    alert("رقم " + name + " هو: " + text);
+  });
+}
+
+// Share Site
+function shareSite() {
+  if (navigator.share) {
+    navigator.share({
+      title: 'MO CONTROL - باقات الاتصالات',
+      text: 'لقيت لك موقع بيعمل عروض على باقات (اتصالات_فودافون_وي)تحفة والدفع بعد التفعيل! جربه من هنا:',
+      url: ''
+    });
+  } else {
+    var el = document.createElement('textarea');
+    el.value = 'www.mocontrol.online';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    alert('تم نسخ رابط الموقع بنجاح، تقدر تبعته لصحابك دلوقتي! ✅');
+  }
+}
+
+// Welcome UI
+function updateWelcomeUI(name) {
+  var card = document.getElementById("welcome-card");
+  var textElement = document.getElementById("welcome-user-text");
+  if (card && textElement) {
+    var parts = name.trim().split(/\s+/);
+    var shortName = parts.slice(0, 2).join(" ");
+    textElement.innerText = "اهلا يا " + shortName + " ☺️";
+    card.style.display = "flex";
+  }
+}
+
+function handleLogout() {
+  if(confirm("هل تريد تسجيل الخروج؟")) {
+    localStorage.removeItem("moCustomerName");
+    window.location.reload();
+  }
+}
+
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.id === 'f_name') {
+    var rawName = e.target.value;
+    if (rawName.length > 2) {
+      localStorage.setItem("moCustomerName", rawName);
+      updateWelcomeUI(rawName);
+    }
+  }
+});
+
+window.addEventListener('load', function() {
+  var savedName = localStorage.getItem("moCustomerName");
+  if (savedName) {
+    updateWelcomeUI(savedName);
+  }
+});
+
+// Notifications
+function startHiddenNumberNotifs() {
+  const providers = ["010", "011", "012", "015"];
+  const moPkgs = [
+    "إيمرالد 20 جيجا (260 ج.م)", "إيمرالد 40 جيجا (420 ج.م)", "إيمرالد 60 جيجا (640 ج.م)",
+    "فودافون RED ٣٠ جيجا (380 ج.م)", "فودافون RED ٦٠ جيجا (580 ج.م)",
+    "WE GOLD ٢٠ جيجا (260 ج.م)", "WE GOLD ٥٠ جيجا (450 ج.م)"
+  ];
+
+  const notifBox = document.getElementById('mo-notif-box');
+  const notifMsg = document.getElementById('mo-notif-msg');
+
+  function generateHiddenNumber() {
+    const prefix = providers[Math.floor(Math.random() * providers.length)];
+    const lastThree = Math.floor(100 + Math.random() * 900);
+    return prefix + "******" + lastThree;
+  }
+
+  function showNotif() {
+    const fakeNumber = generateHiddenNumber();
+    const pkg = moPkgs[Math.floor(Math.random() * moPkgs.length)];
+    notifMsg.innerHTML = "تم تفعيل رقم: <b>" + fakeNumber + "</b><br/>باقة <b>" + pkg + "</b> بنجاح ✅";
+    notifBox.classList.add('show');
+    setTimeout(() => {
+      notifBox.classList.remove('show');
+    }, 4000);
+    setTimeout(showNotif, 12000);
+  }
+
+  setTimeout(showNotif, 3000);
+}
+
+window.addEventListener('load', startHiddenNumberNotifs);
+
+// WhatsApp Links Force New Tab
+document.addEventListener('click', function(e) {
+  var element = e.target.closest('a');
+  if (element && (element.href.includes('wa.me') || element.href.includes('whatsapp.com'))) {
+    e.preventDefault();
+    window.open(element.href, '_blank');
+  }
+}, true);
+</script>
+
+</body>
+</html>
