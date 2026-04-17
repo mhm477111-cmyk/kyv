@@ -909,6 +909,22 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
             </optgroup>
           </select>
         </div>
+
+
+<div class="mo-input-row" style="direction: rtl; text-align: right;">
+  <label style="color:#ffcc00; font-weight: bold; margin-bottom: 8px; display: block;">نوع الطلب</label>
+  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <label style="flex: 1; display: flex; align-items: center; justify-content: center; background: #111; border: 1px solid #333; padding: 10px; border-radius: 10px; cursor: pointer; color: #fff; font-size: 12px; transition: 0.3s;" id="label-new">
+      <input type="radio" name="sub_type" value="new" checked style="margin-left: 8px; accent-color: #ffcc00;" onclick="document.getElementById('label-new').style.borderColor='#ffcc00'; document.getElementById('label-renew').style.borderColor='#333';">
+      اشتراك أول مرة
+    </label>
+    <label style="flex: 1; display: flex; align-items: center; justify-content: center; background: #111; border: 1px solid #333; padding: 10px; border-radius: 10px; cursor: pointer; color: #fff; font-size: 12px; transition: 0.3s;" id="label-renew">
+      <input type="radio" name="sub_type" value="renew" style="margin-left: 8px; accent-color: #ffcc00;" onclick="document.getElementById('label-renew').style.borderColor='#ffcc00'; document.getElementById('label-new').style.borderColor='#333';">
+      تجديد اشتراك
+    </label>
+  </div>
+</div>
+        
         <div class="mo-input-row">
           <label>موعد تجديد الباقة شهرياً</label>
           <select class="mo-premium-select" id="f_renewal_date" required>
