@@ -332,6 +332,21 @@ https://wa.me/2${formData.whatsapp}`
                 </select>
               </div>
 
+{/* قسم اختيار نوع الاشتراك - مريح للموبايل */}
+<div className="flex flex-col gap-3 my-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+  <p className="text-right text-sm font-bold text-gray-700 mb-1">نوع الطلب:</p>
+  <div className="flex justify-around items-center">
+    <label className="flex items-center gap-2 cursor-pointer group">
+      <input type="radio" name="subType" value="new" className="w-5 h-5 accent-blue-600" defaultChecked />
+      <span className="text-gray-800 font-medium">اشتراك جديد</span>
+    </label>
+    <label className="flex items-center gap-2 cursor-pointer group">
+      <input type="radio" name="subType" value="renew" className="w-5 h-5 accent-blue-600" />
+      <span className="text-gray-800 font-medium">تجديد اشتراك</span>
+    </label>
+  </div>
+
+              
               <div className="mb-1.5 text-right">
                 <label className="block text-[#eee] text-[14px] mb-0.5">
                   إرفاق اسكرين تحويل الفلوس (اختياري)
