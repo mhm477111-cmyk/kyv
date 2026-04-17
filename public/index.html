@@ -481,6 +481,81 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
 .mo-scroll-gold::-webkit-scrollbar { width: 6px; }
 .mo-scroll-gold::-webkit-scrollbar-track { background: #111; border-radius: 10px; }
 .mo-scroll-gold::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
+
+<style>
+.news-bar-container {
+  width: 100%;
+  background: #0a0a0a;
+  border-top: 1px solid #222;
+  border-bottom: 1px solid #222;
+  display: flex;
+  align-items: center;
+  height: 50px; /* ارتفاع صغير عشان مياخدش مساحة */
+  overflow: hidden;
+  direction: rtl;
+  font-family: 'Cairo', sans-serif;
+}
+
+.news-label {
+  background: #ffcc00;
+  color: #000;
+  font-weight: 900;
+  padding: 0 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+}
+
+.news-items-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.news-track {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 0 20px;
+  /* لو عايز الأخبار تتحرك لوحدها فعل السطر اللي تحت */
+  /* animation: scroll-news 20s linear infinite; */
+}
+
+.news-item-btn {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #111;
+  border: 1px solid #333;
+  padding: 5px 15px;
+  border-radius: 50px;
+  color: #eee;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: 0.3s;
+}
+
+.news-item-btn:hover {
+  border-color: #ffcc00;
+  background: #1a1a1a;
+  color: #ffcc00;
+}
+
+.news-item-btn .icon {
+  font-size: 14px;
+}
+
+/* تحريك الأخبار لو تحب (اختياري) */
+@keyframes scroll-news {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+  
 </style>
 </head>
 <body>
@@ -759,37 +834,22 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   </div>
 
 
-<section id="news" style="padding: 60px 20px; background: #050505; direction: rtl;">
-  <div style="max-width: 1100px; margin: 0 auto;">
-    
-    <div style="text-align: center; margin-bottom: 40px;">
-      <h2 style="color: #ffcc00; font-family: 'Cairo', sans-serif; font-size: 32px; font-weight: 900; margin: 0;">آخر الأخبار</h2>
-      <div style="width: 60px; height: 4px; background: #ffcc00; margin: 10px auto; border-radius: 2px;"></div>
-      <p style="color: #aaa; font-size: 14px; margin-top: 10px;">تابع أحدث عروض وتقنيات MO CONTROL</p>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
-      
-      <article style="background: #0a0a0a; border: 1px solid #222; border-radius: 20px; overflow: hidden; transition: 0.3s;" onmouseover="this.style.borderColor='#ffcc00'" onmouseout="this.style.borderColor='#222'">
-        <img src="https://via.placeholder.com/400x200/111/ffcc00?text=HyperOS+Updates" alt="تحديثات نظام شاومي الجديد" style="width: 100%; height: 200px; object-fit: cover;" loading="lazy">
-        <div style="padding: 20px;">
-          <span style="color: #ffcc00; font-size: 12px; font-weight: bold;">برمجة وأنظمة</span>
-          <h3 style="color: #fff; font-family: 'Cairo'; font-size: 18px; margin: 10px 0;">أفضل إعدادات HyperOS لتحسين أداء البطارية</h3>
-          <p style="color: #888; font-size: 13px; line-height: 1.6;">تعرف على الخطوات الصحيحة لتثبيت التحديثات الجديدة وتحسين استهلاك الطاقة في هواتف شاومي...</p>
-          <a href="#" style="color: #ffcc00; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-block; margin-top: 15px;">اقرأ المزيد ←</a>
-        </div>
-      </article>
-
-      <article style="background: #0a0a0a; border: 1px solid #222; border-radius: 20px; overflow: hidden; transition: 0.3s;" onmouseover="this.style.borderColor='#ffcc00'" onmouseout="this.style.borderColor='#222'">
-        <img src="https://via.placeholder.com/400x200/111/ffcc00?text=Internet+Offers" alt="عروض إنترنت MO CONTROL" style="width: 100%; height: 200px; object-fit: cover;" loading="lazy">
-        <div style="padding: 20px;">
-          <span style="color: #ffcc00; font-size: 12px; font-weight: bold;">عروض الباقات</span>
-          <h3 style="color: #fff; font-family: 'Cairo'; font-size: 18px; margin: 10px 0;">توفير يصل لـ 40% على باقات إيميرالد وفودافون RED</h3>
-          <p style="color: #888; font-size: 13px; line-height: 1.6;">الآن مع MO CONTROL، استمتع بأكبر سعة إنترنت بأقل سعر في مصر مع ضمان التفعيل الفوري...</p>
-          <a href="#" style="color: #ffcc00; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-block; margin-top: 15px;">اقرأ المزيد ←</a>
-        </div>
-      </article>
-
+<section class="news-bar-container">
+  <div class="news-label">آخر الأخبار</div>
+  <div class="news-items-wrapper">
+    <div class="news-track">
+      <a href="/about" class="news-item-btn">
+        <span class="icon">⚡</span>
+        <span class="text">تعرف على قصة MO CONTROL ورؤيتنا للمستقبل</span>
+      </a>
+      <a href="/packages" class="news-item-btn">
+        <span class="icon">🎁</span>
+        <span class="text">خصومات حصرية بنسبة 40% على باقات فودافون وإتصالات</span>
+      </a>
+      <a href="/contact" class="news-item-btn">
+        <span class="icon">📞</span>
+        <span class="text">تواصل معنا الآن للحصول على دعم فني مباشر</span>
+      </a>
     </div>
   </div>
 </section>
