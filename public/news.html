@@ -3,172 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدونة MO CONTROL | عروض باقات الإنترنت وأسرار التقنية</title>
-    <meta name="description" content="اكتشف أقوى عروض باقات فودافون وإتصالات، وأحدث شروحات برمجة هواتف شاومي وتحديثات HyperOS. كل ما تحتاجه للتحكم في عالمك الرقمي.">
-    <meta name="keywords" content="باقات فودافون، باقات إتصالات، انترنت منزلي، شاومي، HyperOS، برمجة، MO CONTROL">
+    <title>عروض الباقات والأنظمة | MO CONTROL</title>
+    <meta name="description" content="دليل MO CONTROL الشامل لأقوى عروض باقات فودافون ريد، إيميرالد، وي جولد، وراوتر الهوم فور جي. وفر حتى 40% على خدمات الاتصالات في مصر.">
+    <meta name="keywords" content="فودافون ريد, Vodafone RED, Emerald, WE Gold, وي جولد, Home 4G, راوتر هوائي, دقائق دولي">
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffcc00; --dark: #050505; --card: #0a0a0a; }
-        body { background: var(--dark); color: #fff; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+        :root { --gold: #ffcc00; --dark: #050505; --card: #0a0a0a; --gray: #888; }
+        body { background: var(--dark); color: #fff; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 60px 20px; }
         
-        .header-section { text-align: center; margin-bottom: 60px; }
-        .header-section h1 { color: var(--gold); font-size: clamp(28px, 5vw, 42px); font-weight: 900; margin: 0; }
-        .header-section p { color: #888; margin-top: 10px; font-size: 18px; }
+        .page-header { text-align: center; margin-bottom: 50px; border-bottom: 2px solid var(--gold); padding-bottom: 20px; }
+        .page-header h1 { color: var(--gold); font-size: 36px; font-weight: 900; margin: 0; }
+        .page-header p { color: var(--gray); font-size: 18px; margin-top: 10px; }
 
-        /* Grid التصميم */
-        .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
-        
-        .news-card { 
+        /* ستايل المقالات (كل مقال في بلوك منفصل) */
+        .article-block { 
             background: var(--card); 
             border: 1px solid #222; 
-            border-radius: 24px; 
-            overflow: hidden; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            text-decoration: none; 
-            color: inherit;
-            display: flex;
-            flex-direction: column;
+            border-radius: 20px; 
+            padding: 30px; 
+            margin-bottom: 40px; 
+            transition: 0.3s;
         }
+        .article-block:hover { border-color: var(--gold); box-shadow: 0 5px 20px rgba(255, 204, 0, 0.05); }
         
-        .news-card:hover { border-color: var(--gold); transform: translateY(-10px); box-shadow: 0 10px 30px rgba(255, 204, 0, 0.1); }
-        
-        .image-container { position: relative; width: 100%; height: 220px; overflow: hidden; }
-        .news-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .news-card:hover img { scale: 1.1; }
-        
-        .card-tag { 
-            position: absolute; top: 15px; right: 15px; 
+        .article-tag { 
             background: var(--gold); color: #000; 
-            padding: 4px 12px; border-radius: 50px; 
-            font-size: 12px; font-weight: bold; 
+            padding: 4px 15px; border-radius: 5px; 
+            font-size: 12px; font-weight: bold; text-transform: uppercase;
         }
 
-        .card-content { padding: 25px; flex-grow: 1; }
-        .card-title { font-size: 20px; font-weight: 900; margin: 0 0 12px 0; color: #fff; line-height: 1.4; }
-        .card-desc { color: #aaa; font-size: 14px; line-height: 1.7; margin-bottom: 20px; }
+        .article-title { color: var(--gold); font-size: 24px; font-weight: 800; margin: 20px 0 15px 0; }
+        .article-content { color: #ddd; font-size: 16px; }
+        .article-content b { color: #fff; }
         
-        .read-more { color: var(--gold); font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        /* قائمة المميزات داخل المقال */
+        .feature-list { list-style: none; padding: 0; margin: 20px 0; }
+        .feature-list li { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 15px; }
+        .feature-list li::before { content: "⚡"; color: var(--gold); }
 
-        .btn-back { 
-            display: inline-block; margin-top: 50px; background: var(--gold); 
-            color: #000; text-decoration: none; padding: 15px 40px; 
-            border-radius: 50px; font-weight: 900; transition: 0.3s;
+        .footer-action { text-align: center; margin-top: 60px; }
+        .btn-home { 
+            text-decoration: none; background: var(--gold); color: #000; 
+            padding: 15px 40px; border-radius: 50px; font-weight: 900; 
+            display: inline-block; transition: 0.3s;
         }
-        .btn-back:hover { opacity: 0.9; transform: scale(1.05); }
+        .btn-home:hover { transform: scale(1.05); }
 
-        @media (max-width: 768px) { .news-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .page-header h1 { font-size: 28px; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header-section">
-        <h1>مركز الأخبار والعروض 🚀</h1>
-        <p>بوابتك للتحكم في عالم الإنترنت والتقنية</p>
+    <div class="page-header">
+        <h1>أخبار وعروض MO CONTROL</h1>
+        <p>كل ما يخص أنظمة الـ VIP وباقات الإنترنت المنزلي</p>
     </div>
 
-    <div class="news-grid">
-        <article>
-            <a href="#" class="news-card">
-                <div class="image-container">
-                    <span class="card-tag">عروض باقات</span>
-                    <img src="https://images.unsplash.com/photo-1562157873-818bc0726f68?auto=format&fit=crop&q=80&w=400" alt="عروض فودافون مصر">
-                </div>
-                <div class="card-content">
-                    <h2 class="card-title">وفر 40% من استهلاك باقة فودافون RED مع MO CONTROL</h2>
-                    <p class="card-desc">اكتشف الطريقة الحصرية لتفعيل باقات إيميرالد وفودافون ريد بأقصى توفير ممكن مع ضمان التفعيل الرسمي في دقائق...</p>
-                    <span class="read-more">اقرأ التفاصيل ←</span>
-                </div>
-            </a>
-        </article>
+    <section class="article-block">
+        <span class="article-tag">فودافون مصر</span>
+        <h2 class="article-title">باقات Vodafone RED & Emerald: تحكم كامل في مميزاتك</h2>
+        <div class="article-content">
+            <p>تعتبر أنظمة <b>Vodafone RED</b> و <b>Emerald</b> هي الاختيار الأول لعملاء الـ VIP في مصر. مع MO CONTROL، نساعدك على إدارة دقائقك الدولية واشتراكات الترفيه (OSN, Shahid) بأفضل وسيلة ممكنة.</p>
+            <ul class="feature-list">
+                <li>إمكانية إضافة أفراد العائلة ومشاركة الباقة بسهولة.</li>
+                <li>تفعيل الدقائق الدولية المجانية المدمجة في النظام.</li>
+                <li>حلول فورية لمشاكل الفواتير العالية والتحكم في "الليميت".</li>
+            </ul>
+            <p>نحن نضمن لك تفعيل باقات إضافية بخصومات تصل إلى 40% لضمان عدم انقطاع الخدمة قبل نهاية الشهر.</p>
+        </div>
+    </section>
 
-        <article>
-            <a href="#" class="news-card">
-                <div class="image-container">
-                    <span class="card-tag">برمجة وأنظمة</span>
-                    <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=400" alt="تحديث شاومي HyperOS">
-                </div>
-                <div class="card-content">
-                    <h2 class="card-title">شرح تفعيل مميزات HyperOS المخفية لهواتف شاومي</h2>
-                    <p class="card-desc">إذا كنت تمتلك هاتف Redmi أو Poco، إليك أفضل 5 إعدادات برمجية لتحسين سلاسة النظام وتوفير البطارية بشكل جذري...</p>
-                    <span class="read-more">تعلم الطريقة ←</span>
-                </div>
-            </a>
-        </article>
+    <section class="article-block">
+        <span class="article-tag">المصرية للاتصالات</span>
+        <h2 class="article-title">نظام WE Gold: ملك السرعة والتوفير</h2>
+        <div class="article-content">
+            <p>نظام <b>وي جولد (WE Gold)</b> أحدث ثورة في عالم الاتصالات بجمعه بين الموبايل والإنترنت الأرضي في فاتورة واحدة. في MO CONTROL، نوفر لك شحن نقاط "الملك" وتجديد الباقة في ثوانٍ.</p>
+            <ul class="feature-list">
+                <li>الحصول على أكبر سعات إنترنت موبايل في السوق المصري.</li>
+                <li>متابعة استهلاك الإنترنت الأرضي المربوط بالنظام.</li>
+                <li>عروض حصرية عند الشحن عن طريق محفظة MO CONTROL.</li>
+            </ul>
+        </div>
+    </section>
 
-        <article>
-            <a href="#" class="news-card">
-                <div class="image-container">
-                    <span class="card-tag">نصائح تقنية</span>
-                    <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=400" alt="تسريع الإنترنت">
-                </div>
-                <div class="card-content">
-                    <h2 class="card-title">كيفية زيادة سرعة الـ Wi-Fi في المنزل بدون راوتر جديد</h2>
-                    <p class="card-desc">حل مشكلة اللاج في الألعاب وسرعة التحميل البطيئة من خلال تغيير إعدادات الـ DNS والقنوات الترددية للراوتر...</p>
-                    <span class="read-more">جرب الآن ←</span>
-                </div>
-            </a>
-        </article>
+    <section class="article-block">
+        <span class="article-tag">إتصالات مصر</span>
+        <h2 class="article-title">إتصالات Emerald: عالم من الخدمات المتميزة</h2>
+        <div class="article-content">
+            <p>خدمات <b>Etisalat Emerald</b> توفر لك دقائق دولية، إنترنت تجوال، وإنترنت منزلي فائق السرعة. نحن في MO CONTROL متخصصون في تفعيل الخدمات الإضافية لأنظمة إيميرالد وضمان استمرارية الخدمة.</p>
+            <ul class="feature-list">
+                <li>إدارة شاملة لدقائق الرومينج والدولي.</li>
+                <li>تجديد باقات الهوم فور جي التابعة لنظام إيميرالد.</li>
+                <li>توفير اشتراكات المواقع الترفيهية المدرجة في باقتك.</li>
+            </ul>
+        </div>
+    </section>
 
-        <article>
-            <a href="#" class="news-card">
-                <div class="image-container">
-                    <span class="card-tag">عروض حصرية</span>
-                    <img src="https://images.unsplash.com/photo-1556742044-3c52d6e88c62?auto=format&fit=crop&q=80&w=400" alt="عروض إتصالات مصر">
-                </div>
-                <div class="card-content">
-                    <h2 class="card-title">أقوى عروض إتصالات كاش وباقات الداتا لشهر أبريل 2026</h2>
-                    <p class="card-desc">حصرياً لمشتركين MO CONTROL، احصل على كاش باك فوري عند شحن باقات الموبايل إنترنت من خلال منصتنا...</p>
-                    <span class="read-more">اغتنم العرض ←</span>
-                </div>
-            </a>
-        </article>
+    <section class="article-block" style="border-right: 4px solid var(--gold);">
+        <span class="article-tag">إنترنت هوائي</span>
+        <h2 class="article-title">راوتر الـ Home 4G: إنترنت منزلي بدون خط أرضي</h2>
+        <div class="article-content">
+            <p>لو معندكش خط أرضي، الـ <b>Home 4G</b> هو الحل الأمثل. بنوفرلك شحن باقات "فودافون هوم فور جي" و "إتصالات منزلي" و "وي هوائي" بأسعار منافسة.</p>
+            <ul class="feature-list">
+                <li>سرعات تصل لـ 150 ميجا بدون أسلاك.</li>
+                <li>باقات سعة كبيرة مخصصة لمشاهدة الأفلام والألعاب.</li>
+                <li>إمكانية نقل الراوتر في أي مكان (المصيف، المكتب، أو المنزل).</li>
+            </ul>
+        </div>
+    </section>
 
-        <article>
-            <a href="#" class="news-card">
-                <div class="image-container">
-                    <span class="card-tag">أمان رقمي</span>
-                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=400" alt="حماية الحسابات">
-                </div>
-                <div class="card-content">
-                    <h2 class="card-title">حماية حسابات تليجرام وواتساب من الاختراق النهائي</h2>
-                    <p class="card-desc">دليل شامل لتأمين بياناتك وخصوصيتك في العصر الرقمي، وكيف تكتشف إذا كان هاتفك مراقباً أم لا...</p>
-                    <span class="read-more">احمِ نفسك ←</span>
-                </div>
-            </a>
-        </article>
-
-        <article>
-            <a href="#" class="news-card">
-                <div class="image-container">
-                    <span class="card-tag">تجارة إلكترونية</span>
-                    <img src="https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&q=80&w=400" alt="الربح من الإنترنت">
-                </div>
-                <div class="card-content">
-                    <h2 class="card-title">كيف تبدأ مشروعك الخاص في بيع خدمات الاتصالات</h2>
-                    <p class="card-desc">هل تريد الانضمام لفريق وكلاء MO CONTROL؟ تعلم كيف تدير عملك الخاص من الموبايل وتحقق أرباحاً شهرية...</p>
-                    <span class="read-more">ابدأ الآن ←</span>
-                </div>
-            </a>
-        </article>
-    </div>
-
-    <div style="text-align: center;">
-        <a href="index.html" class="btn-back">العودة للرئيسية</a>
+    <div class="footer-action">
+        <a href="index.html" class="btn-home">العودة للرئيسية</a>
     </div>
 </div>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Blog",
-  "name": "مدونة MO CONTROL",
-  "description": "أخبار التقنية وعروض باقات الإنترنت في مصر",
-  "url": "https://mo-control.vercel.app/news.html"
-}
-</script>
 
 </body>
 </html>
