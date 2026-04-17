@@ -9,8 +9,8 @@
 <title>MO CONTROL | BLACK GOLD - VIP Services</title>
 <link rel="icon" href="favicon.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="favicon.png">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link rel="preload" href="Cairo-VariableFont_slnt,wght.ttf" as="font" type="font/ttf" crossorigin>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 
 
@@ -27,6 +27,21 @@ if (uri.indexOf("?m=1") > 0) {
 <style>
 #navbar-iframe, .navbar, .Header, .sidebar-wrapper, .footer-outer { display:none !important; }
 
+/* تعريف الخط المتغير محلياً */
+@font-face {
+  font-family: 'Cairo';
+  /* تأكد أن اسم الملف هو نفس اللي رفعته بالضبط على GitHub */
+  src: url('Cairo-VariableFont_slnt,wght.ttf') format('truetype');
+  font-weight: 100 900; /* ده بيعرف المتصفح إن الملف فيه كل الأوزان */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* تطبيق الخط على الموقع بالكامل */
+* {
+    font-family: 'Cairo', sans-serif !important;
+}
+  
 :root {
   --gold-bright: #f9e29d; 
   --gold-dark: #d4af37;
