@@ -807,37 +807,90 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   </p>
 </div>
   <!-- Vodafone Red Section -->
-  <div style="display: flex; justify-content: center; align-items: center; margin-top: 60px; margin-bottom: 20px;">
-    <div style="position: relative; padding: 3px; border-radius: 50px; background: linear-gradient(90deg, #ff0000, #fff, #ff0000); background-size: 200% auto; animation: glow-move 3s linear infinite; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);">
-      <div style="background: #000; padding: 12px 35px; border-radius: 50px; display: flex; align-items: center; gap: 15px;">
-        <img src="vodafone.webp" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #e60000; flex-shrink: 0;" alt="باقات فودافون ريد - مو كنترول" loading="lazy">
-        <h3 style="margin: 0; font-family: 'Cairo', sans-serif; font-size: 1.8rem; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255,0.5);">
-          Vodafone <span style="color: #ff0000;">Red</span>
-        </h3>
-      </div>
+ <div style="display: flex; justify-content: center; align-items: center; margin-top: 60px; margin-bottom: 20px;">
+  <div style="position: relative; padding: 3px; border-radius: 50px; background: linear-gradient(90deg, #ff0000, #fff, #ff0000); background-size: 200% auto; animation: glow-move 3s linear infinite; box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);">
+    <div style="background: #000; padding: 12px 35px; border-radius: 50px; display: flex; align-items: center; gap: 15px;">
+      <img src="download.webp" width="45" height="45" style="border-radius: 50%; border: 2px solid #e60000; flex-shrink: 0;" alt="لوجو باقات فودافون ريد - مو كنترول" loading="lazy">
+      <h3 style="margin: 0; font-family: 'Cairo', sans-serif; font-size: 1.8rem; font-weight: 900; color: #ffffff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,255,255,0.5);">
+        Vodafone <span style="color: #ff0000;">Red</span>
+      </h3>
     </div>
   </div>
+</div>
 
-  <div onclick="openFeat('voda')" style="cursor: pointer; width: 100%; background: #000; border-top: 1px solid #ff0000; border-bottom: 1px solid #ff0000; padding: 12px 0; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); margin: 25px 0;">
-    <span style="color: #fff; font-family: 'Cairo'; font-weight: 700; font-size: 13px; white-space: nowrap; text-shadow: 0 0 5px #ff0000;">
-      اضغط هنا لمعرفة مميزات وشروط الاشتراك (فودافون) 📜
-    </span>
+<div onclick="openFeat('voda')" role="button" aria-label="مميزات وشروط اشتراك فودافون" style="cursor: pointer; width: 100%; background: #000; border-top: 2px solid #ff0000; border-bottom: 2px solid #ff0000; padding: 18px 0; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); margin: 25px 0;">
+  <span style="color: #ffffff; font-family: 'Cairo'; font-weight: 700; font-size: 15px; white-space: nowrap; text-shadow: 0 0 5px #ff0000;">
+    اضغط هنا لمعرفة مميزات وشروط الاشتراك (فودافون) 📜
+  </span>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3 style="color: #ff4d4d;">20 جيجا 🔴</h3>
+    <div class="price">300<span>ج.م</span></div>
+    <div class="details" style="color: #eee;">
+      <div>⭐ 1500 دقيقة</div>
+      <div style="margin-top: 5px;">✉️ 50 رسالة نصية</div>
+    </div>
+    <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_20GB_300')" style="background: #ff0000; color: #ffffff; min-height: 48px; display: flex; align-items: center; justify-content: center;">اشترك الآن</a>
   </div>
 
-  <div class="grid">
-    <div class="card"><h3>20 جيجا 🔴</h3><div class="price">300<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_20GB_300')">اشترك الآن</a></div>
-    <div class="card"><h3>25 جيجا 🔴</h3><div class="price">340<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_25GB_340')">اشترك الآن</a></div>
-    <div class="card"><h3>30 جيجا 🔴</h3><div class="price">380<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_30GB_380')">اشترك الآن</a></div>
-    <div class="card"><h3>40 جيجا 🔴</h3><div class="price">460<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_40GB_460')">اشترك الآن</a></div>
-    <div class="card"><h3>50 جيجا 🔴</h3><div class="price">520<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_50GB_520')">اشترك الآن</a></div>
-    <div class="card"><h3>60 جيجا 🔴</h3><div class="price">580<span>ج.م</span></div><div class="details"><div>⭐ 1500 دقيقة</div><div style="margin-top: 5px;">✉️ 50 رسالة نصية</div></div><a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_60GB_580')">اشترك الآن</a></div>
+  <div class="card">
+    <h3 style="color: #ff4d4d;">25 جيجا 🔴</h3>
+    <div class="price">340<span>ج.م</span></div>
+    <div class="details" style="color: #eee;">
+      <div>⭐ 1500 دقيقة</div>
+      <div style="margin-top: 5px;">✉️ 50 رسالة نصية</div>
+    </div>
+    <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_25GB_340')" style="background: #ff0000; color: #ffffff; min-height: 48px; display: flex; align-items: center; justify-content: center;">اشترك الآن</a>
   </div>
 
-  <div style="margin: 15px auto; max-width: 420px; padding: 12px; background: rgba(211, 47, 47, 0.05); border-right: 4px solid #d32f2f; border-radius: 0 10px 10px 0; direction: rtl;">
-    <p style="margin: 0; color: #d32f2f; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; line-height: 1.6;">
-      🔴 <span style="color: #fff;">ملحوظة هامة:</span> سعر باقة <span style="color: #fff;">فودافون</span> الموضح لا يشمل الضريبة؛ يضاف مبلغ الضريبة المقررة شهرياً عند التجديد.
-    </p>
+  <div class="card">
+    <h3 style="color: #ff4d4d;">30 جيجا 🔴</h3>
+    <div class="price">380<span>ج.م</span></div>
+    <div class="details" style="color: #eee;">
+      <div>⭐ 1500 دقيقة</div>
+      <div style="margin-top: 5px;">✉️ 50 رسالة نصية</div>
+    </div>
+    <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_30GB_380')" style="background: #ff0000; color: #ffffff; min-height: 48px; display: flex; align-items: center; justify-content: center;">اشترك الآن</a>
   </div>
+
+  <div class="card">
+    <h3 style="color: #ff4d4d;">40 جيجا 🔴</h3>
+    <div class="price">460<span>ج.م</span></div>
+    <div class="details" style="color: #eee;">
+      <div>⭐ 1500 دقيقة</div>
+      <div style="margin-top: 5px;">✉️ 50 رسالة نصية</div>
+    </div>
+    <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_40GB_460')" style="background: #ff0000; color: #ffffff; min-height: 48px; display: flex; align-items: center; justify-content: center;">اشترك الآن</a>
+  </div>
+
+  <div class="card">
+    <h3 style="color: #ff4d4d;">50 جيجا 🔴</h3>
+    <div class="price">520<span>ج.م</span></div>
+    <div class="details" style="color: #eee;">
+      <div>⭐ 1500 دقيقة</div>
+      <div style="margin-top: 5px;">✉️ 50 رسالة نصية</div>
+    </div>
+    <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_50GB_520')" style="background: #ff0000; color: #ffffff; min-height: 48px; display: flex; align-items: center; justify-content: center;">اشترك الآن</a>
+  </div>
+
+  <div class="card">
+    <h3 style="color: #ff4d4d;">60 جيجا 🔴</h3>
+    <div class="price">580<span>ج.م</span></div>
+    <div class="details" style="color: #eee;">
+      <div>⭐ 1500 دقيقة</div>
+      <div style="margin-top: 5px;">✉️ 50 رسالة نصية</div>
+    </div>
+    <a class="btn" href="javascript:void(0)" onclick="openMoFinal('Voda_60GB_580')" style="background: #ff0000; color: #ffffff; min-height: 48px; display: flex; align-items: center; justify-content: center;">اشترك الآن</a>
+  </div>
+</div>
+
+<div style="margin: 20px auto; max-width: 420px; padding: 15px; background: rgba(255, 0, 0, 0.1); border-right: 5px solid #ff0000; border-radius: 0 10px 10px 0; direction: rtl;">
+  <p style="margin: 0; color: #ff6666; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700; line-height: 1.6;">
+    🔴 <span style="color: #fff;">ملحوظة هامة:</span> سعر باقة <span style="color: #fff;">فودافون</span> الموضح لا يشمل الضريبة؛ يضاف مبلغ الضريبة المقررة شهرياً عند التجديد.
+  </p>
+</div>
 
   <!-- WE Gold Section -->
   <div style="display: flex; justify-content: center; align-items: center; margin-top: 60px; margin-bottom: 20px;">
