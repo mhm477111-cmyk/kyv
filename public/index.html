@@ -19,7 +19,15 @@ if (uri.indexOf("?m=1") > 0) {
   window.history.replaceState({}, document.title, clean_uri);
 }
 </script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V5TQ99XK12"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'G-V5TQ99XK12');
+</script>
 <style>
 #navbar-iframe, .navbar, .Header, .sidebar-wrapper, .footer-outer { display:none !important; }
 
