@@ -636,6 +636,20 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   if (window.navigator.userAgent.includes("MO_CONTROL_APP")) {
     document.body.classList.add('is-app');
   }
+
+.news-bar-container {
+    display: flex;            /* بيخلي العناصر جوه الحاوية مرنة */
+    justify-content: center;  /* بيسنتر العناصر بالعرض (في النص) */
+    align-items: center;      /* بيسنتر العناصر بالطول (في نص المساحة) */
+    width: 100%;              /* بيخلي الحاوية واخدة عرض الشاشة بالكامل */
+    padding: 10px 0;          /* مسافة فوق وتحت عشان يبقى شكلها شيك */
+}
+
+.news-label {
+    text-align: center;       /* زيادة أمان عشان النص نفسه يتسنتر */
+    font-weight: bold;        /* اختيار: عشان الكلمة تظهر بشكل أوضح */
+}
+  
 </script>
   
   
