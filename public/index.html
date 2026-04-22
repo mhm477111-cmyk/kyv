@@ -625,18 +625,6 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
     overflow-x: hidden;
 }
 
-/* الزرار اللي عايزينه يظهر فوق الكل */
-.your-whatsapp-button-class {
-    position: fixed; /* بيثبته في مكان محدد مهما عملت سكرول */
-    bottom: 20px;    /* بيطلعه 20 بكسل من تحت */
-    right: 20px;     /* بيطلعه 20 بكسل من اليمين */
-    z-index: 99999;  /* ده الرقم اللي بيخليه يركب فوق أي عنصر تاني */
-}
-
-/* العنصر اللي مغطي على الزرار (اللي هو شريط الأخبار) */
-.news-ticker-class {
-    z-index: 1; /* بنخليه في الطبقة اللي تحت */
-}
   
 </style>
 
@@ -1620,6 +1608,18 @@ document.addEventListener('click', function(e) {
         70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(40, 167, 69, 0); }
         100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
     }
+  /* الزرار اللي عايزينه يظهر فوق الكل */
+.your-whatsapp-button-class {
+    position: fixed; /* بيثبته في مكان محدد مهما عملت سكرول */
+    bottom: 20px;    /* بيطلعه 20 بكسل من تحت */
+    right: 20px;     /* بيطلعه 20 بكسل من اليمين */
+    z-index: 99999;  /* ده الرقم اللي بيخليه يركب فوق أي عنصر تاني */
+}
+
+/* العنصر اللي مغطي على الزرار (اللي هو شريط الأخبار) */
+.news-ticker-class {
+    z-index: 1; /* بنخليه في الطبقة اللي تحت */
+}
 </style>
 
 <script>
