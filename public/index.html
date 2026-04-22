@@ -1669,14 +1669,14 @@ document.addEventListener('click', function(e) {
 }, true);
 </script>
 
-<script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    // بدل ما نفحص أي متصفح، هنفحص "كلمة سر" إحنا هنحطها في التطبيق
-    if (navigator.userAgent.includes("MO_CONTROL_APP_SECRET")) {
-      const btn = document.getElementById('download-btn');
-      if (btn) btn.style.display = 'none';
-    }
-  });
+  <script>
+    // التأكد إن الكود بيشتغل بعد ما الصفحة تحمل بالكامل
+    window.addEventListener('load', function() {
+        if (navigator.userAgent.indexOf("MoControlApp") > -1) {
+            var btn = document.getElementById('download-btn');
+            if (btn) btn.style.display = 'none';
+        }
+    });
 </script>
 
   
