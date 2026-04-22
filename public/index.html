@@ -636,20 +636,42 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   if (window.navigator.userAgent.includes("MO_CONTROL_APP")) {
     document.body.classList.add('is-app');
   }
-
 .news-bar-container {
-    display: flex;            /* بيخلي العناصر جوه الحاوية مرنة */
-    justify-content: center;  /* بيسنتر العناصر بالعرض (في النص) */
-    align-items: center;      /* بيسنتر العناصر بالطول (في نص المساحة) */
-    width: 100%;              /* بيخلي الحاوية واخدة عرض الشاشة بالكامل */
-    padding: 10px 0;          /* مسافة فوق وتحت عشان يبقى شكلها شيك */
+    display: flex;
+    flex-direction: column;   /* بيخلي العناصر تحت بعض (الكلمة فوق والأخبار تحتها) */
+    align-items: center;      /* بيسنتر الكل في النص */
+    width: 100%;
+    padding: 15px;
 }
 
 .news-label {
-    text-align: center;       /* زيادة أمان عشان النص نفسه يتسنتر */
-    font-weight: bold;        /* اختيار: عشان الكلمة تظهر بشكل أوضح */
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 15px;      /* مسافة بين الكلمة وبين الأزرار */
+    color: #333;
 }
-  
+
+.news-track {
+    display: flex;
+    flex-direction: column;   /* بيخلي الأزرار تحت بعض */
+    width: 100%;
+    gap: 10px;                /* مسافة بين كل زرار والتاني */
+}
+
+.news-item-btn {
+    display: flex;
+    justify-content: space-between; /* بيبعد الكلام عن الأيقونة */
+    align-items: center;
+    padding: 12px;
+    background: #f8f8f8;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #000;
+    width: 90%;               /* عشان ميبقاش لازق في طرف الشاشة */
+    margin: 0 auto;           /* تسنتر الأزرار في النص */
+}
+
 </script>
   
   
