@@ -1582,5 +1582,39 @@ document.addEventListener('click', function(e) {
 }, true);
 </script>
 
+
+<style>
+    /* الستايل اللي بيخلي الزرار يتحرك */
+    .float-download {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        background-color: #28a745;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 50px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        z-index: 9999;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: Arial, sans-serif;
+        animation: pulse 2s infinite;
+        font-size: 16px;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(40, 167, 69, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+    }
+</style>
+
+<script>
+    // السكربت اللي بيظهر الزرار للأندرويد بس
+    if (/Android/i.test(navigator.userAgent)) {
+        document.write('<a href="رابط_الـ_APK_بتاعك" class="float-download">📲 حمل التطبيق</a>');
+    }
+</script>
+
+  
 </body>
 </html>
