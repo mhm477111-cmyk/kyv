@@ -645,10 +645,11 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
 }
 
 .news-label {
-    text-align: center;
-    font-size: 1.2rem;
+    text-align: center !important;  /* بتجبر النص يجي في النص */
+    display: block !important;      /* بتخلي العنصر ياخد سطر لوحده */
+    width: 100% !important;         /* بتخليه ياخد عرض الحاوية بالكامل */
     font-weight: bold;
-    margin-bottom: 15px;      /* مسافة بين الكلمة وبين الأزرار */
+    margin-bottom: 15px;
     color: #333;
 }
 
