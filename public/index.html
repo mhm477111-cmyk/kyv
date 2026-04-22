@@ -624,6 +624,20 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
     max-width: 100%;
     overflow-x: hidden;
 }
+
+/* الزرار اللي عايزينه يظهر فوق الكل */
+.your-whatsapp-button-class {
+    position: fixed; /* بيثبته في مكان محدد مهما عملت سكرول */
+    bottom: 20px;    /* بيطلعه 20 بكسل من تحت */
+    right: 20px;     /* بيطلعه 20 بكسل من اليمين */
+    z-index: 99999;  /* ده الرقم اللي بيخليه يركب فوق أي عنصر تاني */
+}
+
+/* العنصر اللي مغطي على الزرار (اللي هو شريط الأخبار) */
+.news-ticker-class {
+    z-index: 1; /* بنخليه في الطبقة اللي تحت */
+}
+  
 </style>
 
 
@@ -1609,10 +1623,8 @@ document.addEventListener('click', function(e) {
 </style>
 
 <script>
-    // السكربت اللي بيظهر الزرار للأندرويد بس
-    if (/Android/i.test(navigator.userAgent)) {
-        document.write('<a href="رابط_الـ_APK_بتاعك" class="float-download">📲 حمل التطبيق</a>');
-    }
+    // شلنا الشرط عشان نشوف هيظهر للكل ولا لأ
+    document.write('<a href="رابط_الـ_APK" class="float-download">📲 حمل التطبيق</a>');
 </script>
 
   
