@@ -711,7 +711,7 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
 <div class="main-content">
 
   <!-- Header -->
-<header class="brand-header" style="background: #000; padding: 30px 0 20px 0; text-align: center; position: relative; overflow: hidden; font-family: 'Cairo', sans-serif; direction: ltr; --primary-gold: #e0c770;">
+<header class="brand-header" style="background: #000; padding: 20px 10px; text-align: center; position: relative; overflow: hidden; font-family: 'Cairo', sans-serif; direction: ltr; --primary-gold: #e0c770;">
   <style>
     @keyframes logo_fade_in {
       0% { opacity: 0; transform: translateY(-20px); }
@@ -729,21 +729,20 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   
   <div style="position: relative; z-index: 10;">
     <div style="display: inline-block; position: relative; margin-bottom: 20px; overflow: hidden; border-radius: 10px; animation: logo_fade_in 1.5s ease-out;">
-      <h1 style="margin: 0; font-size: 4.5rem; font-weight: 900; color: #fff; letter-spacing: 2px; word-spacing: 10px; text-transform: uppercase; line-height: 1; filter: drop-shadow(0 0 15px rgba(224, 199, 112, 0.3));">
+      <h1 style="margin: 0; font-size: clamp(2.2rem, 8vw, 4.5rem); font-weight: 900; color: #fff; letter-spacing: 2px; word-spacing: 5px; text-transform: uppercase; line-height: 1; filter: drop-shadow(0 0 15px rgba(224, 199, 112, 0.3));">
         MO <span style="color: #e0c770;">CONTROL</span>
       </h1>
       <div style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: sweep_animation 3.5s infinite; transform: skewX(-25deg); pointer-events: none;"></div>
     </div>
 
     <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-      <div style="height: 1px; width: 220px; background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);"></div>
+      <div style="height: 1px; width: 180px; background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);"></div>
       
-      <div style="display: flex; gap: 18px; font-weight: 700; font-size: 0.9rem; color: #fff; direction: rtl; flex-wrap: wrap; justify-content: center; align-items: center;">
+      <div style="display: flex; gap: 15px; font-weight: 700; font-size: 0.85rem; color: #fff; direction: rtl; flex-wrap: wrap; justify-content: center; align-items: center;">
         <div style="display: flex; align-items: center; gap: 8px; border: 1px solid rgba(224, 199, 112, 0.1); padding: 5px 12px; border-radius: 10px; background: rgba(224, 199, 112, 0.03); animation: border_glow 3s infinite;">
           <span style="color: #e0c770; font-size: 1rem;">&#9889;</span>
           <span>تفعيل فوري</span>
         </div>
-        <span style="color: #fff; opacity: 0.2;">&#8226;</span>
         <div style="display: flex; align-items: center; gap: 8px; border: 1px solid rgba(224, 199, 112, 0.1); padding: 5px 12px; border-radius: 10px; background: rgba(224, 199, 112, 0.03); animation: border_glow 3s infinite;">
           <span style="color: #e0c770; font-size: 1rem;">🛡️</span>
           <span>حماية فائقة</span>
@@ -752,7 +751,7 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
 
       <a id="download-btn" href="https://mocontrol.online/mocontrol.apk" 
          download="MO_CONTROL_App.apk"
-         style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 30px; background: linear-gradient(45deg, #e0c770, #ffd700); color: #000; text-decoration: none; font-weight: 900; border-radius: 50px; box-shadow: 0 0 20px rgba(224, 199, 112, 0.5); animation: pulse_glow 2s infinite; border: 2px solid #fff; cursor: pointer;"
+         style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 25px; background: linear-gradient(45deg, #e0c770, #ffd700); color: #000; text-decoration: none; font-weight: 900; border-radius: 50px; box-shadow: 0 0 20px rgba(224, 199, 112, 0.5); animation: pulse_glow 2s infinite; border: 2px solid #fff; cursor: pointer; max-width: 90%; text-align: center;"
          onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px rgba(224, 199, 112, 0.8)'"
          onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 20px rgba(224, 199, 112, 0.5)'">
          <span style="display: flex; align-items: center; gap: 8px; direction: ltr;">
