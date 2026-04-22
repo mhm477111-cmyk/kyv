@@ -725,32 +725,73 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
             <span style="text-shadow: 0 0 5px rgba(224, 199, 112, 0.3);">حماية فائقة</span>
           </div>
 
-<a href="https://mocontrol.online/mocontrol.apk" 
-   download="MO_CONTROL_App.apk"
-   style="
-     display: inline-flex;
-     align-items: center;
-     justify-content: center;
-     padding: 14px 30px;
-     background: linear-gradient(45deg, #e0c770, #ffd700);
-     color: #000;
-     text-decoration: none;
-     font-weight: 900;
-     font-size: 1.1rem;
-     border-radius: 50px;
-     box-shadow: 0 0 25px rgba(224, 199, 112, 0.6);
-     animation: pulse_glow 2s infinite;
-     margin: 20px 0;
-     transition: all 0.4s ease;
-     border: 2px solid #fff;
-     cursor: pointer;
-   "
-   onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 35px rgba(224, 199, 112, 0.8)'"
-   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 25px rgba(224, 199, 112, 0.6)'">
-   
-   حمل تطبيق MO CONTROL دلوقتي &nbsp;
-   <span style="font-size: 1.3rem;">📱</span> 
-</a>
+<header class="brand-header" style="background: #000; padding: 40px 0 20px 0; text-align: center; position: relative; overflow: hidden; font-family: 'Cairo', sans-serif; direction: ltr;">
+  
+  <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+    <div style="position: absolute; width: 3px; height: 3px; background: rgba(224, 199, 112, 0.4); border-radius: 50%; top: 10%; left: 20%; animation: particle_float 6s infinite;"></div>
+    <div style="position: absolute; width: 2px; height: 2px; background: rgba(224, 199, 112, 0.3); border-radius: 50%; top: 40%; left: 70%; animation: particle_float 8s infinite;"></div>
+    <div style="position: absolute; width: 4px; height: 4px; background: rgba(224, 199, 112, 0.5); border-radius: 50%; top: 80%; left: 30%; animation: particle_float 7s infinite;"></div>
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 90px; background: rgba(224, 199, 112, 0.15); filter: blur(45px); border-radius: 50%; animation: core_pulse 4s ease-in-out infinite;"></div>
+  </div>
+
+  <div style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+    
+    <div style="display: inline-block; position: relative; margin-bottom: 5px;">
+      <h1 style="margin: 0; font-size: 3.2rem; font-weight: 900; color: #fff; letter-spacing: 5px; text-transform: uppercase; line-height: 1.1; filter: drop-shadow(0 0 10px rgba(224, 199, 112, 0.2));">
+        MO <span style="color: #e0c770;">CONTROL</span>
+      </h1>
+      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: sweep_animation 3.5s infinite; transform: skewX(-25deg);"></div>
+    </div>
+
+    <a href="https://mocontrol.online/mocontrol.apk" 
+       download="MO_CONTROL_App.apk"
+       style="
+         display: inline-flex;
+         align-items: center;
+         justify-content: center;
+         padding: 12px 28px;
+         background: linear-gradient(45deg, #e0c770, #ffd700);
+         color: #000;
+         text-decoration: none;
+         font-weight: 900;
+         font-size: 1rem;
+         border-radius: 50px;
+         box-shadow: 0 0 20px rgba(224, 199, 112, 0.5);
+         animation: pulse_glow 2s infinite;
+         transition: all 0.4s ease;
+         border: 2px solid #fff;
+         cursor: pointer;
+         margin-top: 5px;
+       "
+       onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px rgba(224, 199, 112, 0.8)'"
+       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 20px rgba(224, 199, 112, 0.5)'">
+       حمل تطبيق MO CONTROL دلوقتي &nbsp;
+       <span style="font-size: 1.2rem;">📱</span> 
+    </a>
+  </div>
+
+  <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, transparent, #e0c770, transparent); box-shadow: 0px 5px 20px rgba(224, 199, 112, 0.5); z-index: 20;"></div>
+</header>
+
+<style>
+@keyframes pulse_glow {
+  0% { box-shadow: 0 0 10px rgba(224, 199, 112, 0.4); }
+  50% { box-shadow: 0 0 25px rgba(224, 199, 112, 0.8); }
+  100% { box-shadow: 0 0 10px rgba(224, 199, 112, 0.4); }
+}
+@keyframes particle_float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes core_pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.25; }
+}
+@keyframes sweep_animation {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+</style>
 
 <style>
 @keyframes pulse_glow 
