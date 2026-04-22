@@ -733,7 +733,8 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
    style="
      display: inline-flex; 
      align-items: center; 
-     justify-content: center; /* عشان يسنتر المحتوى */
+     justify-content: center; /* تثبيت العناصر في المنتصف */
+     flex-direction: row-reverse; /* عكس الترتيب عشان يثبت مكان الإيموجي والنص */
      padding: 12px 30px; 
      background: linear-gradient(45deg, #e0c770, #ffd700); 
      color: #000; 
@@ -744,13 +745,13 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
      animation: pulse_glow 2s infinite; 
      border: 2px solid #fff; 
      cursor: pointer;
-     direction: ltr; /* هنخلي الزرار يقرأ من الشمال لليمين عشان الترتيب ميتلخبطش */
+     direction: rtl; /* اتجاه اللغة العربي */
    "
    onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px rgba(224, 199, 112, 0.8)'"
    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 20px rgba(224, 199, 112, 0.5)'">
    
-   <span style="font-size: 1.1rem; margin-right: 8px;">📱</span> 
-   حمل تطبيق MO CONTROL دلوقتي
+   حمل تطبيق MO CONTROL دلوقتي 
+   <span style="font-size: 1.1rem; margin-right: 10px; display: inline-block;">📱</span> 
 </a>
       </div>
     </div>
