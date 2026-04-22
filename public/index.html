@@ -725,18 +725,9 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
         <h1 style="margin: 0; font-size: 3.2rem; font-weight: 900; color: #fff; letter-spacing: 5px; text-transform: uppercase; line-height: 1.1; filter: drop-shadow(0 0 10px rgba(224, 199, 112, 0.2));">
           MO <span style="color: #e0c770;">CONTROL</span>
         </h1>
-<div style="
-    position: absolute; 
-    top: 0; 
-    left: -150%; 
-    width: 100%; 
-    height: 100%; 
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); 
-    animation: sweep_animation 3.5s infinite; 
-    transform: skewX(-25deg);
-    pointer-events: none;
-    clip-path: inset(0 0 0 0); /* ده اللي بيجبره يفضل جوه الحدود */
-  "></div>
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: sweep_animation 3.5s infinite; transform: skewX(-25deg);"></div>
+      </div>
+
       <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
         
         <div style="display: flex; gap: 18px; font-weight: 700; font-size: 0.85rem; color: #fff; direction: rtl; flex-wrap: wrap; justify-content: center; align-items: center;">
@@ -751,7 +742,7 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
           </div>
         </div>
 
-<a id="download-btn" href="https://mocontrol.online/mocontrol.apk" 
+<a href="https://mocontrol.online/mocontrol.apk" 
    download="MO_CONTROL_App.apk"
    style="
      display: inline-flex; 
@@ -769,6 +760,19 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
      cursor: pointer;
    "
    onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px rgba(224, 199, 112, 0.8)'"
+   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 20px rgba(224, 199, 112, 0.5)'">
+   
+   <span style="display: flex; align-items: center; gap: 8px; direction: ltr;">
+     <span style="font-size: 1.1rem;">📱</span> 
+     <span style="direction: rtl;">حمل تطبيق MO CONTROL دلوقتي</span>
+   </span>
+   
+</a>
+
+      </div>
+    </div>
+</header>
+  eover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px rgba(224, 199, 112, 0.8)'"
    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 20px rgba(224, 199, 112, 0.5)'">
    
    <span style="display: flex; align-items: center; gap: 8px; direction: ltr;">
