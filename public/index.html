@@ -625,6 +625,20 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
     overflow-x: hidden;
 }
 
+<style>
+  /* الكلاس ده هيتضاف للـ body لما الموقع يتفتح جوه التطبيق */
+  .is-app #download-btn {
+    display: none !important;
+  }
+</style>
+
+<script>
+  // الكود ده بيفحص لو أنت فاتح من التطبيق وبيديله كلاس عشان يختفي
+  if (window.navigator.userAgent.includes("MO_CONTROL_APP")) {
+    document.body.classList.add('is-app');
+  }
+</script>
+  
   
 </style>
 
