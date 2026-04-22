@@ -728,8 +728,8 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
           </div>
         </div>
 
-<a href="https://mocontrol.online/mocontrol.apk" 
-   download="MO_CONTROL_App.apk"
+<a id="download-btn" href="https://mocontrol.online/mocontrol.apk" ... >
+  download="MO_CONTROL_App.apk"
    style="
      display: inline-flex; 
      align-items: center; 
@@ -1671,7 +1671,19 @@ document.addEventListener('click', function(e) {
 }, true);
 </script>
 
-
+<script>
+  // الدالة دي بتشوف هل الموقع مفتوح جوه تطبيقك ولا متصفح عادي
+  function checkAppEnvironment() {
+    // افترضنا إنك ضفت كلمة 'mocontrol-app' في الـ User Agent بتاع التطبيق
+    // أو ببساطة لو الزرار مش عايزه يظهر في التطبيق، بنشوف لو فيه علامة معينة
+    if (window.navigator.userAgent.includes("MO_CONTROL_APP")) {
+      document.getElementById("download-btn").style.display = "none";
+    }
+  }
+  
+  // تشغيل الفحص أول ما الصفحة تفتح
+  window.onload = checkAppEnvironment;
+</script>
 
   
 </body>
