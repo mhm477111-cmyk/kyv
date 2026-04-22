@@ -1602,37 +1602,7 @@ document.addEventListener('click', function(e) {
 }, true);
 </script>
 
-<style>
-    .float-custom {
-        position: fixed;
-        top: 200px; /* ده الرقم اللي بيتحكم في نزول الزرار (كل ما تزوده، الزرار ينزل لتحت) */
-        right: 20px; 
-        background-color: #28a745;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 50px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        z-index: 99999; 
-        text-decoration: none;
-        font-weight: bold;
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        animation: pulse 2s infinite;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
 
-    @keyframes pulse {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-        70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-    }
-</style>
-
-<script>
-    document.body.insertAdjacentHTML('beforeend', '<a href="رابط_الـ_APK" class="float-custom">📲 حمل التطبيق</a>');
-</script>
 
   
 </body>
