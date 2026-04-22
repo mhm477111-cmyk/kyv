@@ -1608,17 +1608,10 @@ document.addEventListener('click', function(e) {
         70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(40, 167, 69, 0); }
         100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
     }
-  /* الزرار اللي عايزينه يظهر فوق الكل */
-.your-whatsapp-button-class {
-    position: fixed; /* بيثبته في مكان محدد مهما عملت سكرول */
-    bottom: 20px;    /* بيطلعه 20 بكسل من تحت */
-    right: 20px;     /* بيطلعه 20 بكسل من اليمين */
-    z-index: 99999;  /* ده الرقم اللي بيخليه يركب فوق أي عنصر تاني */
-}
-
-/* العنصر اللي مغطي على الزرار (اللي هو شريط الأخبار) */
-.news-ticker-class {
-    z-index: 1; /* بنخليه في الطبقة اللي تحت */
+.activation-btn {
+    top: 50px; /* جرب تغير الرقم ده (50، 60، 70) لحد ما ييجي تحت الشريط بالظبط */
+    right: 20px;
+    bottom: auto; /* بنلغي الـ bottom عشان نتحكم من الـ top */
 }
 </style>
 
