@@ -1685,17 +1685,21 @@ document.addEventListener('click', function(e) {
 </script>
 
 <script>
-  // الدالة دي بتشوف هل الموقع مفتوح جوه تطبيقك ولا متصفح عادي
-  function checkAppEnvironment() {
-    // افترضنا إنك ضفت كلمة 'mocontrol-app' في الـ User Agent بتاع التطبيق
-    // أو ببساطة لو الزرار مش عايزه يظهر في التطبيق، بنشوف لو فيه علامة معينة
-    if (window.navigator.userAgent.includes("MO_CONTROL_APP")) {
-      document.getElementById("download-btn").style.display = "none";
+  // الكود ده بيشتغل بمجرد ما الصفحة تفتح
+  (function() {
+    // التطبيقات اللي معموله بـ WebView بتبعت User-Agent خاص غالباً
+    // أو نقدر نشوف لو الموقع مفتوح في إطار (iframe) لو التطبيق بيستخدمه
+    const isApp = navigator.userAgent.includes("wv") || /Android|iPhone/i.test(navigator.userAgent);
+    
+    // إذا كنت عايز تخفي الزرار في التطبيق فقط
+    if (isApp) {
+      // بنستنى الصفحة تحمل وبعدين نخفي الزرار
+      window.addEventListener('DOMContentLoaded', (event) => {
+        const btn = document.getElementById('download-btn');
+        if (btn) btn.style.display = 'none';
+      });
     }
-  }
-  
-  // تشغيل الفحص أول ما الصفحة تفتح
-  window.onload = checkAppEnvironment;
+  })();
 </script>
 
   
