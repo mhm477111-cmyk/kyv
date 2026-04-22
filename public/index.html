@@ -724,27 +724,13 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
       <h1 style="display: inline-block; margin: 0 auto 15px auto; font-size: 3.2rem; font-weight: 900; color: #fff; letter-spacing: 5px; text-transform: uppercase; line-height: 1.1; filter: drop-shadow(0 0 10px rgba(224, 199, 112, 0.2)); position: relative; overflow: hidden; border-radius: 10px;">
         MO <span style="color: #e0c770;">CONTROL</span>
         
-        <div style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); animation: sweep_animation 3.5s infinite; transform: skewX(-25deg); pointer-events: none;"></div>
+        <div style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); animation: mo_sweep_unique 3.5s infinite; transform: skewX(-25deg); pointer-events: none;"></div>
       </h1>
 
       <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-        <div style="display: flex; gap: 18px; font-weight: 700; font-size: 0.85rem; color: #fff; direction: rtl; flex-wrap: wrap; justify-content: center; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 8px; border: 1px solid rgba(224, 199, 112, 0.1); padding: 5px 12px; border-radius: 10px; background: rgba(224, 199, 112, 0.03); animation: border_glow 3s infinite;">
-            <span style="color: #e0c770; font-size: 1rem;">&#9889;</span>
-            <span style="text-shadow: 0 0 5px rgba(224, 199, 112, 0.3);">تفعيل فوري</span>
-          </div>
-          <span style="color: #fff; opacity: 0.2;">&#8226;</span>
-          <div style="display: flex; align-items: center; gap: 8px; border: 1px solid rgba(224, 199, 112, 0.1); padding: 5px 12px; border-radius: 10px; background: rgba(224, 199, 112, 0.03); animation: border_glow 3s infinite;">
-            <span style="color: #e0c770; font-size: 1rem;">🛡️</span>
-            <span style="text-shadow: 0 0 5px rgba(224, 199, 112, 0.3);">حماية فائقة</span>
-          </div>
-        </div>
-
         <a id="download-btn" href="https://mocontrol.online/mocontrol.apk" 
            download="MO_CONTROL_App.apk"
-           style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 30px; background: linear-gradient(45deg, #e0c770, #ffd700); color: #000; text-decoration: none; font-weight: 900; border-radius: 50px; box-shadow: 0 0 20px rgba(224, 199, 112, 0.5); animation: pulse_glow 2s infinite; border: 2px solid #fff; cursor: pointer;"
-           onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px rgba(224, 199, 112, 0.8)'"
-           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 20px rgba(224, 199, 112, 0.5)'">
+           style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 30px; background: linear-gradient(45deg, #e0c770, #ffd700); color: #000; text-decoration: none; font-weight: 900; border-radius: 50px; box-shadow: 0 0 20px rgba(224, 199, 112, 0.5); animation: pulse_glow 2s infinite; border: 2px solid #fff; cursor: pointer;">
            <span style="display: flex; align-items: center; gap: 8px; direction: ltr;">
              <span style="font-size: 1.1rem;">📱</span> 
              <span style="direction: rtl;">حمل تطبيق MO CONTROL دلوقتي</span>
@@ -753,6 +739,13 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
       </div>
     </div>
 </header>
+
+<style>
+  @keyframes mo_sweep_unique {
+    0% { left: -100%; }
+    100% { left: 150%; }
+  }
+</style>
 <style>
 @keyframes pulse_glow 
   0% { box-shadow: 0 0 15px rgba(224, 199, 112, 0.5); }
