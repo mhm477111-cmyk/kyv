@@ -1585,17 +1585,16 @@ document.addEventListener('click', function(e) {
 </script>
 
 <style>
-    /* الستايل الأساسي للزرار */
     .float-custom {
         position: fixed;
-        top: 80px; /* المسافة من فوق (شريط الأخبار غالباً واخد 50-60، فـ 80 رقم مناسب جداً) */
-        right: 20px; /* المسافة من الجنب */
+        top: 150px; /* ده الرقم اللي بيتحكم في نزول الزرار (كل ما تزوده، الزرار ينزل لتحت) */
+        right: 20px; 
         background-color: #28a745;
         color: white;
         padding: 12px 20px;
         border-radius: 50px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        z-index: 99999; /* عشان يفضل فوق أي حاجة تانية */
+        z-index: 99999; 
         text-decoration: none;
         font-weight: bold;
         font-family: Arial, sans-serif;
@@ -1614,7 +1613,6 @@ document.addEventListener('click', function(e) {
 </style>
 
 <script>
-    // تعديل بسيط: أضفنا الكود ده يضيف الزرار لآخر الصفحة عشان يفضل ظاهر
     document.body.insertAdjacentHTML('beforeend', '<a href="رابط_الـ_APK" class="float-custom">📲 حمل التطبيق</a>');
 </script>
 
