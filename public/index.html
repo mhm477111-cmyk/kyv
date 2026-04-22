@@ -1584,40 +1584,38 @@ document.addEventListener('click', function(e) {
 }, true);
 </script>
 
-
 <style>
-    /* الستايل اللي بيخلي الزرار يتحرك */
-    .float-download {
+    /* الستايل الأساسي للزرار */
+    .float-custom {
         position: fixed;
-        bottom: 25px;
-        right: 25px;
+        top: 80px; /* المسافة من فوق (شريط الأخبار غالباً واخد 50-60، فـ 80 رقم مناسب جداً) */
+        right: 20px; /* المسافة من الجنب */
         background-color: #28a745;
         color: white;
-        padding: 15px 25px;
+        padding: 12px 20px;
         border-radius: 50px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        z-index: 9999;
+        z-index: 99999; /* عشان يفضل فوق أي حاجة تانية */
         text-decoration: none;
         font-weight: bold;
         font-family: Arial, sans-serif;
+        font-size: 14px;
         animation: pulse 2s infinite;
-        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
+
     @keyframes pulse {
         0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-        70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(40, 167, 69, 0); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
         100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
     }
-.activation-btn {
-    top: 50px; /* جرب تغير الرقم ده (50، 60، 70) لحد ما ييجي تحت الشريط بالظبط */
-    right: 20px;
-    bottom: auto; /* بنلغي الـ bottom عشان نتحكم من الـ top */
-}
 </style>
 
 <script>
-    // شلنا الشرط عشان نشوف هيظهر للكل ولا لأ
-    document.write('<a href="رابط_الـ_APK" class="float-download">📲 حمل التطبيق</a>');
+    // تعديل بسيط: أضفنا الكود ده يضيف الزرار لآخر الصفحة عشان يفضل ظاهر
+    document.body.insertAdjacentHTML('beforeend', '<a href="رابط_الـ_APK" class="float-custom">📲 حمل التطبيق</a>');
 </script>
 
   
