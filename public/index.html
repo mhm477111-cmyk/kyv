@@ -1687,21 +1687,13 @@ document.addEventListener('click', function(e) {
 </script>
 
 <script>
-  // الكود ده بيشتغل بمجرد ما الصفحة تفتح
-  (function() {
-    // التطبيقات اللي معموله بـ WebView بتبعت User-Agent خاص غالباً
-    // أو نقدر نشوف لو الموقع مفتوح في إطار (iframe) لو التطبيق بيستخدمه
-    const isApp = navigator.userAgent.includes("wv") || /Android|iPhone/i.test(navigator.userAgent);
-    
-    // إذا كنت عايز تخفي الزرار في التطبيق فقط
-    if (isApp) {
-      // بنستنى الصفحة تحمل وبعدين نخفي الزرار
-      window.addEventListener('DOMContentLoaded', (event) => {
-        const btn = document.getElementById('download-btn');
-        if (btn) btn.style.display = 'none';
-      });
+  window.addEventListener('DOMContentLoaded', (event) => {
+    // بدل ما نفحص أي متصفح، هنفحص "كلمة سر" إحنا هنحطها في التطبيق
+    if (navigator.userAgent.includes("MO_CONTROL_APP_SECRET")) {
+      const btn = document.getElementById('download-btn');
+      if (btn) btn.style.display = 'none';
     }
-  })();
+  });
 </script>
 
   
