@@ -1722,19 +1722,18 @@ document.addEventListener('click', function(e) {
 </audio>
 
 <script>
-  function playAudio() {
-    var audio = document.getElementById("quranAudio");
-    audio.play().then(function() {
-      // الصوت اشتغل بنجاح
-    }).catch(function(error) {
-      // المتصفح منع التشغيل، هيفضل مستني أول ضغطة من المستخدم
-      document.addEventListener('click', playAudio, { once: true });
-    });
-  }
-
-  // محاولة تشغيل فورية عند تحميل الصفحة
-  window.onload = playAudio;
+  // ده كود "هادي" مش بيحاول يجبر المتصفح على حاجة
+  // بيستنى المستخدم يلمس أي حتة في التطبيق ويشغل الصوت
+  document.addEventListener('click', function() {
+    var audio = document.getElementById('quranAudio');
+    if (audio.paused) {
+      audio.play().catch(function(error) {
+        console.log("Autoplay prevented by system");
+      });
+    }
+  }, { once: true });
 </script>
+
 
 
 
