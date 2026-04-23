@@ -1715,6 +1715,23 @@ document.addEventListener('click', function(e) {
     });
 </script>
 
+
+
+<audio id="quranAudio" loop>
+  <source src="https://server11.mp3quran.net/hazza/055.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  // الكود ده بيشغل الصوت تلقائياً مع أول لمسة للموقع (عشان قوانين المتصفحات)
+  document.addEventListener('click', function() {
+    var audio = document.getElementById('quranAudio');
+    if (audio.paused) {
+        audio.play();
+    }
+  }, { once: true });
+</script>
+
+
   
 </body>
 </html>
