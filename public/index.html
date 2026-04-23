@@ -1717,22 +1717,18 @@ document.addEventListener('click', function(e) {
 
 
 
-<audio id="quranAudio" loop>
-  <source src="https://server11.mp3quran.net/hazza/055.mp3" type="audio/mpeg">
-</audio>
-
 <script>
-  // ده كود "هادي" مش بيحاول يجبر المتصفح على حاجة
-  // بيستنى المستخدم يلمس أي حتة في التطبيق ويشغل الصوت
+  // كود أكثر أماناً للتطبيقات
   document.addEventListener('click', function() {
     var audio = document.getElementById('quranAudio');
-    if (audio.paused) {
-      audio.play().catch(function(error) {
-        console.log("Autoplay prevented by system");
+    if (audio && audio.paused) {
+      audio.play().catch(function(e) {
+        console.log("Audio skipped to protect network stability");
       });
     }
   }, { once: true });
 </script>
+
 
 
 
