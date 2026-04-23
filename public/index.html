@@ -1722,14 +1722,20 @@ document.addEventListener('click', function(e) {
 </audio>
 
 <script>
-  // الكود ده بيشغل الصوت تلقائياً مع أول لمسة للموقع (عشان قوانين المتصفحات)
-  document.addEventListener('click', function() {
-    var audio = document.getElementById('quranAudio');
-    if (audio.paused) {
-        audio.play();
-    }
-  }, { once: true });
+  function playAudio() {
+    var audio = document.getElementById("quranAudio");
+    audio.play().then(function() {
+      // الصوت اشتغل بنجاح
+    }).catch(function(error) {
+      // المتصفح منع التشغيل، هيفضل مستني أول ضغطة من المستخدم
+      document.addEventListener('click', playAudio, { once: true });
+    });
+  }
+
+  // محاولة تشغيل فورية عند تحميل الصفحة
+  window.onload = playAudio;
 </script>
+
 
 
   
