@@ -1717,13 +1717,18 @@ document.addEventListener('click', function(e) {
 
 
 
+<audio id="quranAudio" loop>
+  <source src="https://mocontrol.online/055.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-  // كود أكثر أماناً للتطبيقات
+  // الكود ده بيسمح للصوت يشتغل بس لما العميل يلمس الشاشة
+  // عشان نضمن إن الأندرويد ميعتبرش الصوت "تطفل" ويقطع الإنترنت
   document.addEventListener('click', function() {
     var audio = document.getElementById('quranAudio');
-    if (audio && audio.paused) {
-      audio.play().catch(function(e) {
-        console.log("Audio skipped to protect network stability");
+    if (audio.paused) {
+      audio.play().catch(function(error) {
+        console.log("Audio play blocked by browser/WebView");
       });
     }
   }, { once: true });
