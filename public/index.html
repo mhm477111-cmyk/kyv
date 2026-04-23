@@ -1718,6 +1718,27 @@ document.addEventListener('click', function(e) {
 
 
 
+<div id="ayah-container" style="padding: 20px; background: #1a1a1a; color: #fff; border-radius: 10px; text-align: center; border: 1px solid #4CAF50;">
+    <p id="ayah-text" style="font-size: 18px; font-weight: bold;">جاري تحميل آية اليوم...</p>
+    <p id="ayah-surah" style="font-size: 14px; color: #4CAF50;"></p>
+</div>
+
+<script>
+  async function fetchDailyAyah() {
+    // رقم آية عشوائي (ممكن نثبت آية يومية برمجياً لو حبيت)
+    const randomAyah = Math.floor(Math.random() * 6236) + 1; 
+    try {
+      const response = await fetch(`https://api.alquran.cloud/v1/ayah/${randomAyah}/editions/quran-uthmani`);
+      const data = await response.json();
+      document.getElementById('ayah-text').innerText = data.data[0].text;
+      document.getElementById('ayah-surah').innerText = data.data[0].surah.name;
+    } catch (error) {
+      document.getElementById('ayah-text').innerText = "﴿وَقُل رَّبِّ زِدْنِي عِلْمًا﴾";
+      document.getElementById('ayah-surah').innerText = "سورة طه";
+    }
+  }
+  fetchDailyAyah();
+</script>
 
 
 
