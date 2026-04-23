@@ -871,6 +871,55 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
         </span>
       </div>
     </div>
+
+
+<div id="ayah-trigger" style="cursor: pointer; background: linear-gradient(145deg, #1f1f1f, #121212); border: 1px solid #4CAF50; color: #4CAF50; padding: 12px 25px; border-radius: 12px; text-align: center; margin: 20px auto; width: fit-content; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2); transition: 0.3s;">
+    آية اليوم
+</div>
+
+<div id="ayah-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #1a1a1a; color: #fff; padding: 30px; border-radius: 20px; width: 85%; max-width: 400px; text-align: center; border: 1px solid #4CAF50; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <h3 style="color: #4CAF50; margin-bottom: 20px;">آية اليوم</h3>
+        <p id="ayah-content" style="font-size: 19px; line-height: 1.6; font-family: 'Traditional Arabic', serif; margin-bottom: 20px;">جاري التحميل...</p>
+        <p id="ayah-source" style="font-size: 15px; color: #aaa;"></p>
+    </div>
+</div>
+
+<script>
+  const modal = document.getElementById('ayah-modal');
+  const trigger = document.getElementById('ayah-trigger');
+
+  // فتح المربع
+  trigger.onclick = function() {
+    modal.style.display = 'flex';
+    fetchDailyAyah();
+  };
+
+  // قفل المربع عند الضغط في أي مكان فاضي (خارج الورقة)
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
+    }
+  };
+
+  // سحب الآية من الـ API
+  async function fetchDailyAyah() {
+    const randomAyah = Math.floor(Math.random() * 6236) + 1;
+    try {
+      const response = await fetch(`https://api.alquran.cloud/v1/ayah/${randomAyah}/editions/quran-uthmani`);
+      const data = await response.json();
+      document.getElementById('ayah-content').innerText = data.data[0].text;
+      document.getElementById('ayah-source').innerText = data.data[0].surah.name;
+    } catch (e) {
+      document.getElementById('ayah-content').innerText = "﴿وَقُل رَّبِّ زِدْنِي عِلْمًا﴾";
+      document.getElementById('ayah-source').innerText = "سورة طه";
+    }
+  }
+</script>
+
+
+
+    
     <div id="welcome-card" style="display:none; align-items: center; background: rgba(212, 175, 55, 0.1); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 100px; border: 1px solid #d4af37; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); direction: rtl; margin: 5px;">
       <div style="display: flex; align-items: center; gap: 10px;">
         <i class="fas fa-crown" style="color: #d4af37; font-size: 0.9rem;"></i>
@@ -1718,49 +1767,7 @@ document.addEventListener('click', function(e) {
 
 
 
-<div id="ayah-trigger" style="cursor: pointer; background: linear-gradient(145deg, #1f1f1f, #121212); border: 1px solid #4CAF50; color: #4CAF50; padding: 12px 25px; border-radius: 12px; text-align: center; margin: 20px auto; width: fit-content; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2); transition: 0.3s;">
-    آية اليوم
-</div>
 
-<div id="ayah-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: #1a1a1a; color: #fff; padding: 30px; border-radius: 20px; width: 85%; max-width: 400px; text-align: center; border: 1px solid #4CAF50; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-        <h3 style="color: #4CAF50; margin-bottom: 20px;">آية اليوم</h3>
-        <p id="ayah-content" style="font-size: 19px; line-height: 1.6; font-family: 'Traditional Arabic', serif; margin-bottom: 20px;">جاري التحميل...</p>
-        <p id="ayah-source" style="font-size: 15px; color: #aaa;"></p>
-    </div>
-</div>
-
-<script>
-  const modal = document.getElementById('ayah-modal');
-  const trigger = document.getElementById('ayah-trigger');
-
-  // فتح المربع
-  trigger.onclick = function() {
-    modal.style.display = 'flex';
-    fetchDailyAyah();
-  };
-
-  // قفل المربع عند الضغط في أي مكان فاضي (خارج الورقة)
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = 'none';
-    }
-  };
-
-  // سحب الآية من الـ API
-  async function fetchDailyAyah() {
-    const randomAyah = Math.floor(Math.random() * 6236) + 1;
-    try {
-      const response = await fetch(`https://api.alquran.cloud/v1/ayah/${randomAyah}/editions/quran-uthmani`);
-      const data = await response.json();
-      document.getElementById('ayah-content').innerText = data.data[0].text;
-      document.getElementById('ayah-source').innerText = data.data[0].surah.name;
-    } catch (e) {
-      document.getElementById('ayah-content').innerText = "﴿وَقُل رَّبِّ زِدْنِي عِلْمًا﴾";
-      document.getElementById('ayah-source').innerText = "سورة طه";
-    }
-  }
-</script>
 
 
 
