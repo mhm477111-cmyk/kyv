@@ -857,13 +857,9 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
 
   <!-- Status Container -->
 
-<div class="status-container" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0; direction: rtl; flex-wrap: wrap; text-align: center;">
+<div class="status-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; margin: 20px 0; direction: rtl;">
     
-    <div id="ayah-trigger" style="cursor: pointer; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(76, 175, 80, 0.3); color: #7eba27; font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 700; transition: 0.3s; white-space: nowrap; margin: 5px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); flex: 1 1 100%; max-width: 250px;">
-        آية اليوم 📖
-    </div>
-
-    <div style="display: flex; align-items: center; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.4); white-space: nowrap; margin: 5px; flex: 1 1 100%; max-width: 320px;">
+    <div style="display: flex; align-items: center; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.4); width: fit-content; max-width: 90%;">
       <div style="display: flex; align-items: center; gap: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 12px; margin-left: 12px; direction: ltr;">
         <div style="position: relative; width: 8px; height: 8px;">
           <span style="position: absolute; width: 100%; height: 100%; background: #7eba27; border-radius: 50%; z-index: 2;"></span>
@@ -877,7 +873,50 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
         </span>
       </div>
     </div>
+
+    <div id="ayah-trigger" style="cursor: pointer; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(76, 175, 80, 0.3); color: #7eba27; font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 700; transition: 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.4); width: fit-content; min-width: 150px; text-align: center;">
+        آية اليوم 📖
+    </div>
 </div>
+
+<div id="ayah-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: #1a1a1a; color: #fff; padding: 30px; border-radius: 20px; width: 85%; max-width: 400px; text-align: center; border: 1px solid #7eba27; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <h3 style="color: #7eba27; margin-bottom: 20px;">آية اليوم</h3>
+        <p id="ayah-content" style="font-size: 19px; line-height: 1.6; font-family: 'Traditional Arabic', serif; margin-bottom: 20px;">جارِ جلب الآية...</p>
+        <p id="ayah-source" style="font-size: 15px; color: #aaa;"></p>
+    </div>
+</div>
+
+<script>
+  // نضمن إن الكود يشتغل بعد ما الصفحة تحمل بالكامل
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('ayah-modal');
+    const trigger = document.getElementById('ayah-trigger');
+
+    trigger.addEventListener('click', function() {
+        modal.style.display = 'flex';
+        fetchDailyAyah();
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    async function fetchDailyAyah() {
+        const randomAyah = Math.floor(Math.random() * 6236) + 1;
+        try {
+            const response = await fetch(`https://api.alquran.cloud/v1/ayah/${randomAyah}/editions/quran-uthmani`);
+            const data = await response.json();
+            document.getElementById('ayah-content').innerText = data.data[0].text;
+            document.getElementById('ayah-source').innerText = data.data[0].surah.name;
+        } catch (e) {
+            document.getElementById('ayah-content').innerText = "﴿وَقُل رَّبِّ زِدْنِي عِلْمًا﴾";
+        }
+    }
+  });
+</script>
 
 
 
