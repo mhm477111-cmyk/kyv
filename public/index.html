@@ -856,7 +856,12 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
   </header>
 
   <!-- Status Container -->
-  <div class="status-container" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0; direction: rtl; flex-wrap: wrap; text-align: center;">
+<div class="status-container" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0; direction: rtl; flex-wrap: wrap; text-align: center;">
+    
+    <div id="ayah-trigger" style="cursor: pointer; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(76, 175, 80, 0.3); color: #7eba27; font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 700; transition: 0.3s; white-space: nowrap; margin: 5px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+        آية اليوم 📖
+    </div>
+
     <div style="display: flex; align-items: center; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.4); white-space: nowrap; margin: 5px;">
       <div style="display: flex; align-items: center; gap: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 12px; margin-left: 12px; direction: ltr;">
         <div style="position: relative; width: 8px; height: 8px;">
@@ -871,38 +876,26 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
         </span>
       </div>
     </div>
-
-
-<div id="ayah-trigger" style="cursor: pointer; background: linear-gradient(145deg, #1f1f1f, #121212); border: 1px solid #4CAF50; color: #4CAF50; padding: 12px 25px; border-radius: 12px; text-align: center; margin: 20px auto; width: fit-content; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2); transition: 0.3s;">
-    آية اليوم
 </div>
 
-<div id="ayah-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: #1a1a1a; color: #fff; padding: 30px; border-radius: 20px; width: 85%; max-width: 400px; text-align: center; border: 1px solid #4CAF50; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-        <h3 style="color: #4CAF50; margin-bottom: 20px;">آية اليوم</h3>
-        <p id="ayah-content" style="font-size: 19px; line-height: 1.6; font-family: 'Traditional Arabic', serif; margin-bottom: 20px;">جاري التحميل...</p>
+<div id="ayah-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #1a1a1a; color: #fff; padding: 30px; border-radius: 20px; width: 85%; max-width: 400px; text-align: center; border: 1px solid #7eba27; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <h3 style="color: #7eba27; margin-bottom: 20px;">آية اليوم</h3>
+        <p id="ayah-content" style="font-size: 19px; line-height: 1.6; font-family: 'Traditional Arabic', serif; margin-bottom: 20px;">جاري تحميل الآية...</p>
         <p id="ayah-source" style="font-size: 15px; color: #aaa;"></p>
     </div>
 </div>
 
 <script>
+  // تفعيل فتح وقفل المربع
   const modal = document.getElementById('ayah-modal');
-  const trigger = document.getElementById('ayah-trigger');
-
-  // فتح المربع
-  trigger.onclick = function() {
+  document.getElementById('ayah-trigger').onclick = function() {
     modal.style.display = 'flex';
     fetchDailyAyah();
   };
-
-  // قفل المربع عند الضغط في أي مكان فاضي (خارج الورقة)
   window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = 'none';
-    }
+    if (event.target == modal) modal.style.display = 'none';
   };
-
-  // سحب الآية من الـ API
   async function fetchDailyAyah() {
     const randomAyah = Math.floor(Math.random() * 6236) + 1;
     try {
@@ -912,10 +905,13 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
       document.getElementById('ayah-source').innerText = data.data[0].surah.name;
     } catch (e) {
       document.getElementById('ayah-content').innerText = "﴿وَقُل رَّبِّ زِدْنِي عِلْمًا﴾";
-      document.getElementById('ayah-source').innerText = "سورة طه";
     }
   }
 </script>
+
+
+
+
 
 
 
