@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
@@ -14,14 +14,17 @@ export default function Dashboard() {
       if (user) {
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) setUserData(docSnap.data());
+        if (docSnap.exists()) {
+          setUserData(docSnap.data());
+        }
       } else {
-        router.push('/login');
+        // توجيه غير المسجلين لصفحة الـ Auth الموحدة
+        router.push('/auth');
       }
     });
   }, [router]);
 
-  // الربط الأوتوماتيكي: السيستم بيكون Live فقط لو (مُفعل إدارياً + تم الدفع)
+  // منطق النظام الأوتوماتيكي: السيستم شغال فقط لو (أنت مفعله إدارياً + العميل دافع)
   const isSystemLive = userData?.active && userData?.paid;
 
   return (
@@ -35,7 +38,7 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        {/* كارت حالة الخدمة (أوتوماتيكي) */}
+        {/* كارت حالة الخدمة */}
         <div className="bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-3xl shadow-[0_0_15px_rgba(202,138,4,0.2)]">
           <h2 className="text-yellow-600 font-bold text-sm mb-4">حالة الخدمة</h2>
           <p className="text-2xl font-bold mb-4">{userData?.planName || "---"}</p>
@@ -77,15 +80,15 @@ export default function Dashboard() {
           تفعيل باقة الآن 🚀
         </button>
 
-<button 
-  onClick={() => {
-    auth.signOut();
-    router.push('/auth'); // هنا التعديل: بدل ما يروح لـ /login هيروح لـ /auth
-  }}
-  className="w-full bg-transparent border border-gray-700 text-gray-400 py-3 rounded-2xl hover:border-red-900 hover:text-red-500 transition-all"
->
-  تسجيل الخروج
-</button>
+        <button 
+          onClick={() => {
+            signOut(auth);
+            router.push('/auth');
+          }}
+          className="w-full bg-transparent border border-gray-700 text-gray-400 py-3 rounded-2xl hover:border-red-900 hover:text-red-500 transition-all"
+        >
+          تسجيل الخروج
+        </button>
       </div>
     </div>
   );
