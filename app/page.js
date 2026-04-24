@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import AuthModal from '@/components/AuthModal';
+import AuthModal from '../components/AuthModal';
 
 export default function Home() {
   const [showAuth, setShowAuth] = useState(false);
