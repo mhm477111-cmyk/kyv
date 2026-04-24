@@ -32,7 +32,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         {/* كارت حالة الباقة */}
-        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-lg">
           <h2 className="text-gray-400 text-sm">الباقة الحالية</h2>
           <p className="text-xl font-bold mt-2">{userData?.planName || "غير محددة"}</p>
           <span className={`inline-block mt-3 px-3 py-1 rounded-full text-xs ${userData?.active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -41,30 +41,34 @@ export default function Dashboard() {
         </div>
 
         {/* كارت حالة الدفع */}
-        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-lg">
           <h2 className="text-gray-400 text-sm">حالة الدفع</h2>
           <p className="text-xl font-bold mt-2">{userData?.paid ? "تم الدفع ✅" : "لم يتم الدفع ❌"}</p>
         </div>
 
         {/* كارت تاريخ التجديد */}
-        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-lg">
           <h2 className="text-gray-400 text-sm">تاريخ التجديد القادم</h2>
           <p className="text-xl font-bold mt-2">{userData?.nextRenewal || "---"}</p>
         </div>
-
       </div>
-<button 
-  onClick={() => router.push('/path-to-your-telegram-form')} // حط المسار اللي الصفحة موجودة فيه
-  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-all"
->
-  تجديد الباقة 🚀
-</button>
-      <button 
-        onClick={() => auth.signOut()}
-        className="mt-10 bg-red-500/10 text-red-400 border border-red-500/20 px-6 py-2 rounded-lg hover:bg-red-500/20 transition-all"
-      >
-        تسجيل الخروج
-      </button>
+
+      {/* Action Buttons */}
+      <div className="mt-8 flex flex-col gap-4 max-w-sm">
+        <button 
+          onClick={() => router.push('/renewal')} 
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20"
+        >
+          تجديد الباقة 🚀
+        </button>
+
+        <button 
+          onClick={() => auth.signOut()}
+          className="w-full bg-gray-900 border border-gray-800 text-gray-400 py-3 rounded-xl font-semibold hover:border-red-500/50 hover:text-red-400 transition-all"
+        >
+          تسجيل الخروج
+        </button>
+      </div>
     </div>
   );
 }
