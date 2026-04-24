@@ -42,17 +42,18 @@ export default function AdminDashboard() {
 
       alert("تم تحديث البيانات بنجاح!");
       setEditingUser(null);
-      fetchUsers(); // تحديث القائمة بعد الحفظ
+      fetchUsers();
     } catch (error) {
       console.error("خطأ أثناء التحديث:", error);
       alert("فشل التحديث: " + error.message);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (confirm("هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع عن هذا الإجراء!")) {
+  const handleDelete = async (id, name) => {
+    if (confirm(`هل أنت متأكد من حذف بيانات العميل ${name} نهائياً؟`)) {
       try {
         await deleteDoc(doc(db, "users", id));
+        alert("تم حذف بيانات العميل بنجاح.");
         fetchUsers();
       } catch (err) {
         alert("خطأ أثناء الحذف: " + err.message);
@@ -66,10 +67,9 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="p-8 bg-black min-h-screen text-white">
+    <div className="p-8 bg-black min-h-screen text-white font-sans">
       <h1 className="text-3xl font-bold mb-8 text-yellow-500">لوحة تحكم الأدمن - MO CONTROL</h1>
 
-      {/* شريط البحث */}
       <input 
         placeholder="🔍 ابحث بالاسم أو رقم الموبايل..." 
         className="w-full p-4 mb-8 bg-gray-900 rounded-2xl border border-gray-700 outline-none focus:border-yellow-600 transition-all"
@@ -85,13 +85,12 @@ export default function AdminDashboard() {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setEditingUser(user)} className="bg-yellow-600 px-4 py-2 rounded-xl text-black font-bold hover:bg-yellow-500 transition-all">تعديل</button>
-              <button onClick={() => handleDelete(user.id)} className="bg-red-600/20 text-red-500 px-4 py-2 rounded-xl hover:bg-red-600 hover:text-white transition-all">حذف</button>
+              <button onClick={() => handleDelete(user.id, user.name)} className="bg-red-600/20 text-red-500 px-4 py-2 rounded-xl hover:bg-red-600 hover:text-white transition-all">حذف البيانات</button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* نافذة التعديل */}
       {editingUser && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
           <form onSubmit={handleUpdate} className="bg-gray-900 p-8 rounded-3xl w-full max-w-lg border border-yellow-600/50">
@@ -99,8 +98,8 @@ export default function AdminDashboard() {
             
             <div className="grid grid-cols-2 gap-4">
               <input className="bg-black p-3 rounded-xl border border-gray-700" placeholder="الاسم" value={editingUser.name || ''} onChange={e => setEditingUser({...editingUser, name: e.target.value})} />
-              <input className="bg-black p-3 rounded-xl border border-gray-700" placeholder="رقم الهاتف" value={editingUser.phone || ''} onChange={e => setEditingUser({...editingUser, phone: e.target.value})} />
-              <input className="bg-black p-3 rounded-xl border border-gray-700" placeholder="اسم الباقة" value={editingUser.planName || ''} onChange={e => setEditingUser({...editingUser, planName: e.target.value})} />
+              <input className="bg-black p-3 rounded-xl border border-gray-700" placeholder="الهاتف" value={editingUser.phone || ''} onChange={e => setEditingUser({...editingUser, phone: e.target.value})} />
+              <input className="bg-black p-3 rounded-xl border border-gray-700" placeholder="الباقة" value={editingUser.planName || ''} onChange={e => setEditingUser({...editingUser, planName: e.target.value})} />
               <input type="number" className="bg-black p-3 rounded-xl border border-gray-700" placeholder="السعر" value={editingUser.price || ''} onChange={e => setEditingUser({...editingUser, price: e.target.value})} />
               <input type="number" className="bg-black p-3 rounded-xl border border-gray-700" placeholder="المبلغ المتبقي" value={editingUser.debt || ''} onChange={e => setEditingUser({...editingUser, debt: e.target.value})} />
               <input type="number" className="bg-black p-3 rounded-xl border border-gray-700" placeholder="عدد الشهور" value={editingUser.durationMonths || ''} onChange={e => setEditingUser({...editingUser, durationMonths: e.target.value})} />
