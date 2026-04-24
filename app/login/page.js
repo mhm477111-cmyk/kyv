@@ -2,21 +2,24 @@
 import { useState } from 'react';
 import { auth } from '@/lib/firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useRouter } from 'next/navigation'; // 1. أضف هذا السطر
 
 export default function Login() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter(); // 2. أضف هذا السطر
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // بنحول رقم الموبايل لإيميل وهمي عشان Firebase
       const fakeEmail = `${phone}@mocontrol.com`;
       await signInWithEmailAndPassword(auth, fakeEmail, password);
-      alert("تم تسجيل الدخول بنجاح! أهلاً بك في MO CONTROL");
-      // ممكن توجهه لصفحة الـ dashboard هنا لو عايز
+      
+      // 3. التوجيه للوحة التحكم بعد النجاح
+      router.push('/dashboard'); 
+      
     } catch (error) {
       alert("خطأ في تسجيل الدخول: تأكد من الرقم وكلمة السر");
     } finally {
@@ -25,6 +28,7 @@ export default function Login() {
   };
 
   return (
+    // ... (باقي الكود زي ما هو)
     <div style={{ maxWidth: '400px', margin: '50px auto', textAlign: 'center' }}>
       <h1>دخول MO CONTROL</h1>
       <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
