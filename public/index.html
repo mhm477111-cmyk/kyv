@@ -1918,6 +1918,23 @@ document.addEventListener('click', function(e) {
     }
   })();
 </script>
+
+
+<script>
+  (function() {
+    window.addEventListener('pageshow', function(event) {
+      // التحقق مما إذا كانت الصفحة محملة من الـ Cache (زر الرجوع)
+      if (event.persisted || (window.performance && window.performance.getEntriesByType("navigation")[0].type === 'back_forward')) {
+        // إجبار المتصفح على إعادة تحميل الصفحة لتحديث حالة تسجيل الدخول
+        window.location.reload();
+      }
+    });
+  })();
+</script>
+
+
+
+
   
 </body>
 </html>
