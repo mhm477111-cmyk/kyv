@@ -80,13 +80,12 @@ export default function AdminDashboard() {
   };
 
   // --- 4. تحديث البيانات (شامل تغيير الباسورد في Auth) ---
+// تأكد من وجود كلمة async هنا بالظبط:
 const handleUpdate = async (e) => {
   e.preventDefault();
   try {
     // 1. تحديث الباسورد إذا قام الأدمن بكتابة باسورد جديد
-    if (newPasswordValue.length >= 6) {
-      // بما أننا أدمن، سنستخدم طريقة أكثر أماناً ومباشرة
-      // سنحدث الباسورد في Firestore فقط، وسيكون هذا هو المرجع في صفحة الـ Login
+    if (newPasswordValue && newPasswordValue.length >= 6) {
       editingUser.password = newPasswordValue;
       alert("🔐 تم تحديث كلمة المرور في قاعدة البيانات (Firestore)");
     }
@@ -95,7 +94,7 @@ const handleUpdate = async (e) => {
     await updateDoc(doc(db, "users", editingUser.id), {
       name: editingUser.name,
       phone: editingUser.phone,
-      password: editingUser.password, // تحديث الباسورد
+      password: editingUser.password, 
       planName: editingUser.planName,
       price: Number(editingUser.price),
       debt: Number(editingUser.debt),
@@ -113,29 +112,6 @@ const handleUpdate = async (e) => {
     alert("❌ حدث خطأ أثناء التحديث: " + err.message);
   }
 };
-
-      // تحديث باقي البيانات في Firestore
-      await updateDoc(doc(db, "users", editingUser.id), {
-        name: editingUser.name,
-        phone: editingUser.phone,
-        password: editingUser.password, // تحديث الباسورد لو اتغير
-        planName: editingUser.planName,
-        price: Number(editingUser.price),
-        debt: Number(editingUser.debt),
-        durationMonths: Number(editingUser.durationMonths),
-        startDate: editingUser.startDate,
-        endDate: editingUser.endDate,
-        isPaid: !!editingUser.isPaid
-      });
-
-      alert("💾 تم حفظ جميع التعديلات بنجاح!");
-      setEditingUser(null);
-      setNewPasswordValue("");
-      fetchUsers();
-    } catch (err) {
-      alert("❌ حدث خطأ أثناء التحديث: " + err.message);
-    }
-  };
 
   return (
     <div className="p-6 md:p-10 bg-black min-h-screen text-white font-sans">
