@@ -1767,7 +1767,11 @@ document.addEventListener('click', function(e) {
             <h2 style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
             <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
             <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
-            <button onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">دخول</button>
+            
+            <button id="loginBtn" onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:black; transition:0.3s; box-shadow: 0 4px 15px rgba(202, 138, 4, 0.3);">
+                دخول
+            </button>
+            
             <p style="text-align:center; color:white; cursor:pointer; margin-top:15px;" onclick="showRegister()">ليس لديك حساب؟ <b>إنشاء حساب</b></p>
         </div>
     </div>
@@ -1788,62 +1792,46 @@ document.addEventListener('click', function(e) {
   const db = firebase.firestore();
   const auth = firebase.auth();
 
-function loginUser() {
+  function loginUser() {
     const btn = document.getElementById('loginBtn');
     const phone = document.getElementById('phone').value;
     const pass = document.getElementById('pass').value;
-    
-    // التحقق البسيط من الحقول
+
     if (!phone || !pass) {
         alert("يرجى إدخال رقم الهاتف وكلمة المرور");
         return;
     }
 
-    const email = phone + "@mocontrol.com";
-
-    // 1. تفعيل رد الفعل (Loading State)
     btn.innerHTML = "جاري الدخول...";
     btn.style.opacity = "0.7";
     btn.style.cursor = "wait";
     btn.disabled = true;
 
-    firebase.auth().signInWithEmailAndPassword(email, pass)
+    auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass)
       .then((userCredential) => {
-        const userId = userCredential.user.uid;
-        firebase.firestore().collection("users").doc(userId).get().then((doc) => {
+        db.collection("users").doc(userCredential.user.uid).get().then((doc) => {
           if (doc.exists) {
             const data = doc.data();
-            // عرض لوحة البيانات بعد النجاح
             document.getElementById('modalBody').innerHTML = `
               <div style="text-align:right; color:white; direction:rtl; font-family:sans-serif;">
                 <h2 style="color:#ca8a04; text-align:center;">مرحباً بك، ${data.name || 'عميلنا العزيز'}</h2>
                 <div style="background:#222; padding:15px; border-radius:10px; margin:10px 0; border:1px solid #333;">
-                  <p style="margin:5px 0;">نوع الباقة: <b>${data.planName || 'غير مشترك'}</b></p>
-                  <p style="margin:5px 0;">تاريخ التجديد: <b>${data.nextRenewal || 'لم يحدد'}</b></p>
-                  <p style="margin:5px 0;">حالة الحساب: 
-                    <span style="color: ${data.active ? '#22c55e' : '#ef4444'}; font-weight:bold;">
-                      ${data.active ? 'نشط ✅' : 'غير نشط ❌'}
-                    </span>
-                  </p>
+                  <p>رقم الهاتف: <b>${data.phone || '---'}</b></p>
+                  <p>الباقة: <b>${data.planName || 'غير مشترك'}</b></p>
+                  <p>الحالة: <span style="color:${data.active ? '#22c55e' : '#ef4444'}; font-weight:bold;">${data.active ? 'نشط ✅' : 'غير نشط ❌'}</span></p>
                 </div>
-                <button onclick="firebase.auth().signOut().then(() => location.reload())" 
-                        style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer; margin-top:10px;">
-                  تسجيل خروج
-                </button>
+                <button onclick="auth.signOut().then(() => location.reload())" style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer;">تسجيل خروج</button>
               </div>
             `;
           }
         });
       })
       .catch((error) => {
-        // 2. إرجاع الزرار لطبيعته في حالة الخطأ
         btn.innerHTML = "دخول";
         btn.style.opacity = "1";
         btn.style.cursor = "pointer";
         btn.disabled = false;
-        
-        // رسالة الخطأ
-        alert("خطأ في تسجيل الدخول: " + error.message);
+        alert("خطأ: " + error.message);
       });
   }
 
@@ -1853,7 +1841,7 @@ function loginUser() {
       <input type="text" id="name" placeholder="الاسم" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
       <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
       <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
-      <button onclick="registerUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">تسجيل</button>
+      <button onclick="registerUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:black;">تسجيل</button>
       <p style="text-align:center; color:white; cursor:pointer; margin-top:15px;" onclick="location.reload()">لديك حساب بالفعل؟ <b>دخول</b></p>
     `;
   }
@@ -1862,19 +1850,11 @@ function loginUser() {
     const name = document.getElementById('name').value;
     const phone = document.getElementById('phone').value;
     const pass = document.getElementById('pass').value;
-    
     auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass)
       .then((user) => {
-        db.collection("users").doc(user.user.uid).set({
-          name: name,
-          phone: phone,
-          planName: "غير مشترك",
-          active: false
-        }).then(() => {
-          alert("تم إنشاء الحساب بنجاح!");
-          location.reload();
-        }).catch(err => alert("خطأ في حفظ البيانات: " + err.message));
-      }).catch((err) => alert("خطأ في الإنشاء: " + err.message));
+        db.collection("users").doc(user.user.uid).set({ name, phone, planName: "غير مشترك", active: false })
+          .then(() => { alert("تم إنشاء الحساب!"); location.reload(); });
+      }).catch((err) => alert("خطأ: " + err.message));
   }
 </script>
 
