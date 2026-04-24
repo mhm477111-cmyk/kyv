@@ -11,6 +11,9 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
+    // تحديث الصفحة عند الرجوع لها من المتصفح لضمان التحقق من الحالة
+    router.refresh();
+
     // إصلاح مشكلة الخروج التلقائي بتثبيت الجلسة في المتصفح
     const initAuth = async () => {
       try {
@@ -70,23 +73,6 @@ export default function Dashboard() {
     </div>
   );
 
-import { useRouter } from 'next/navigation';
-
-// داخل الـ Component بتاع الداشبورد
-const router = useRouter();
-
-useEffect(() => {
-  // ده بيخلي الداشبورد تتأكد من حالة الدخول حتى لو المتصفح جابها من الـ Cache
-  const handleRouteChange = () => {
-    // ممكن تعمل هنا تحديث بسيط لو محتاج
-  };
-
-  // لو بتستخدم Next.js App Router، الـ useEffect بيشتغل تلقائياً عند الرجوع
-  // لكن لو عايز تتأكد 100%، أضف السطر ده:
-  router.refresh(); 
-}, [router]);
-
-
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
       <header className="mb-10 border-b border-yellow-600/30 pb-6">
@@ -108,8 +94,7 @@ useEffect(() => {
       </div>
 
       {/* منطقة الأزرار */}
-<div className="flex flex-col gap-4 max-w-md">
-        
+      <div className="flex flex-col gap-4 max-w-md">
         <button onClick={() => router.push('/')} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold text-lg transition-all">
           العودة للموقع الرئيسي
         </button>
