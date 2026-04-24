@@ -781,19 +781,18 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
 
 
 
-<div id="authModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:20px;">
-    <div id="modalBody" style="background:#111; padding:30px; border-radius:20px; border:1px solid #ca8a04; width:100%; max-width:400px; position:relative;">
-        <button onclick="document.getElementById('authModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer; font-size:20px;">✕</button>
-        
-        <div id="loginForm">
-            <h2 style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
-            <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
-            <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
-            <button onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">دخول</button>
-            <p style="text-align:center; color:white; cursor:pointer; margin-top:10px;" onclick="showRegister()">ليس لديك حساب؟ <b>إنشاء حساب</b></p>
-        </div>
-    </div>
-</div>
+<button onclick="document.getElementById('authModal').style.display='flex'" 
+        style="background: #ca8a04; 
+               color: black; 
+               padding: 12px 24px; 
+               border-radius: 12px; 
+               font-weight: bold; 
+               border: none; 
+               cursor: pointer; 
+               transition: 0.3s;
+               box-shadow: 0 4px 15px rgba(202, 138, 4, 0.3);">
+    تسجيل دخول / حساب جديد
+</button>
 
 
     
