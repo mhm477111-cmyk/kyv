@@ -46,11 +46,6 @@ export default function Dashboard() {
               SYSTEM LIVE ✅
             </span>
           ) : (
-            <span className="inline-block px-4 py-1 rounded-full text-xs bg-red-500/20 text-red-400 border border-red-500/30">
-              ● SYSTEM OFFLINE ❌
-            </span>
-          )}
-        </div>
 
         {/* كارت حالة الدفع */}
         <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl">
