@@ -683,10 +683,6 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
 <html lang="ar" dir="rtl"> <head>
 
 
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
   
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -781,7 +777,7 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
 
 
 
-<button onclick="document.getElementById('authModal').style.display='flex'" 
+<button id="mainActionBtn"
         style="background: #ca8a04; 
                color: black; 
                padding: 12px 24px; 
@@ -793,7 +789,7 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
                box-shadow: 0 4px 15px rgba(202, 138, 4, 0.3);"
         onmouseover="this.style.backgroundColor='#d97706'; this.style.transform='scale(1.05)';" 
         onmouseout="this.style.backgroundColor='#ca8a04'; this.style.transform='scale(1)';" >
-    تسجيل دخول / حساب جديد
+    جاري التحقق...
 </button>
 
 
@@ -1760,11 +1756,6 @@ document.addEventListener('click', function(e) {
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-<button id="mainActionBtn" 
-        style="background: #ca8a04; color: black; padding: 12px 24px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(202, 138, 4, 0.3);">
-    جاري التحقق...
-</button>
-
 <div id="authModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:20px;">
     <div id="modalBody" style="background:#111; padding:30px; border-radius:20px; border:1px solid #ca8a04; width:100%; max-width:400px; position:relative;">
         <button onclick="document.getElementById('authModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer; font-size:20px;">✕</button>
@@ -1780,7 +1771,11 @@ document.addEventListener('click', function(e) {
 </div>
 
 <script>
-    // 1. الإعدادات والتهيئة
+    // ============================================================
+    // FIREBASE AUTH - UNIFIED & FIXED
+    // ============================================================
+
+    // 1. الإعدادات والتهيئة (مرة واحدة فقط)
     const firebaseConfig = {
         apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
         authDomain: "mo-control-site.firebaseapp.com",
@@ -1795,55 +1790,99 @@ document.addEventListener('click', function(e) {
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    const btn = document.getElementById('mainActionBtn');
-
-    // 2. دالة تحديث الواجهة الموحدة (Single Source of Truth)
+    // 2. دالة تحديث الواجهة الموحدة - المصدر الوحيد للحقيقة
+    // تعتمد فقط على user الواردة من onAuthStateChanged
     async function updateUI(user) {
-        if (!btn) return;
-        
+        // نجيب كل الأزرار اللي تحمل id="mainActionBtn"
+        const allBtns = document.querySelectorAll('#mainActionBtn');
+        if (!allBtns.length) return;
+
         if (user) {
+            let displayName = "عميلنا";
             try {
                 const userDoc = await db.collection("users").doc(user.uid).get();
-                const name = userDoc.exists ? userDoc.data().name : "عميلنا";
-                btn.innerText = "أهلاً " + name + " - لوحة التحكم";
-                btn.onclick = () => window.location.href = '/dashboard';
+                if (userDoc.exists && userDoc.data().name) {
+                    displayName = userDoc.data().name;
+                }
             } catch (e) {
-                console.error("خطأ جلب البيانات", e);
+                console.warn("تحذير: تعذّر جلب بيانات المستخدم من Firestore", e);
             }
+
+            allBtns.forEach(btn => {
+                btn.innerText = "أهلاً " + displayName + " - لوحة التحكم";
+                btn.onclick = () => window.location.href = '/dashboard';
+            });
         } else {
-            btn.innerText = "تسجيل دخول / حساب جديد";
-            btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
+            allBtns.forEach(btn => {
+                btn.innerText = "تسجيل دخول / حساب جديد";
+                btn.onclick = () => { document.getElementById('authModal').style.display = 'flex'; };
+            });
         }
     }
 
-    // 3. التنفيذ بالترتيب (Persistence ثم المراقبة)
+    // 3. التنفيذ بالترتيب الصحيح:
+    //    أولاً: setPersistence → ثم: onAuthStateChanged (مرة واحدة فقط)
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .then(() => {
             auth.onAuthStateChanged((user) => {
+                // هنا الحكم الوحيد على حالة الـ UI
+                // لا localStorage، لا متغيرات خارجية
                 updateUI(user);
             });
         })
-        .catch((e) => console.error("Persistence Error", e));
+        .catch((e) => {
+            console.error("خطأ في ضبط Persistence:", e);
+            // حتى لو فشل setPersistence، نراقب الحالة
+            auth.onAuthStateChanged((user) => {
+                updateUI(user);
+            });
+        });
 
-    // 4. دوال الدخول والتسجيل (مباشرة)
+    // 4. دوال تسجيل الدخول والتسجيل
+    function showRegister() {
+        document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
+        document.getElementById('name').style.display = 'block';
+        document.getElementById('actionBtn').innerText = "إنشاء الحساب";
+        document.getElementById('actionBtn').onclick = registerUser;
+        document.getElementById('toggleText').innerHTML = 'لديك حساب بالفعل؟ <b>تسجيل الدخول</b>';
+        document.getElementById('toggleText').onclick = showLogin;
+    }
+
+    function showLogin() {
+        document.getElementById('modalTitle').innerText = "تسجيل الدخول";
+        document.getElementById('name').style.display = 'none';
+        document.getElementById('actionBtn').innerText = "دخول";
+        document.getElementById('actionBtn').onclick = loginUser;
+        document.getElementById('toggleText').innerHTML = 'ليس لديك حساب؟ <b>إنشاء حساب</b>';
+        document.getElementById('toggleText').onclick = showRegister;
+    }
+
     async function loginUser() {
-        const phone = document.getElementById('phone').value;
+        const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
+        if (!phone || !pass) { alert("يرجى إدخال رقم الموبايل وكلمة المرور"); return; }
         try {
             await auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass);
+            document.getElementById('authModal').style.display = 'none';
             window.location.href = '/dashboard';
-        } catch (e) { alert("خطأ: " + e.message); }
+        } catch (e) {
+            alert("خطأ في تسجيل الدخول: " + e.message);
+        }
     }
 
     async function registerUser() {
-        const name = document.getElementById('name').value;
-        const phone = document.getElementById('phone').value;
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
+        if (!name || !phone || !pass) { alert("يرجى إدخال جميع البيانات"); return; }
         try {
             const res = await auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass);
             await db.collection("users").doc(res.user.uid).set({ name, phone });
+            document.getElementById('authModal').style.display = 'none';
             window.location.href = '/dashboard';
-        } catch (e) { alert("خطأ: " + e.message); }
+        } catch (e) {
+            alert("خطأ في إنشاء الحساب: " + e.message);
+        }
     }
 </script>
 
