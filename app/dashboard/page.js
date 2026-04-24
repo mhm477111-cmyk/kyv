@@ -5,7 +5,6 @@ import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
-
 export default function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,12 +13,24 @@ export default function Dashboard() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
+        try {
+          const docRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+
+          // التحقق من وجود الملف في Firestore
+          if (docSnap.exists()) {
+            setUserData(docSnap.data());
+            setLoading(false);
+          } else {
+            // إذا لم يجد الملف (تم حذفه من قبل الأدمن)
+            await signOut(auth);
+            alert("تم حذف حسابك من قبل الإدارة. يرجى التواصل معنا.");
+            router.push('/auth');
+          }
+        } catch (error) {
+          console.error("خطأ في التحقق من البيانات:", error);
+          setLoading(false);
         }
-        setLoading(false);
       } else {
         router.push('/auth');
       }
@@ -32,7 +43,7 @@ export default function Dashboard() {
     router.push('/');
   };
 
-  if (loading) return <div className="min-h-screen bg-black text-yellow-500 flex items-center justify-center">جاري تحميل بيانات MO CONTROL...</div>;
+  if (loading) return <div className="min-h-screen bg-black text-yellow-500 flex items-center justify-center font-bold text-xl">جاري التأكد من صلاحية الوصول...</div>;
 
   const InfoBox = ({ label, value, color = "text-white" }) => (
     <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl">
