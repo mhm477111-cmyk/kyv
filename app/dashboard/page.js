@@ -7,32 +7,36 @@ import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true); // إضافة حالة تحميل
   const router = useRouter();
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setUserData(docSnap.data());
         }
+        setLoading(false);
       } else {
-        // توجيه غير المسجلين لصفحة الـ Auth الموحدة
         router.push('/auth');
       }
     });
+    return () => unsubscribe();
   }, [router]);
 
   // منطق النظام الأوتوماتيكي: السيستم شغال فقط لو (أنت مفعله إدارياً + العميل دافع)
   const isSystemLive = userData?.active && userData?.paid;
+
+  if (loading) return <div className="min-h-screen bg-black text-yellow-500 flex items-center justify-center">جاري تحميل بيانات MO CONTROL...</div>;
 
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
       {/* Header */}
       <header className="mb-10 border-b border-yellow-600/30 pb-6">
         <h1 className="text-4xl font-bold text-yellow-500">MO CONTROL</h1>
-        <p className="text-gray-400 mt-2">لوحة تحكم العميل</p>
+        <p className="text-gray-400 mt-2">أهلاً بك، {userData?.name || "عميلنا العزيز"}</p>
       </header>
 
       {/* Stats Grid */}
@@ -41,7 +45,7 @@ export default function Dashboard() {
         {/* كارت حالة الخدمة */}
         <div className="bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-3xl shadow-[0_0_15px_rgba(202,138,4,0.2)]">
           <h2 className="text-yellow-600 font-bold text-sm mb-4">حالة الخدمة</h2>
-          <p className="text-2xl font-bold mb-4">{userData?.planName || "---"}</p>
+          <p className="text-2xl font-bold mb-4">{userData?.planName || "غير مشترك"}</p>
           
           {isSystemLive ? (
             <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs bg-green-500/20 text-green-400 border border-green-500/30">
@@ -67,7 +71,7 @@ export default function Dashboard() {
         {/* كارت تاريخ التجديد */}
         <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl">
           <h2 className="text-gray-400 text-sm mb-2">تاريخ التجديد</h2>
-          <p className="text-xl font-bold">{userData?.nextRenewal || "---"}</p>
+          <p className="text-xl font-bold text-white">{userData?.nextRenewal || "لم يحدد بعد"}</p>
         </div>
       </div>
 
@@ -81,10 +85,7 @@ export default function Dashboard() {
         </button>
 
         <button 
-          onClick={() => {
-            signOut(auth);
-            router.push('/auth');
-          }}
+          onClick={() => signOut(auth)} // الـ onAuthStateChanged سيقوم بالباقي
           className="w-full bg-transparent border border-gray-700 text-gray-400 py-3 rounded-2xl hover:border-red-900 hover:text-red-500 transition-all"
         >
           تسجيل الخروج
