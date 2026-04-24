@@ -77,12 +77,15 @@ export default function Dashboard() {
           تفعيل باقة الآن 🚀
         </button>
 
-        <button 
-          onClick={() => auth.signOut()}
-          className="w-full bg-transparent border border-gray-700 text-gray-400 py-3 rounded-2xl hover:border-red-900 hover:text-red-500 transition-all"
-        >
-          تسجيل الخروج
-        </button>
+<button 
+  onClick={() => {
+    auth.signOut();
+    router.push('/auth'); // هنا التعديل: بدل ما يروح لـ /login هيروح لـ /auth
+  }}
+  className="w-full bg-transparent border border-gray-700 text-gray-400 py-3 rounded-2xl hover:border-red-900 hover:text-red-500 transition-all"
+>
+  تسجيل الخروج
+</button>
       </div>
     </div>
   );
