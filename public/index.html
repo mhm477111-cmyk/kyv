@@ -1659,41 +1659,7 @@ function shareSite() {
   }
 }
 
-// Welcome UI
-function updateWelcomeUI(name) {
-  var card = document.getElementById("welcome-card");
-  var textElement = document.getElementById("welcome-user-text");
-  if (card && textElement) {
-    var parts = name.trim().split(/\s+/);
-    var shortName = parts.slice(0, 2).join(" ");
-    textElement.innerText = "اهلا يا " + shortName + " ☺️";
-    card.style.display = "flex";
-  }
-}
 
-function handleLogout() {
-  if(confirm("هل تريد تسجيل الخروج؟")) {
-    localStorage.removeItem("moCustomerName");
-    window.location.reload();
-  }
-}
-
-document.addEventListener('input', function(e) {
-  if (e.target && e.target.id === 'f_name') {
-    var rawName = e.target.value;
-    if (rawName.length > 2) {
-      localStorage.setItem("moCustomerName", rawName);
-      updateWelcomeUI(rawName);
-    }
-  }
-});
-
-window.addEventListener('load', function() {
-  var savedName = localStorage.getItem("moCustomerName");
-  if (savedName) {
-    updateWelcomeUI(savedName);
-  }
-});
 
 // Notifications
 function startHiddenNumberNotifs() {
