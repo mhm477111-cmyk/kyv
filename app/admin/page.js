@@ -16,6 +16,11 @@ try {
 } catch (e) { console.error(e); }
 
 export default function AdminDashboard() {
+  // --- إعدادات كلمة المرور ---
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passInput, setPassInput] = useState("");
+  const ADMIN_PASSWORD = "123"; // 👈 غير الباسورد من هنا
+
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -23,8 +28,10 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (isAuthenticated) {
+        fetchUsers();
+    }
+  }, [isAuthenticated]);
 
   const fetchUsers = async () => {
     try {
@@ -35,7 +42,15 @@ export default function AdminDashboard() {
     }
   };
 
-  // وظيفة تفعيل/إلغاء تفعيل الحساب
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (passInput === ADMIN_PASSWORD) {
+        setIsAuthenticated(true);
+    } else {
+        alert("❌ كلمة المرور غير صحيحة!");
+    }
+  };
+
   const toggleActive = async (user) => {
     try {
       const userRef = doc(db, "users", user.id);
@@ -44,7 +59,6 @@ export default function AdminDashboard() {
     } catch (err) { alert("خطأ في تغيير الحالة"); }
   };
 
-  // وظيفة إضافة عميل جديد
   const handleAddClient = async (e) => {
     e.preventDefault();
     try {
@@ -75,7 +89,7 @@ export default function AdminDashboard() {
         endDate: editingUser.endDate || "",
         durationMonths: Number(editingUser.durationMonths) || 0,
         isPaid: !!editingUser.isPaid,
-        active: !!editingUser.active // حافظنا على الحالة المختارة
+        active: !!editingUser.active 
       });
 
       alert("تم تحديث البيانات بنجاح!");
@@ -100,11 +114,32 @@ export default function AdminDashboard() {
     u.phone?.includes(searchTerm)
   );
 
+  // --- شاشة الدخول (تظهر لو لم يتم إدخال الباسورد) ---
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-6">
+        <form onSubmit={handleLogin} className="bg-gray-900 p-8 rounded-3xl border border-yellow-600/30 w-full max-w-sm text-center">
+          <h1 className="text-3xl font-bold text-yellow-500 mb-2">MO CONTROL</h1>
+          <p className="text-gray-400 mb-8 text-sm">لوحة تحكم الإدارة</p>
+          <input 
+            type="password" 
+            placeholder="أدخل كلمة المرور" 
+            className="w-full p-4 bg-black rounded-2xl border border-gray-800 text-white outline-none focus:border-yellow-600 mb-4 text-center"
+            onChange={(e) => setPassInput(e.target.value)}
+          />
+          <button type="submit" className="w-full bg-yellow-600 text-black py-4 rounded-2xl font-bold hover:bg-yellow-500 transition-all">
+            دخول النظام 🔐
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  // --- لوحة التحكم الأصلية ---
   return (
     <div className="p-8 bg-black min-h-screen text-white">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-yellow-500">لوحة تحكم الأدمن - MO CONTROL</h1>
-        {/* زر إضافة عميل - طلب رقم 1 */}
         <button onClick={() => setIsAddModalOpen(true)} className="bg-green-600 px-6 py-3 rounded-2xl text-white font-bold hover:bg-green-500 transition-all">
           + إضافة عميل جديد
         </button>
@@ -124,7 +159,6 @@ export default function AdminDashboard() {
               <p className="text-yellow-600 font-mono text-sm">{user.phone}</p>
             </div>
             <div className="flex gap-2">
-              {/* زر تفعيل/إلغاء تفعيل - طلب رقم 3 */}
               <button onClick={() => toggleActive(user)} className={`${user.active ? 'bg-orange-600/20 text-orange-500' : 'bg-green-600/20 text-green-500'} px-4 py-2 rounded-xl font-bold transition-all`}>
                 {user.active ? 'تعطيل الحساب' : 'تفعيل الحساب'}
               </button>
@@ -155,7 +189,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* نافذة التعديل - تم توضيح التواريخ طلب رقم 2 */}
+      {/* نافذة التعديل */}
       {editingUser && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
           <form onSubmit={handleUpdate} className="bg-gray-900 p-8 rounded-3xl w-full max-w-lg border border-yellow-600/50">
