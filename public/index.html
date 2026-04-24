@@ -1768,6 +1768,11 @@ document.addEventListener('click', function(e) {
     button:hover { background: #eab308 !important; transform: translateY(-2px); }
 </style>
 
+
+  import { db } from '@/lib/firebaseConfig';
+import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
