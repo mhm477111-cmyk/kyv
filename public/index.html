@@ -1797,48 +1797,71 @@ document.addEventListener('click', function(e) {
 
   const btn = document.getElementById('mainActionBtn');
 
-  // وظيفة التحقق المباشر
-  function updateUI(user) {
+  // دالة تحديث الزرار بناءً على الحالة
+  function updateUI(user, userName) {
     if (user) {
-      db.collection("users").doc(user.uid).get().then((doc) => {
-        const name = doc.exists ? doc.data().name : "عميلنا";
-        btn.innerText = "أهلاً " + name + " - لوحة التحكم";
+        btn.innerText = "أهلاً " + (userName || "عميلنا") + " - لوحة التحكم";
         btn.onclick = () => window.location.href = '/dashboard';
         localStorage.setItem("isLoggedIn", "true");
-      });
     } else {
-      btn.innerText = "تسجيل دخول / حساب جديد";
-      btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
-      localStorage.removeItem("isLoggedIn");
+        btn.innerText = "تسجيل دخول / حساب جديد";
+        btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
+        localStorage.removeItem("isLoggedIn");
     }
   }
 
-  // تفعيل Persistence أولاً
+  // 1. تفعيل Persistence (أمان الجلسة)
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
-    // 1. تحقق لحظي من الـ LocalStorage (للسرعة)
-    if (localStorage.getItem("isLoggedIn") === "true") {
-      btn.innerText = "جاري التحقق...";
-    }
-
-    // 2. تحقق رسمي من Firebase
+    
+    // 2. التحقق من Firebase
     auth.onAuthStateChanged((user) => {
-      updateUI(user);
+      if (user) {
+        db.collection("users").doc(user.uid).get().then((doc) => {
+          const name = doc.exists ? doc.data().name : "عميلنا";
+          updateUI(user, name);
+        });
+      } else {
+        updateUI(null);
+      }
     });
   });
 
-  // دوال التسجيل (يجب إضافة تحديث الـ UI فيها)
+  // دوال التسجيل
+  function showRegister() {
+    document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
+    document.getElementById('name').style.display = 'block';
+    document.getElementById('actionBtn').innerText = "تسجيل";
+    document.getElementById('actionBtn').onclick = registerUser;
+    document.getElementById('toggleText').innerHTML = "لديك حساب؟ <b>تسجيل دخول</b>";
+    document.getElementById('toggleText').onclick = () => location.reload();
+  }
+
+  function registerUser() {
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const pass = document.getElementById('pass').value;
+    if (!name || !phone || !pass) return alert("يرجى ملء جميع البيانات");
+
+    auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass)
+      .then((userCredential) => {
+        db.collection("users").doc(userCredential.user.uid).set({ 
+            name: name, phone: phone, planName: "غير مشترك", active: false, paid: false
+        }).then(() => { 
+            alert("تم إنشاء الحساب بنجاح!"); 
+            window.location.href = '/dashboard'; 
+        });
+      }).catch((err) => alert("خطأ: " + err.message));
+  }
+
   function loginUser() {
     const phone = document.getElementById('phone').value;
     const pass = document.getElementById('pass').value;
+    if (!phone || !pass) return alert("يرجى إدخال البيانات");
+    
     auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass)
-      .then(() => {
-        localStorage.setItem("isLoggedIn", "true");
-        window.location.href = '/dashboard';
-      })
+      .then(() => window.location.href = '/dashboard')
       .catch((err) => alert("خطأ: " + err.message));
   }
-  
-  // باقي الدوال (showRegister, registerUser) كما هي...
 </script>
 
 
