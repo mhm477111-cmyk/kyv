@@ -70,7 +70,6 @@ export default function Dashboard() {
     </div>
   );
 
-// أضف هذه المكتبة
 import { useRouter } from 'next/navigation';
 
 // داخل الـ Component بتاع الداشبورد
