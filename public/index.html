@@ -1760,7 +1760,47 @@ document.addEventListener('click', function(e) {
 
 
 
+<script>
+  // بيانات السيستم
+  const firebaseConfig = {
+    apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
+    authDomain: "mo-control-site.firebaseapp.com",
+    projectId: "mo-control-site",
+    storageBucket: "mo-control-site.firebasestorage.app",
+    messagingSenderId: "116572656345",
+    appId: "1:116572656345:web:5f4b758daf21a9b7c164c8",
+    measurementId: "G-T34HXXMMLD"
+  };
 
+  // تهيئة الفايربيس (باستخدام نسخة الـ compat لتعمل داخل HTML العادي)
+  firebase.initializeApp(firebaseConfig);
+  
+  function loginUser() {
+    const phone = document.getElementById('phone').value;
+    const pass = document.getElementById('pass').value;
+    
+    // تأكد أنك تستخدم نفس الإيميل الذي تسجل به في السيستم
+    const email = phone + "@mocontrol.com";
+
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+      .then((userCredential) => {
+        // بمجرد الدخول الناجح، نغير محتوى النافذة
+        document.getElementById('modalBody').innerHTML = `
+          <div style="text-align:center; color:white;">
+            <h2 style="color:#ca8a04;">تم الدخول بنجاح!</h2>
+            <p>مرحباً بك في لوحة تحكم MO CONTROL</p>
+            <button onclick="window.location.href='/dashboard'" 
+                    style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; margin-top:20px; font-weight:bold; cursor:pointer;">
+              انتقل إلى لوحة التحكم
+            </button>
+          </div>
+        `;
+      })
+      .catch((error) => {
+        alert("خطأ في تسجيل الدخول: " + error.message);
+      });
+  }
+</script>
 
 
   
