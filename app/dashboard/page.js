@@ -21,16 +21,9 @@ export default function Dashboard() {
             setUserData(docSnap.data());
             setLoading(false);
           } else {
-            // حالة العميل المحذوف
+            // العميل غير موجود في قاعدة البيانات -> تحويله لصفحة الحذف
             await signOut(auth);
-            
-            // 1. فتح الواتساب في تاب جديدة
-            const adminWhatsApp = "201112893086"; // استبدله برقمك
-            const message = "مرحباً، تم إيقاف حسابي وأحتاج للمساعدة بخصوص MO CONTROL.";
-            window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(message)}`, '_blank');
-
-            // 2. تحويل التاب الحالية للصفحة الرئيسية
-            router.push('/');
+            router.push('/deleted');
           }
         } catch (error) {
           console.error("خطأ:", error);
