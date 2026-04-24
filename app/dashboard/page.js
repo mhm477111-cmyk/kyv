@@ -21,10 +21,16 @@ export default function Dashboard() {
             setUserData(docSnap.data());
             setLoading(false);
           } else {
+            // حالة العميل المحذوف
             await signOut(auth);
-            const adminWhatsApp = "201000000000"; // ضع رقمك هنا
+            
+            // 1. فتح الواتساب في تاب جديدة
+            const adminWhatsApp = "201112893086"; // استبدله برقمك
             const message = "مرحباً، تم إيقاف حسابي وأحتاج للمساعدة بخصوص MO CONTROL.";
-            window.location.href = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(message)}`;
+            window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(message)}`, '_blank');
+
+            // 2. تحويل التاب الحالية للصفحة الرئيسية
+            router.push('/');
           }
         } catch (error) {
           console.error("خطأ:", error);
