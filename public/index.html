@@ -1854,21 +1854,29 @@ document.addEventListener('click', function(e) {
     async function loginUser() {
         const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
+        const btn = document.getElementById('actionBtn');
+        if (!phone || !pass) { alert("يرجى إدخال رقم الموبايل وكلمة المرور"); return; }
+        btn.innerText = "جاري الدخول...";
+        btn.disabled = true;
         try {
             await auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass);
             window.location.href = '/dashboard';
-        } catch (e) { alert("خطأ: " + e.message); }
+        } catch (e) { alert("خطأ: " + e.message); btn.innerText = "دخول"; btn.disabled = false; }
     }
 
     async function registerUser() {
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
+        const btn = document.getElementById('actionBtn');
+        if (!name || !phone || !pass) { alert("يرجى إدخال جميع البيانات"); return; }
+        btn.innerText = "جاري إنشاء الحساب...";
+        btn.disabled = true;
         try {
             const res = await auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass);
             await db.collection("users").doc(res.user.uid).set({ name, phone });
             window.location.href = '/dashboard';
-        } catch (e) { alert("خطأ: " + e.message); }
+        } catch (e) { alert("خطأ: " + e.message); btn.innerText = "إنشاء الحساب"; btn.disabled = false; }
     }
 </script>
 
