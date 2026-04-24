@@ -1778,7 +1778,8 @@ document.addEventListener('click', function(e) {
             <input type="text" id="name" placeholder="الاسم الكامل" 
                    style="display:none; width:100%; padding:14px; margin-bottom:15px; background:#000; border:1px solid #333; color:white; border-radius:12px; outline:none; transition: 0.3s; box-sizing: border-box;">
             
-            <input type="tel" id="phone" placeholder="رقم الموبايل" 
+            <input type="tel" id="phone" placeholder="رقم الموبايل (11 رقم)" maxlength="11"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                    style="width:100%; padding:14px; margin-bottom:15px; background:#000; border:1px solid #333; color:white; border-radius:12px; outline:none; transition: 0.3s; box-sizing: border-box;">
             
             <input type="password" id="pass" placeholder="كلمة المرور" 
@@ -1818,7 +1819,6 @@ document.addEventListener('click', function(e) {
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // دالة عرض رسالة الخطأ داخل الموقع
     function showSiteError(message) {
         const errorDiv = document.getElementById('errorMessage');
         errorDiv.innerText = message;
@@ -1867,7 +1867,8 @@ document.addEventListener('click', function(e) {
         const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
         const btn = document.getElementById('actionBtn');
-        if (!phone || !pass) { showSiteError("يرجى إدخال البيانات المطلوبة"); return; }
+        if (phone.length !== 11) { showSiteError("رقم الموبايل يجب أن يكون 11 رقماً"); return; }
+        if (!pass) { showSiteError("يرجى إدخال كلمة المرور"); return; }
         
         btn.innerText = "جاري الدخول...";
         btn.disabled = true;
@@ -1882,7 +1883,9 @@ document.addEventListener('click', function(e) {
         const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
         const btn = document.getElementById('actionBtn');
-        if (!name || !phone || !pass) { showSiteError("يرجى ملء جميع البيانات"); return; }
+        if (!name) { showSiteError("يرجى إدخال الاسم"); return; }
+        if (phone.length !== 11) { showSiteError("رقم الموبايل يجب أن يكون 11 رقماً"); return; }
+        if (!pass) { showSiteError("يرجى إدخال كلمة المرور"); return; }
         
         btn.innerText = "جاري إنشاء الحساب...";
         btn.disabled = true;
