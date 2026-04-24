@@ -1879,6 +1879,17 @@ document.addEventListener('click', function(e) {
             window.location.href = '/dashboard';
         } catch (e) { alert("خطأ: " + e.message); btn.innerText = "إنشاء الحساب"; btn.disabled = false; }
     }
+  async function resetPassword() {
+    const phone = document.getElementById('phone').value.trim();
+    if (!phone) {
+        alert("يرجى إدخال رقم الموبايل أولاً لنعرف حسابك");
+        return;
+    }
+    
+    // بما أن الإيميل وهمي، سنفتح الواتساب للتواصل معك
+    const whatsappMsg = `مرحباً، أنا العميل صاحب رقم ${phone} ونسيت كلمة المرور الخاصة بحسابي في MO CONTROL.`;
+    window.open(`https://wa.me/201112893086?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
+}
 </script>
 
   
