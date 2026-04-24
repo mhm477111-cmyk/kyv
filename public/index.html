@@ -1844,6 +1844,78 @@ document.addEventListener('click', function(e) {
 
     async function registerUser() {
         const name = document.getElementById('name').value.trim();
+<script>
+    // الحصول على عناصر الـ Modal
+    const authModal = document.getElementById('authModal');
+
+    // الدالة الجديدة لفتح الـ Modal والتحكم في زر الرجوع
+    function openAuthModal() {
+        authModal.style.display = 'flex';
+        // إضافة حالة للتاريخ بحيث "الرجوع" يعتبر إغلاق للـ Modal
+        window.history.pushState({ modal: 'open' }, '');
+    }
+
+    // مراقبة زر الرجوع (لو المستخدم داس رجوع، نقفل الـ Modal بس)
+    window.addEventListener('popstate', function(event) {
+        if (authModal.style.display === 'flex') {
+            authModal.style.display = 'none';
+        }
+    });
+
+    function updateUI(user) {
+        const btn = document.getElementById('authBtn');
+        if (user) {
+            btn.innerText = "لوحة التحكم";
+            try {
+                btn.onclick = () => window.location.href = '/dashboard';
+            } catch (e) { console.error(e); }
+        } else {
+            btn.innerText = "تسجيل دخول / حساب جديد";
+            // استخدمنا الدالة الجديدة هنا
+            btn.onclick = () => openAuthModal();
+        }
+    }
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+        auth.onAuthStateChanged((user) => updateUI(user));
+    });
+
+    // باقي الدوال الخاصة بك كما هي بدون تغيير
+    function showRegister() {
+        document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
+        document.getElementById('name').style.display = 'block';
+        document.getElementById('actionBtn').innerText = "إنشاء الحساب";
+        document.getElementById('actionBtn').onclick = registerUser;
+        document.getElementById('toggleText').innerHTML = 'لديك حساب بالفعل؟ <b style="color:white;">تسجيل الدخول</b>';
+        document.getElementById('toggleText').onclick = showLogin;
+    }
+
+    function showLogin() {
+        document.getElementById('modalTitle').innerText = "تسجيل الدخول";
+        document.getElementById('name').style.display = 'none';
+        document.getElementById('actionBtn').innerText = "دخول";
+        document.getElementById('actionBtn').onclick = loginUser;
+        document.getElementById('toggleText').innerHTML = 'ليس لديك حساب؟ <b style="color:white;">إنشاء حساب</b>';
+        document.getElementById('toggleText').onclick = showRegister;
+    }
+
+    async function loginUser() {
+        const phone = document.getElementById('phone').value.trim();
+        const pass = document.getElementById('pass').value;
+        const btn = document.getElementById('actionBtn');
+        if (phone.length !== 11) { showSiteError("رقم الموبايل يجب أن يكون 11 رقماً"); return; }
+        if (!pass) { showSiteError("يرجى إدخال كلمة المرور"); return; }
+        
+        btn.innerText = "جاري الدخول...";
+        btn.disabled = true;
+        try {
+            await auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass);
+            window.location.href = '/dashboard';
+        } catch (e) { showSiteError("بيانات الدخول غير صحيحة"); btn.innerText = "دخول"; btn.disabled = false; }
+    }
+
+    async function registerUser() {
+        const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
         const btn = document.getElementById('actionBtn');
@@ -1866,6 +1938,7 @@ document.addEventListener('click', function(e) {
         window.open(`https://wa.me/201112893086?text=${encodeURIComponent(msg)}`, '_blank');
     }
 </script>
+
 
 <script>
   (function() {
