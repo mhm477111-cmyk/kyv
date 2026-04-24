@@ -1756,19 +1756,25 @@ document.addEventListener('click', function(e) {
 
 
 
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
 <div id="authModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:20px;">
     <div id="modalBody" style="background:#111; padding:30px; border-radius:20px; border:1px solid #ca8a04; width:100%; max-width:400px; position:relative;">
         <button onclick="document.getElementById('authModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer; font-size:20px;">✕</button>
         
-        <h2 style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
-        <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
-        <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
-        <button onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">دخول</button>
+        <div id="loginForm">
+            <h2 style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
+            <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+            <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+            <button onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">دخول</button>
+            <p style="text-align:center; color:white; cursor:pointer; margin-top:15px;" onclick="showRegister()">ليس لديك حساب؟ <b>إنشاء حساب</b></p>
+        </div>
     </div>
 </div>
 
 <script>
-  // تهيئة Firebase مرة واحدة فقط
   const firebaseConfig = {
     apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
     authDomain: "mo-control-site.firebaseapp.com",
@@ -1778,40 +1784,47 @@ document.addEventListener('click', function(e) {
     appId: "1:116572656345:web:5f4b758daf21a9b7c164c8",
     measurementId: "G-T34HXXMMLD"
   };
-  
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
 
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+  // دالة الدخول
   function loginUser() {
     const phone = document.getElementById('phone').value;
     const pass = document.getElementById('pass').value;
     const email = phone + "@mocontrol.com";
 
     firebase.auth().signInWithEmailAndPassword(email, pass)
-      .then((userCredential) => {
-        const userId = userCredential.user.uid;
-        firebase.firestore().collection("users").doc(userId).get().then((doc) => {
-          if (doc.exists) {
-            const data = doc.data();
-            document.getElementById('modalBody').innerHTML = `
-              <div style="text-align:right; color:white; direction:rtl;">
-                <h2 style="color:#ca8a04; text-align:center;">أهلاً بك يا ${data.name || 'عميلنا'}</h2>
-                <div style="background:#222; padding:15px; border-radius:10px; margin:10px 0;">
-                  <p>الباقة: <b>${data.planName || '---'}</b></p>
-                  <p>الحالة: <b>${data.active ? 'نشط ✅' : 'غير نشط ❌'}</b></p>
-                  <p>تجديد: <b>${data.nextRenewal || '---'}</b></p>
-                </div>
-                <button onclick="firebase.auth().signOut().then(() => location.reload())" 
-                        style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer;">تسجيل خروج</button>
-              </div>
-            `;
-          }
+      .then((user) => {
+        firebase.firestore().collection("users").doc(user.user.uid).get().then((doc) => {
+          const data = doc.data();
+          document.getElementById('modalBody').innerHTML = `<div style="text-align:right; color:white; direction:rtl;"><h2 style="color:#ca8a04; text-align:center;">أهلاً بك ${data.name}</h2><div style="background:#222; padding:15px; border-radius:10px; margin:10px 0;"><p>الباقة: <b>${data.planName || '---'}</b></p><p>الحالة: <b>${data.active ? 'نشط ✅' : 'غير نشط ❌'}</b></p></div><button onclick="firebase.auth().signOut().then(() => location.reload())" style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer;">تسجيل خروج</button></div>`;
         });
-      })
-      .catch((error) => {
-        alert("خطأ في البيانات: " + error.message);
-      });
+      }).catch((err) => alert("خطأ: " + err.message));
+  }
+
+  // دالة عرض فورم التسجيل
+  function showRegister() {
+    document.getElementById('loginForm').innerHTML = `
+      <h2 style="color:#ca8a04; text-align:center;">إنشاء حساب جديد</h2>
+      <input type="text" id="name" placeholder="الاسم" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+      <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+      <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+      <button onclick="registerUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">تسجيل</button>
+      <p style="text-align:center; color:white; cursor:pointer; margin-top:15px;" onclick="location.reload()">لديك حساب؟ <b>دخول</b></p>
+    `;
+  }
+
+  // دالة التسجيل في Firebase
+  function registerUser() {
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const pass = document.getElementById('pass').value;
+    firebase.auth().createUserWithEmailAndPassword(phone + "@mocontrol.com", pass)
+      .then((user) => {
+        firebase.firestore().collection("users").doc(user.user.uid).set({ name, phone, planName: "غير مشترك", active: false });
+        alert("تم إنشاء الحساب!");
+        location.reload();
+      }).catch((err) => alert("خطأ: " + err.message));
   }
 </script>
 
