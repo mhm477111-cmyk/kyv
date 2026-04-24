@@ -33,6 +33,26 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated]);
 
+  // إضافة تحكم في زر الرجوع للـ Modals
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (isAddModalOpen || editingUser) {
+        window.history.pushState(null, '', window.location.href);
+        setIsAddModalOpen(false);
+        setEditingUser(null);
+      }
+    };
+
+    if (isAddModalOpen || editingUser) {
+      window.history.pushState(null, '', window.location.href);
+      window.addEventListener('popstate', handlePopState);
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [isAddModalOpen, editingUser]);
+
   const fetchUsers = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "users"));
@@ -114,7 +134,6 @@ export default function AdminDashboard() {
     u.phone?.includes(searchTerm)
   );
 
-  // --- شاشة الدخول (تظهر لو لم يتم إدخال الباسورد) ---
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6">
@@ -135,7 +154,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // --- لوحة التحكم الأصلية ---
   return (
     <div className="p-8 bg-black min-h-screen text-white">
       <div className="flex justify-between items-center mb-8">
@@ -169,7 +187,6 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* نافذة إضافة عميل */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
           <form onSubmit={handleAddClient} className="bg-gray-900 p-8 rounded-3xl w-full max-w-lg border border-yellow-600/50">
@@ -189,7 +206,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* نافذة التعديل */}
       {editingUser && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto">
           <form onSubmit={handleUpdate} className="bg-gray-900 p-8 rounded-3xl w-full max-w-lg border border-yellow-600/50">
