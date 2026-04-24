@@ -1756,6 +1756,7 @@ document.addEventListener('click', function(e) {
 
 
 
+
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -1794,25 +1795,25 @@ document.addEventListener('click', function(e) {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // تفعيل بقاء الجلسة (Persistence)
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-  // تحديث الزرار الرئيسي حسب حالة المستخدم
-  auth.onAuthStateChanged((user) => {
-    const btn = document.getElementById('mainActionBtn');
-    if (user) {
-      db.collection("users").doc(user.uid).get().then((doc) => {
-        const name = doc.exists ? doc.data().name : "عميلنا";
-        btn.innerText = "أهلاً " + name + " - دخول للوحة التحكم";
-        btn.onclick = () => window.location.href = '/dashboard';
+  // التعديل الجوهري هنا: ضمان تفعيل Persistence قبل أي شيء آخر
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => {
+      // بعد نجاح التفعيل، نراقب حالة العميل
+      auth.onAuthStateChanged((user) => {
+        const btn = document.getElementById('mainActionBtn');
+        if (user) {
+          db.collection("users").doc(user.uid).get().then((doc) => {
+            const name = doc.exists ? doc.data().name : "عميلنا";
+            btn.innerText = "أهلاً " + name + " - دخول للوحة التحكم";
+            btn.onclick = () => window.location.href = '/dashboard';
+          });
+        } else {
+          btn.innerText = "تسجيل دخول / حساب جديد";
+          btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
+        }
       });
-    } else {
-      btn.innerText = "تسجيل دخول / حساب جديد";
-      btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
-    }
-  });
+    });
 
-  // تبديل شكل الفورم بين الدخول والإنشاء
   function showRegister() {
     document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
     document.getElementById('name').style.display = 'block';
@@ -1845,7 +1846,6 @@ document.addEventListener('click', function(e) {
       .catch((err) => alert("خطأ: " + err.message));
   }
 </script>
-
 
 
   
