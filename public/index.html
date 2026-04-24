@@ -1864,7 +1864,30 @@ document.addEventListener('click', function(e) {
   }
 </script>
 
+<script>
+  // 1. انتظر حتى تتحمل الصفحة بالكامل
+  window.addEventListener('DOMContentLoaded', (event) => {
+    
+    // 2. مراقبة حالة المستخدم لحظياً (هذا الجزء يمنع اختفاء الزر)
+    auth.onAuthStateChanged((user) => {
+      const btn = document.getElementById('mainActionBtn');
+      
+      if (user) {
+        // إذا كان مسجلاً، اذهب للـ Database وجيب الاسم
+        db.collection("users").doc(user.uid).get().then((doc) => {
+          const name = doc.exists ? doc.data().name : "عميلنا";
+          btn.innerText = "أهلاً " + name + " - لوحة التحكم";
+          btn.onclick = () => window.location.href = '/dashboard';
+        });
+      } else {
+        // إذا لم يكن مسجلاً
+        btn.innerText = "تسجيل دخول / حساب جديد";
+        btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
+      }
+    });
 
+  });
+</script>
   
   
 </body>
