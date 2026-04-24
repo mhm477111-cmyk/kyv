@@ -1780,88 +1780,71 @@ document.addEventListener('click', function(e) {
 </div>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
-    authDomain: "mo-control-site.firebaseapp.com",
-    projectId: "mo-control-site",
-    storageBucket: "mo-control-site.firebasestorage.app",
-    messagingSenderId: "116572656345",
-    appId: "1:116572656345:web:5f4b758daf21a9b7c164c8",
-    measurementId: "G-T34HXXMMLD"
-  };
+    // 1. الإعدادات والتهيئة
+    const firebaseConfig = {
+        apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
+        authDomain: "mo-control-site.firebaseapp.com",
+        projectId: "mo-control-site",
+        storageBucket: "mo-control-site.firebasestorage.app",
+        messagingSenderId: "116572656345",
+        appId: "1:116572656345:web:5f4b758daf21a9b7c164c8",
+        measurementId: "G-T34HXXMMLD"
+    };
 
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-  // 1. تفعيل حفظ الجلسة ليعمل الموقع بعد كل Refresh
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-  // 2. المراقبة الوحيدة لحالة المستخدم (هذا هو اللي بيثبت الزر)
-// مراقبة حالة المستخدم
-  auth.onAuthStateChanged((user) => {
     const btn = document.getElementById('mainActionBtn');
-    
-    if (user) {
-      // 1. احفظ حالة الدخول محلياً كإجراء احترازي
-      localStorage.setItem("userLoggedIn", "true");
-      
-      db.collection("users").doc(user.uid).get().then((doc) => {
-        const name = doc.exists ? doc.data().name : "عميلنا";
-        btn.innerText = "أهلاً " + name + " - لوحة التحكم";
-        btn.onclick = () => window.location.href = '/dashboard';
-      });
-    } else {
-      // 2. إذا لم يكن هناك مستخدم، تأكد من مسح أي أثر
-      localStorage.removeItem("userLoggedIn");
-      btn.innerText = "تسجيل دخول / حساب جديد";
-      btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
+
+    // 2. دالة تحديث الواجهة الموحدة (Single Source of Truth)
+    async function updateUI(user) {
+        if (!btn) return;
+        
+        if (user) {
+            try {
+                const userDoc = await db.collection("users").doc(user.uid).get();
+                const name = userDoc.exists ? userDoc.data().name : "عميلنا";
+                btn.innerText = "أهلاً " + name + " - لوحة التحكم";
+                btn.onclick = () => window.location.href = '/dashboard';
+            } catch (e) {
+                console.error("خطأ جلب البيانات", e);
+            }
+        } else {
+            btn.innerText = "تسجيل دخول / حساب جديد";
+            btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
+        }
     }
-  });
 
-  // 3. أضف هذا السطر ليتأكد الموقع عند التحميل
-  window.addEventListener('load', () => {
-    const isLogged = localStorage.getItem("userLoggedIn");
-    if (isLogged === "true") {
-       // الموقع سيعرف تلقائياً من الفايربيس بمجرد تحميل الصفحة
+    // 3. التنفيذ بالترتيب (Persistence ثم المراقبة)
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+            auth.onAuthStateChanged((user) => {
+                updateUI(user);
+            });
+        })
+        .catch((e) => console.error("Persistence Error", e));
+
+    // 4. دوال الدخول والتسجيل (مباشرة)
+    async function loginUser() {
+        const phone = document.getElementById('phone').value;
+        const pass = document.getElementById('pass').value;
+        try {
+            await auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass);
+            window.location.href = '/dashboard';
+        } catch (e) { alert("خطأ: " + e.message); }
     }
-  });
 
-  // دوال التسجيل والدخول
-  function showRegister() {
-    document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
-    document.getElementById('name').style.display = 'block';
-    document.getElementById('actionBtn').innerText = "تسجيل";
-    document.getElementById('actionBtn').onclick = registerUser;
-    document.getElementById('toggleText').innerHTML = "لديك حساب؟ <b>تسجيل دخول</b>";
-    document.getElementById('toggleText').onclick = () => location.reload();
-  }
-
-  function registerUser() {
-    const name = document.getElementById('name').value;
-    const phone = document.getElementById('phone').value;
-    const pass = document.getElementById('pass').value;
-    if (!name || !phone || !pass) return alert("يرجى ملء جميع البيانات");
-
-    auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass)
-      .then((userCredential) => {
-        db.collection("users").doc(userCredential.user.uid).set({ 
-            name: name, phone: phone, planName: "غير مشترك", active: false, paid: false
-        }).then(() => { 
-            window.location.href = '/dashboard'; 
-        });
-      }).catch((err) => alert("خطأ: " + err.message));
-  }
-
-  function loginUser() {
-    const phone = document.getElementById('phone').value;
-    const pass = document.getElementById('pass').value;
-    if (!phone || !pass) return alert("يرجى إدخال البيانات");
-    
-    auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass)
-      .then(() => window.location.href = '/dashboard')
-      .catch((err) => alert("خطأ: " + err.message));
-  }
+    async function registerUser() {
+        const name = document.getElementById('name').value;
+        const phone = document.getElementById('phone').value;
+        const pass = document.getElementById('pass').value;
+        try {
+            const res = await auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass);
+            await db.collection("users").doc(res.user.uid).set({ name, phone });
+            window.location.href = '/dashboard';
+        } catch (e) { alert("خطأ: " + e.message); }
+    }
 </script>
 
   
