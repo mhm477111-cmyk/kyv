@@ -74,3 +74,11 @@
     "typescript": "5.7.3"
   }
 }
+{
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "firebase": "^10.0.0" 
+  }
+}
