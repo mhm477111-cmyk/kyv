@@ -781,8 +781,8 @@ body { margin: 0; padding: 0; background-color: var(--black); color: #fff; font-
 
 
 
-<button onclick="document.getElementById('authModal').style.display='flex'" 
-        style="background: #ca8a04; 
+<button id="loginBtn" onclick="loginUser()" style="...">دخول</button>
+    style="background: #ca8a04; 
                color: black; 
                padding: 12px 24px; 
                border-radius: 12px; 
@@ -1786,25 +1786,36 @@ document.addEventListener('click', function(e) {
   const db = firebase.firestore();
   const auth = firebase.auth();
 
- function loginUser() {
+function loginUser() {
+    const btn = document.getElementById('loginBtn');
     const phone = document.getElementById('phone').value;
     const pass = document.getElementById('pass').value;
+    
+    // التحقق البسيط من الحقول
+    if (!phone || !pass) {
+        alert("يرجى إدخال رقم الهاتف وكلمة المرور");
+        return;
+    }
+
     const email = phone + "@mocontrol.com";
+
+    // 1. تفعيل رد الفعل (Loading State)
+    btn.innerHTML = "جاري الدخول...";
+    btn.style.opacity = "0.7";
+    btn.style.cursor = "wait";
+    btn.disabled = true;
 
     firebase.auth().signInWithEmailAndPassword(email, pass)
       .then((userCredential) => {
         const userId = userCredential.user.uid;
-        // جلب كافة بيانات العميل من الـ Firestore
         firebase.firestore().collection("users").doc(userId).get().then((doc) => {
           if (doc.exists) {
             const data = doc.data();
-            // عرض كافة التفاصيل داخل النافذة
+            // عرض لوحة البيانات بعد النجاح
             document.getElementById('modalBody').innerHTML = `
               <div style="text-align:right; color:white; direction:rtl; font-family:sans-serif;">
                 <h2 style="color:#ca8a04; text-align:center;">مرحباً بك، ${data.name || 'عميلنا العزيز'}</h2>
-                
                 <div style="background:#222; padding:15px; border-radius:10px; margin:10px 0; border:1px solid #333;">
-                  <p style="margin:5px 0;">رقم الهاتف: <b>${data.phone || '---'}</b></p>
                   <p style="margin:5px 0;">نوع الباقة: <b>${data.planName || 'غير مشترك'}</b></p>
                   <p style="margin:5px 0;">تاريخ التجديد: <b>${data.nextRenewal || 'لم يحدد'}</b></p>
                   <p style="margin:5px 0;">حالة الحساب: 
@@ -1813,7 +1824,6 @@ document.addEventListener('click', function(e) {
                     </span>
                   </p>
                 </div>
-                
                 <button onclick="firebase.auth().signOut().then(() => location.reload())" 
                         style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer; margin-top:10px;">
                   تسجيل خروج
@@ -1824,6 +1834,13 @@ document.addEventListener('click', function(e) {
         });
       })
       .catch((error) => {
+        // 2. إرجاع الزرار لطبيعته في حالة الخطأ
+        btn.innerHTML = "دخول";
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+        btn.disabled = false;
+        
+        // رسالة الخطأ
         alert("خطأ في تسجيل الدخول: " + error.message);
       });
   }
