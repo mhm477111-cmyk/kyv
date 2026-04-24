@@ -73,6 +73,16 @@ export default function Dashboard() {
     </div>
   );
 
+export const metadata = {
+  // هذا التعديل يمنع المتصفح من تخزين الصفحات في الـ Cache
+  other: {
+    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
+  },
+};
+
+
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
       <header className="mb-10 border-b border-yellow-600/30 pb-6">
