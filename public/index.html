@@ -1803,8 +1803,6 @@ document.addEventListener('click', function(e) {
     }
 
     btn.innerHTML = "جاري الدخول...";
-    btn.style.opacity = "0.7";
-    btn.style.cursor = "wait";
     btn.disabled = true;
 
     auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass)
@@ -1814,13 +1812,13 @@ document.addEventListener('click', function(e) {
             const data = doc.data();
             document.getElementById('modalBody').innerHTML = `
               <div style="text-align:right; color:white; direction:rtl; font-family:sans-serif;">
-                <h2 style="color:#ca8a04; text-align:center;">مرحباً بك، ${data.name || 'عميلنا العزيز'}</h2>
+                <h2 style="color:#ca8a04; text-align:center;">مرحباً بك، ${data.name}</h2>
                 <div style="background:#222; padding:15px; border-radius:10px; margin:10px 0; border:1px solid #333;">
-                  <p>رقم الهاتف: <b>${data.phone || '---'}</b></p>
-                  <p>الباقة: <b>${data.planName || 'غير مشترك'}</b></p>
+                  <p>نوع الباقة: <b>${data.planName || 'غير مشترك'}</b></p>
+                  <p>تاريخ التجديد: <b>${data.nextRenewal || 'لم يحدد'}</b></p>
                   <p>الحالة: <span style="color:${data.active ? '#22c55e' : '#ef4444'}; font-weight:bold;">${data.active ? 'نشط ✅' : 'غير نشط ❌'}</span></p>
                 </div>
-                <button onclick="auth.signOut().then(() => location.reload())" style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer;">تسجيل خروج</button>
+                <button onclick="handleLogout()" style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer;">تسجيل خروج</button>
               </div>
             `;
           }
@@ -1828,11 +1826,25 @@ document.addEventListener('click', function(e) {
       })
       .catch((error) => {
         btn.innerHTML = "دخول";
-        btn.style.opacity = "1";
-        btn.style.cursor = "pointer";
         btn.disabled = false;
         alert("خطأ: " + error.message);
       });
+  }
+
+  function handleLogout() {
+    auth.signOut().then(() => {
+        document.getElementById('authModal').style.display = 'none';
+        document.getElementById('modalBody').innerHTML = `
+            <button onclick="document.getElementById('authModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer; font-size:20px;">✕</button>
+            <div id="loginForm">
+                <h2 style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
+                <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+                <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+                <button id="loginBtn" onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:black;">دخول</button>
+                <p style="text-align:center; color:white; cursor:pointer; margin-top:15px;" onclick="showRegister()">ليس لديك حساب؟ <b>إنشاء حساب</b></p>
+            </div>
+        `;
+    });
   }
 
   function showRegister() {
