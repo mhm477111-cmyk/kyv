@@ -1798,17 +1798,32 @@ document.addEventListener('click', function(e) {
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
   // 2. المراقبة الوحيدة لحالة المستخدم (هذا هو اللي بيثبت الزر)
+// مراقبة حالة المستخدم
   auth.onAuthStateChanged((user) => {
     const btn = document.getElementById('mainActionBtn');
+    
     if (user) {
+      // 1. احفظ حالة الدخول محلياً كإجراء احترازي
+      localStorage.setItem("userLoggedIn", "true");
+      
       db.collection("users").doc(user.uid).get().then((doc) => {
         const name = doc.exists ? doc.data().name : "عميلنا";
         btn.innerText = "أهلاً " + name + " - لوحة التحكم";
         btn.onclick = () => window.location.href = '/dashboard';
       });
     } else {
+      // 2. إذا لم يكن هناك مستخدم، تأكد من مسح أي أثر
+      localStorage.removeItem("userLoggedIn");
       btn.innerText = "تسجيل دخول / حساب جديد";
       btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
+    }
+  });
+
+  // 3. أضف هذا السطر ليتأكد الموقع عند التحميل
+  window.addEventListener('load', () => {
+    const isLogged = localStorage.getItem("userLoggedIn");
+    if (isLogged === "true") {
+       // الموقع سيعرف تلقائياً من الفايربيس بمجرد تحميل الصفحة
     }
   });
 
