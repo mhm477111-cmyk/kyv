@@ -26,35 +26,46 @@ export default function Dashboard() {
       {/* Header */}
       <header className="mb-10 border-b border-yellow-600/30 pb-6">
         <h1 className="text-4xl font-bold text-yellow-500">MO CONTROL</h1>
-        <p className="text-gray-400 mt-2">لوحة تحكم العميل - النظام فعال</p>
+        <p className="text-gray-400 mt-2">لوحة تحكم العميل</p>
       </header>
 
-      {/* Stats Grid - بنفس ستايل الكروت في الصورة */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        {/* كارت حالة الباقة */}
+        {/* كارت حالة الخدمة (مستقلة) */}
         <div className="bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-3xl shadow-[0_0_15px_rgba(202,138,4,0.2)]">
-          <h2 className="text-yellow-600 font-bold text-sm">الباقة الحالية</h2>
-          <p className="text-2xl font-bold mt-2">{userData?.planName || "---"}</p>
-          <span className="inline-block mt-3 px-4 py-1 rounded-full text-xs bg-yellow-600/20 text-yellow-500 border border-yellow-600/30">
-            {userData?.active ? "النظام فعال ✅" : "غير مفعّل"}
-          </span>
+          <h2 className="text-yellow-600 font-bold text-sm mb-4">حالة الخدمة</h2>
+          <p className="text-2xl font-bold mb-4">{userData?.planName || "---"}</p>
+          
+          {userData?.active ? (
+            <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs bg-green-500/20 text-green-400 border border-green-500/30">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              SYSTEM LIVE ✅
+            </span>
+          ) : (
+            <span className="inline-block px-4 py-1 rounded-full text-xs bg-red-500/20 text-red-400 border border-red-500/30">
+              ● SYSTEM OFFLINE ❌
+            </span>
+          )}
         </div>
 
         {/* كارت حالة الدفع */}
         <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl">
-          <h2 className="text-gray-400 text-sm">حالة الدفع</h2>
-          <p className="text-xl font-bold mt-2 text-white">{userData?.paid ? "تم الدفع 💰" : "بانتظار الدفع"}</p>
+          <h2 className="text-gray-400 text-sm mb-2">حالة الدفع</h2>
+          <p className="text-xl font-bold text-white">{userData?.paid ? "تم الدفع 💰" : "بانتظار الدفع"}</p>
         </div>
 
         {/* كارت تاريخ التجديد */}
         <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl">
-          <h2 className="text-gray-400 text-sm">تاريخ التجديد</h2>
-          <p className="text-xl font-bold mt-2">{userData?.nextRenewal || "---"}</p>
+          <h2 className="text-gray-400 text-sm mb-2">تاريخ التجديد</h2>
+          <p className="text-xl font-bold">{userData?.nextRenewal || "---"}</p>
         </div>
       </div>
 
-      {/* Action Buttons - أزرار التجديد والتحكم بنفس الألوان */}
+      {/* Action Buttons */}
       <div className="mt-10 flex flex-col gap-4 max-w-md">
         <button 
           onClick={() => router.push('/renewal')} 
