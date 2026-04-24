@@ -53,7 +53,12 @@ export default function Dashboard() {
         </div>
 
       </div>
-
+<button 
+  onClick={() => router.push('/path-to-your-telegram-form')} // حط المسار اللي الصفحة موجودة فيه
+  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-all"
+>
+  تجديد الباقة 🚀
+</button>
       <button 
         onClick={() => auth.signOut()}
         className="mt-10 bg-red-500/10 text-red-400 border border-red-500/20 px-6 py-2 rounded-lg hover:bg-red-500/20 transition-all"
