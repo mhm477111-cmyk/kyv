@@ -1,0 +1,319 @@
+<div class='mo-floating-btn' onclick='openMoFinal()'>
+  <span class='btn-text'>تفعيل باقة الآن 🚀</span>
+</div>
+
+<div class='mo-modal-overlay' id='moModalFinal' style='display:none !important;'>
+  <div class='mo-form-card'>
+<span class='close-btn' onclick='closeMoFinal()'>X</span>    
+    <div id='form-content-area'>
+      <div style='text-align:center; margin-bottom:12px;'>
+          <h2 style='color:#ffcc00; margin:0; font-weight:900; font-size:35px; font-family: Cairo;'>MO CONTROL</h2>
+          <p style='color:#aaa; font-size:10px; font-family: Cairo; margin:2px 0;'>عالم من السرعة.. تفعيل باقاتك بالضمان 😊</p>
+      </div>
+
+      <div style='background: rgba(255, 204, 0, 0.05); border: 1px dashed #ffcc00; border-radius: 12px; padding: 10px; margin-bottom: 15px; direction: rtl;'>
+          <div style='display: flex; align-items: center; justify-content: space-between; background: #111; padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #333;'>
+              <span style='color: #fff; font-family: &quot;Cairo&quot;; font-size: 14px;'>محفظة كاش: <b id='voda-num' style='color:#ffcc00;'>01282608730</b></span>
+              <button onclick='copyNum(&quot;voda-num&quot;)' style='background: #ffcc00; border: none; padding: 3px 8px; border-radius: 5px; cursor: pointer; font-size: 10px; font-weight: bold;' type='button'>نسخ</button>
+          </div>   
+          
+          <a href='https://ipn.eg/S/hamoibrahim212/instapay/8Waki0' style='text-decoration: none; display: block;' target='_blank'>
+              <div style='display: flex; align-items: center; justify-content: space-between; background: #000; padding: 10px 15px; border-radius: 8px; border: 1px solid #ffcc00;'>
+                  <span style='color: #fff; font-family: &quot;Cairo&quot;; font-size: 14px;'>اضغط للدفع عبر: <b style='color:#ffcc00;'>InstaPay &#10024;</b></span>
+                  <span style='font-size: 14px;'>🔗</span>
+              </div>
+          </a>
+      </div>
+
+      <form id='mo-final-form'>
+        <div class='mo-input-row'>
+          <label>الاسم بالكامل</label>
+          <input id='f_name' placeholder='اكتب اسمك' required='required' type='text'/>
+        </div>
+
+        <div class='mo-input-row'>
+          <label>رقم الواتساب للتواصل</label>
+          <input id='f_whatsapp' inputmode='numeric' maxlength='11' oninput='this.value = this.value.replace(/[^0-9]/g, &quot;&quot;);' placeholder='01xxxxxxxxx' required='required' type='tel'/>
+        </div>
+
+        <div class='mo-input-row'>
+          <label style='color:#ffcc00;'>الرقم المراد تفعيله</label>
+          <input id='f_target' inputmode='numeric' maxlength='11' oninput='this.value = this.value.replace(/[^0-9]/g, &quot;&quot;);' placeholder='01xxxxxxxxx' required='required' style='border:1px solid #ffcc00;' type='tel'/>
+        </div>
+
+        <div class='mo-input-row'>
+          <label>اختر الشبكة والباقة</label>
+          <select class='mo-premium-select' id='f_package' required='required'>
+              <option disabled='disabled' selected='selected' value=''>-- اضغط لاختيار باقتك --</option>
+              
+              <optgroup label='🟢 ETISALAT EMERALD'>
+                <option value='Eti_20GB_260'>EMERALD - 20GB [260 LE]</option>
+                <option value='Eti_25GB_300'>EMERALD - 25GB [300 LE]</option>
+                <option value='Eti_30GB_340'>EMERALD - 30GB [340 LE]</option>
+                <option value='Eti_40GB_420'>EMERALD - 40GB [420 LE]</option>
+                <option value='Eti_50GB_500'>EMERALD - 50GB [500 LE]</option>
+                <option value='Eti_60GB_640'>EMERALD - 60GB [640 LE]</option>
+              </optgroup>
+
+              <optgroup label='🔴 VODAFONE RED'>
+                <option value='Voda_20GB_300'>VODA - 20GB [300 LE]</option>
+                <option value='Voda_25GB_340'>VODA - 25GB [340 LE]</option>
+                <option value='Voda_30GB_380'>VODA - 30GB [380 LE]</option>
+                <option value='Voda_40GB_460'>VODA - 40GB [460 LE]</option>
+                <option value='Voda_50GB_520'>VODA - 50GB [520 LE]</option>
+                <option value='Voda_60GB_580'>VODA - 60GB [580 LE]</option>
+              </optgroup>
+
+              <optgroup label='🟣 WE GOLD'>
+                <option value='WE_20GB_250'>WE GOLD - 20GB [250 LE]</option>
+                <option value='WE_25GB_280'>WE GOLD - 25GB [280 LE]</option>
+                <option value='WE_30GB_310'>WE GOLD - 30GB [310 LE]</option>
+                <option value='WE_40GB_360'>WE GOLD - 40GB [360 LE]</option>
+                <option value='WE_50GB_410'>WE GOLD - 50GB [410 LE]</option>
+                <option value='WE_60GB_520'>WE GOLD - 60GB [520 LE]</option>
+              </optgroup>
+          </select>
+        </div>
+
+<div class='mo-input-row'>
+  <label>إرفاق اسكرين تحويل الفلوس (اختياري)</label>
+  <input accept='image/*' id='f_image' style='background: #0d0d0d; color: #f9e29d; padding: 8px; border: 1px dashed #d4af37; border-radius: 10px; width: 100%; cursor: pointer;' type='file'/>
+  <p id='f_status' style='color:#ffcc00; font-size:10px; margin:5px 0; display:none;'/>
+</div>
+
+        <button class='mo-btn-submit' id='f_submit' type='submit'>تأكيد الطلب</button>
+      </form>
+    </div>
+
+    <div id='f_success' style='display:none; text-align:center; padding: 20px 0;'>
+      <div style='font-size: 50px; color: #ffcc00; margin-bottom: 10px;'>&#10004;</div>
+      <h2 style='color:#fff; font-size:18px; font-family: Cairo;'>تم استلام طلبك!</h2>
+      <p style='color:#aaa; font-size:12px; font-family: Cairo;'>سيتم التواصل معك عبر الواتساب فورا&#1611;</p>
+      <button onclick='closeMoFinal()' style='background:#ffcc00; border:none; padding:10px 25px; border-radius:10px; cursor:pointer; font-weight:bold; font-family: Cairo; margin-top:15px;' type='button'>إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/*<![CDATA[*/
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+
+.mo-floating-btn { position: fixed; bottom: 20px; left: 20px; background: #ffcc00; color: #000; padding: 12px 20px; border-radius: 50px; cursor: pointer; z-index: 999999; font-family: 'Cairo'; font-weight: 900; border: 2px solid #000; box-shadow: 0 5px 15px rgba(255,204,0,0.4); animation: moPulse 1s infinite; }
+.mo-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000000; padding: 15px; box-sizing: border-box; }
+.mo-form-card { max-width: 380px; width: 100%; background: #000; border: 1px solid #333; padding: 20px; border-radius: 20px; position: relative; direction: rtl; font-family: 'Cairo'; max-height: 92vh; overflow-y: auto; }
+.close-btn { position: absolute; top: 10px; left: 15px; color: #fff; font-size: 30px; cursor: pointer; line-height: 1; z-index: 10; }
+.mo-input-row { margin-bottom: 12px; text-align: right; }
+.mo-input-row label { display: block; color: #eee; font-size: 11px; margin-bottom: 4px; }
+.mo-input-row input, .mo-premium-select { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 10px; font-family: 'Cairo'; font-size: 13px; outline: none; box-sizing: border-box; }
+.mo-btn-submit { width: 100%; padding: 15px; background: #ffcc00; color: #000; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; font-family: 'Cairo'; margin-top: 10px; }
+@keyframes moPulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+/*]]>*/
+</style>
+
+<script type='text/javascript'>
+//<![CDATA[
+function openMoFinal(packageName) { 
+    var modal = document.getElementById("moModalFinal");
+    if(modal) {
+        modal.style.setProperty("display", "flex", "important"); 
+        if (packageName) {
+            document.getElementById("f_package").value = packageName;
+        }
+    }
+}
+
+function closeMoFinal() { 
+    var modal = document.getElementById("moModalFinal");
+    if(modal) modal.style.setProperty("display", "none", "important"); 
+}
+
+function copyNum(id) {
+    var text = document.getElementById(id).innerText;
+    var elem = document.createElement("textarea");
+    document.body.appendChild(elem);
+    elem.value = text;
+    elem.select();
+    document.execCommand("copy");
+    document.body.removeChild(elem);
+    alert("تم نسخ الرقم بنجاح ✅");
+}
+
+document.getElementById("mo-final-form").onsubmit = async function(e) {
+    e.preventDefault();
+    var btn = document.getElementById("f_submit");
+    var stat = document.getElementById("f_status");
+    var fileInput = document.getElementById("f_image");
+    
+    btn.innerHTML = "جاري الإرسال...";
+    btn.disabled = true;
+
+    var botToken = "8623372347:AAGCq4fkye4GqUEzK5uaK4xv4rOlYYgfiCU";
+    var chatId = "6800873609";
+    var msg = "🚀 حجز جديد - MO CONTROL\n" +
+              "━━━━━━━━━━━━━━━\n" +
+              "👤 الاسم: " + document.getElementById("f_name").value + "\n" +
+              "📞 واتساب: " + document.getElementById("f_whatsapp").value + "\n" +
+              "📱 رقم الشحن: " + document.getElementById("f_target").value + "\n" +
+              "📦 الباقة: " + document.getElementById("f_package").value + "\n" +
+              "━━━━━━━━━━━━━━━\n" +
+              "🔗 شات مباشر: https://wa.me/2" + document.getElementById("f_whatsapp").value;
+
+    try {
+        if (fileInput.files.length > 0) {
+            stat.style.display = "block"; 
+            stat.innerHTML = "⏳ جاري رفع الوصل...";
+            var fd = new FormData();
+            fd.append("chat_id", chatId);
+            fd.append("caption", msg);
+            fd.append("photo", fileInput.files[0]);
+            await fetch("https://api.telegram.org/bot" + botToken + "/sendPhoto", { method: "POST", body: fd });
+        } else {
+            // في حال تم تخطي الـ required برمجياً يرسل رسالة نصية
+            await fetch("https://api.telegram.org/bot" + botToken + "/sendMessage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: msg })
+            });
+        }
+        document.getElementById("form-content-area").style.display = "none";
+        document.getElementById("f_success").style.display = "block";
+        document.getElementById("mo-final-form").reset();
+    } catch (err) { 
+        alert("حدث خطأ في الاتصال، حاول مجدداً"); 
+    }
+    btn.disabled = false; 
+    btn.innerHTML = "تأكيد الطلب";
+    stat.style.display = "none";
+};
+//]]>
+  
+
+  //<![CDATA[
+
+// 1. دالة الفتح مع دعم "زر الرجوع" في الموبايل
+function openMoFinal(packageName) { 
+    var modal = document.getElementById("moModalFinal");
+    if(modal) {
+        modal.style.setProperty("display", "flex", "important"); 
+        
+        // اختيار الباقة تلقائياً إذا وجدت
+        if (packageName) {
+            var selectBox = document.getElementById("f_package");
+            if(selectBox) selectBox.value = packageName;
+        }
+
+        // إضافة حالة للسجل لمنع الخروج من الموقع عند الضغط على "رجوع"
+        history.pushState({ modalOpen: true }, "");
+    }
+}
+
+// 2. دالة الإغلاق
+function closeMoFinal() { 
+    var modal = document.getElementById("moModalFinal");
+    if(modal) {
+        modal.style.setProperty("display", "none", "important");
+        // الرجوع بالسجل خطوة للخلف إذا كانت النافذة مفتوحة
+        if (history.state && history.state.modalOpen) {
+            history.back();
+        }
+    }
+}
+
+// 3. معالجة زر الرجوع في الموبايل
+window.onpopstate = function(event) {
+    var modal = document.getElementById("moModalFinal");
+    if (modal) {
+        modal.style.setProperty("display", "none", "important");
+    }
+};
+
+// 4. إغلاق النافذة عند الضغط في أي مكان فارغ (خارج الكارت)
+window.onclick = function(event) {
+    var modal = document.getElementById('moModalFinal');
+    if (event.target == modal) {
+        modal.style.setProperty("display", "none", "important");
+        if (history.state && history.state.modalOpen) {
+            history.back();
+        }
+    }
+};
+
+// 5. دالة نسخ رقم المحفظة
+function copyNum(id) {
+    var text = document.getElementById(id).innerText;
+    var e = document.createElement("textarea");
+    document.body.appendChild(e); 
+    e.value = text; 
+    e.select();
+    document.execCommand("copy"); 
+    document.body.removeChild(e);
+    alert("تم نسخ الرقم بنجاح ✅");
+}
+
+// 6. كود إرسال البيانات للتليجرام + فتح واتساب تلقائياً
+document.getElementById("mo-final-form").onsubmit = async function(e) {
+    e.preventDefault();
+    var btn = document.getElementById("f_submit");
+    var stat = document.getElementById("f_status");
+    var fileInput = document.getElementById("f_image");
+    
+    // جلب القيم من الفورم
+    var name = document.getElementById("f_name").value;
+    var whatsapp = document.getElementById("f_whatsapp").value;
+    var target = document.getElementById("f_target").value;
+    var packageChosen = document.getElementById("f_package").value;
+
+    btn.innerHTML = "جاري الحجز...";
+    btn.disabled = true;
+
+    var botToken = "8623372347:AAGCq4fkye4GqUEzK5uaK4xv4rOlYYgfiCU";
+    var chatId = "6800873609";
+    var msg = "🚀 حجز جديد - MO CONTROL\n" +
+              "━━━━━━━━━━━━━━━\n" +
+              "👤 الاسم: " + name + "\n" +
+              "📞 واتساب: " + whatsapp + "\n" +
+              "📱 رقم الشحن: " + target + "\n" +
+              "📦 الباقة: " + packageChosen + "\n" +
+              "━━━━━━━━━━━━━━━\n" +
+              "🔗 شات مباشر: https://wa.me/2" + whatsapp;
+
+    try {
+        // أولاً: الإرسال للتليجرام
+        if (fileInput.files.length > 0) {
+            stat.style.display = "block"; 
+            stat.innerHTML = "⏳ جاري رفع الوصل...";
+            var fd = new FormData();
+            fd.append("chat_id", chatId);
+            fd.append("caption", msg);
+            fd.append("photo", fileInput.files[0]);
+            await fetch("https://api.telegram.org/bot" + botToken + "/sendPhoto", { method: "POST", body: fd });
+        } else {
+            await fetch("https://api.telegram.org/bot" + botToken + "/sendMessage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: msg })
+            });
+        }
+
+        // ثانياً: فتح واتساب العميل تلقائياً برسالة جاهزة موجهة لك
+        var myNumber = "201112893086"; // رقمك أنت لاستلام الطلبات
+        var msgToMe = "أهلاً MO CONTROL، أنا " + name + " قمت بطلب تفعيل باقة (" + packageChosen + ") للرقم " + target + ". متاح المراجعة الآن؟";
+        
+        window.open("https://wa.me/" + myNumber + "?text=" + encodeURIComponent(msgToMe), "_blank");
+
+        // ثالثاً: عرض رسالة النجاح في الموقع
+        document.getElementById("form-content-area").style.display = "none";
+        document.getElementById("f_success").style.display = "block";
+        document.getElementById("mo-final-form").reset();
+    } catch (err) { 
+        alert("حدث خطأ في الاتصال، حاول مجدداً"); 
+    }
+    btn.disabled = false; 
+    btn.innerHTML = "تأكيد الطلب";
+    stat.style.display = "none";
+};
+
+
+
+
+/*]]>*/
