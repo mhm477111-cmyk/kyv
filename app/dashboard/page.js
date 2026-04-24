@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true); // إضافة حالة تحميل
+  const [loading, setLoading] = useState(true); 
   const router = useRouter();
 
   useEffect(() => {
@@ -26,7 +26,6 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, [router]);
 
-  // منطق النظام الأوتوماتيكي: السيستم شغال فقط لو (أنت مفعله إدارياً + العميل دافع)
   const isSystemLive = userData?.active && userData?.paid;
 
   if (loading) return <div className="min-h-screen bg-black text-yellow-500 flex items-center justify-center">جاري تحميل بيانات MO CONTROL...</div>;
@@ -42,7 +41,6 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        {/* كارت حالة الخدمة */}
         <div className="bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-3xl shadow-[0_0_15px_rgba(202,138,4,0.2)]">
           <h2 className="text-yellow-600 font-bold text-sm mb-4">حالة الخدمة</h2>
           <p className="text-2xl font-bold mb-4">{userData?.planName || "غير مشترك"}</p>
@@ -62,13 +60,11 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* كارت حالة الدفع */}
         <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl">
           <h2 className="text-gray-400 text-sm mb-2">حالة الدفع</h2>
           <p className="text-xl font-bold text-white">{userData?.paid ? "تم الدفع 💰" : "بانتظار الدفع"}</p>
         </div>
 
-        {/* كارت تاريخ التجديد */}
         <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl">
           <h2 className="text-gray-400 text-sm mb-2">تاريخ التجديد</h2>
           <p className="text-xl font-bold text-white">{userData?.nextRenewal || "لم يحدد بعد"}</p>
@@ -85,19 +81,19 @@ export default function Dashboard() {
         </button>
 
         <button 
-          onClick={() => signOut(auth)} // الـ onAuthStateChanged سيقوم بالباقي
+          onClick={() => router.push('/')} 
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold text-lg transition-all"
+        >
+          العودة للموقع الرئيسي
+        </button>
+
+        <button 
+          onClick={() => signOut(auth)} 
           className="w-full bg-transparent border border-gray-700 text-gray-400 py-3 rounded-2xl hover:border-red-900 hover:text-red-500 transition-all"
         >
           تسجيل الخروج
         </button>
       </div>
     </div>
-// أضف هذا الزرار داخل كود الـ Dashboard
-<button 
-  onClick={() => router.push('/')} 
-  className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-bold transition-all"
->
-  العودة للموقع الرئيسي
-</button>
   );
 }
