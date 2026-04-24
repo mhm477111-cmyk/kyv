@@ -21,16 +21,14 @@ export default function Dashboard() {
             setUserData(docSnap.data());
             setLoading(false);
           } else {
-            // حالة العميل المحذوف: تسجيل الخروج والتحويل للرئيسية مع حالة deleted
             await signOut(auth);
             router.push('/?status=deleted');
           }
         } catch (error) {
-          console.error("خطأ في التحقق من البيانات:", error);
+          console.error("خطأ في التحقق:", error);
           setLoading(false);
         }
       } else {
-        // إذا لم يكن هناك مستخدم مسجل، للرئيسية أو صفحة الدخول
         router.push('/auth');
       }
     });
@@ -44,7 +42,7 @@ export default function Dashboard() {
 
   if (loading) return (
     <div className="min-h-screen bg-black text-yellow-500 flex items-center justify-center font-bold text-xl">
-      جاري التحقق من صلاحية الوصول...
+      جاري التحميل...
     </div>
   );
 
@@ -55,7 +53,7 @@ export default function Dashboard() {
         <p className="text-gray-400 mt-2">مرحباً بك، {userData?.name || "عميلنا العزيز"}</p>
       </header>
 
-      {/* شبكة بيانات العميل */}
+      {/* استرجاع كافة البيانات المفقودة */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
         <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl">
           <h2 className="text-gray-400 text-xs uppercase mb-1">الاسم الكامل</h2>
@@ -75,9 +73,9 @@ export default function Dashboard() {
             {userData?.isPaid ? "تم الدفع ✅" : "غير مدفوع ❌"}
           </p>
         </div>
+        {/* يمكنك إضافة أي حقل إضافي هنا بنفس الطريقة */}
       </div>
 
-      {/* الأزرار */}
       <div className="flex flex-col gap-4 max-w-md">
         <button 
           onClick={handleSignOut} 
