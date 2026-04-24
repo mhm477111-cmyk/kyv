@@ -18,10 +18,18 @@ export default function Dashboard() {
           const docSnap = await getDoc(docRef);
           
           if (docSnap.exists()) {
-            setUserData(docSnap.data());
-            setLoading(false);
+            const data = docSnap.data();
+            
+            // التحقق من حالة الحساب (هل هو مفعل أم معطل؟)
+            if (data.active === false) {
+              await signOut(auth);
+              router.push('/?status=deleted');
+            } else {
+              setUserData(data);
+              setLoading(false);
+            }
           } else {
-            // --- هنا منطق العميل المحذوف ---
+            // العميل غير موجود في قاعدة البيانات
             await signOut(auth);
             router.push('/?status=deleted');
           }
@@ -41,7 +49,7 @@ export default function Dashboard() {
     router.push('/');
   };
 
-  if (loading) return <div className="min-h-screen bg-black text-yellow-500 flex items-center justify-center">جاري تحميل بيانات MO CONTROL...</div>;
+  if (loading) return <div className="min-h-screen bg-black text-yellow-500 flex items-center justify-center font-bold text-xl">جاري تحميل بيانات MO CONTROL...</div>;
 
   const InfoBox = ({ label, value, color = "text-white" }) => (
     <div className="bg-gray-900 border border-gray-800 p-5 rounded-2xl">
