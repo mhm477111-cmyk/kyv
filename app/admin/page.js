@@ -9,29 +9,40 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const querySnapshot = await getDocs(collection(db, "users"));
-      setUsers(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        setUsers(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (err) {
+        console.error("خطأ في جلب البيانات:", err);
+      }
     };
     fetchUsers();
   }, []);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    if (!editingUser) return;
+    
     const userRef = doc(db, "users", editingUser.id);
     
-    // الربط الأوتوماتيكي: عند الحفظ، بنحدث الدفع والتفعيل مع بعض
-    await updateDoc(userRef, {
-      name: editingUser.name,
-      phone: editingUser.phone,
-      planName: editingUser.planName,
-      nextRenewal: editingUser.nextRenewal,
-      paid: editingUser.paid,
-      active: editingUser.paid // هنا الربط: لو دفع يبقى active، لو لأ يبقى مش active
-    });
+    try {
+      // إرسال البيانات مع تأمين القيم (استخدام !! للتأكد من أنها boolean)
+      await updateDoc(userRef, {
+        name: editingUser.name || "",
+        phone: editingUser.phone || "",
+        planName: editingUser.planName || "غير مشترك",
+        nextRenewal: editingUser.nextRenewal || "",
+        paid: !!editingUser.paid,
+        active: !!editingUser.paid 
+      });
 
-    alert("تم تحديث بيانات العميل وتفعيل الخدمة أوتوماتيكياً!");
-    setEditingUser(null);
-    window.location.reload(); 
+      alert("تم تحديث البيانات وتفعيل الخدمة بنجاح!");
+      setEditingUser(null);
+      window.location.reload(); 
+    } catch (error) {
+      console.error("خطأ أثناء التحديث:", error);
+      alert("فشل التحديث: " + error.message);
+    }
   };
 
   return (
@@ -44,7 +55,7 @@ export default function AdminDashboard() {
             <div>
               <p className="font-bold text-lg">{user.name}</p>
               <p className="text-yellow-600 font-mono text-sm">{user.phone}</p>
-              <p className="text-gray-400 text-xs mt-1">الباقة: {user.planName}</p>
+              <p className="text-gray-400 text-xs mt-1">الباقة: {user.planName || '---'}</p>
             </div>
             <button 
               onClick={() => setEditingUser(user)} 
@@ -62,20 +73,25 @@ export default function AdminDashboard() {
             <h2 className="text-2xl mb-6 font-bold text-yellow-500">تعديل: {editingUser.name}</h2>
             
             <label className="text-gray-400 text-xs">الاسم</label>
-            <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.name} onChange={e => setEditingUser({...editingUser, name: e.target.value})} />
+            <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.name || ''} onChange={e => setEditingUser({...editingUser, name: e.target.value})} />
             
             <label className="text-gray-400 text-xs">رقم الموبايل</label>
-            <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.phone} onChange={e => setEditingUser({...editingUser, phone: e.target.value})} />
+            <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.phone || ''} onChange={e => setEditingUser({...editingUser, phone: e.target.value})} />
             
             <label className="text-gray-400 text-xs">اسم الباقة</label>
-            <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.planName} onChange={e => setEditingUser({...editingUser, planName: e.target.value})} />
+            <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.planName || ''} onChange={e => setEditingUser({...editingUser, planName: e.target.value})} />
             
             <label className="text-gray-400 text-xs">تاريخ التجديد</label>
             <input type="date" className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700 text-white" value={editingUser.nextRenewal || ''} onChange={e => setEditingUser({...editingUser, nextRenewal: e.target.value})} />
             
             <label className="flex items-center gap-3 mb-8 cursor-pointer text-lg font-bold">
-              <input type="checkbox" className="w-5 h-5" checked={editingUser.paid} onChange={e => setEditingUser({...editingUser, paid: e.target.checked})} />
-              تم دفع رسوم الباقة (سيفعل الخدمة أوتوماتيكياً)
+              <input 
+                type="checkbox" 
+                className="w-5 h-5" 
+                checked={!!editingUser.paid} 
+                onChange={e => setEditingUser({...editingUser, paid: e.target.checked})} 
+              />
+              تم دفع رسوم الباقة
             </label>
 
             <div className="flex gap-3">
