@@ -1756,26 +1756,50 @@ document.addEventListener('click', function(e) {
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-<div id="authModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:20px;">
-    <div id="modalBody" style="background:#111; padding:30px; border-radius:20px; border:1px solid #ca8a04; width:100%; max-width:400px; position:relative;">
-        <button onclick="document.getElementById('authModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer; font-size:20px;">✕</button>
+<button id="mainActionBtn" 
+        style="background: #ca8a04; color: black; padding: 12px 24px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(202, 138, 4, 0.3);">
+    جاري التحقق...
+</button>
+
+<div id="authModal" onclick="if(event.target==this) this.style.display='none'" 
+     style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px; cursor: pointer;">
+    
+    <div id="modalBody" onclick="event.stopPropagation()"
+         style="background:#111; padding:40px; border-radius:24px; border:1px solid #ca8a04; width:100%; max-width:400px; position:relative; cursor: default; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+        
+        <button onclick="document.getElementById('authModal').style.display='none'" 
+                style="position:absolute; top:15px; right:15px; background:none; border:none; color:white; cursor:pointer; font-size:24px; opacity: 0.6;">✕</button>
+        
         <div id="loginForm">
-            <h2 id="modalTitle" style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
-            <input type="text" id="name" placeholder="الاسم" style="display:none; width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
-            <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
-            <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
-            <button id="actionBtn" onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:black;">دخول</button>
-            <p id="toggleText" style="text-align:center; color:white; cursor:pointer; margin-top:15px;" onclick="showRegister()">ليس لديك حساب؟ <b>إنشاء حساب</b></p>
+            <h2 id="modalTitle" style="color:#ca8a04; text-align:center; margin-bottom: 30px; font-size: 1.5rem;">تسجيل الدخول</h2>
+            
+            <input type="text" id="name" placeholder="الاسم الكامل" 
+                   style="display:none; width:100%; padding:14px; margin-bottom:15px; background:#000; border:1px solid #333; color:white; border-radius:12px; outline:none; transition: 0.3s;">
+            
+            <input type="tel" id="phone" placeholder="رقم الموبايل" 
+                   style="width:100%; padding:14px; margin-bottom:15px; background:#000; border:1px solid #333; color:white; border-radius:12px; outline:none; transition: 0.3s;">
+            
+            <input type="password" id="pass" placeholder="كلمة المرور" 
+                   style="width:100%; padding:14px; margin-bottom:25px; background:#000; border:1px solid #333; color:white; border-radius:12px; outline:none; transition: 0.3s;">
+            
+            <button id="actionBtn" onclick="loginUser()" 
+                    style="width:100%; padding:15px; background:#ca8a04; border:none; border-radius:12px; font-weight:bold; cursor:pointer; color:black; font-size: 1rem; transition: 0.3s;">
+                دخول
+            </button>
+            
+            <p id="toggleText" style="text-align:center; color:#888; cursor:pointer; margin-top:20px; font-size: 0.9rem;" onclick="showRegister()">
+                ليس لديك حساب؟ <b style="color: white;">إنشاء حساب</b>
+            </p>
         </div>
     </div>
 </div>
 
-<script>
-    // ============================================================
-    // FIREBASE AUTH - UNIFIED & FIXED
-    // ============================================================
+<style>
+    input:focus { border-color: #ca8a04 !important; box-shadow: 0 0 8px rgba(202, 138, 4, 0.2); }
+    button:hover { background: #eab308 !important; transform: translateY(-2px); }
+</style>
 
-    // 1. الإعدادات والتهيئة (مرة واحدة فقط)
+<script>
     const firebaseConfig = {
         apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
         authDomain: "mo-control-site.firebaseapp.com",
@@ -1790,61 +1814,33 @@ document.addEventListener('click', function(e) {
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2. دالة تحديث الواجهة الموحدة - المصدر الوحيد للحقيقة
-    // تعتمد فقط على user الواردة من onAuthStateChanged
+    // تحديث الواجهة بناءً على حالة المستخدم
     async function updateUI(user) {
-        // نجيب كل الأزرار اللي تحمل id="mainActionBtn"
-        const allBtns = document.querySelectorAll('#mainActionBtn');
-        if (!allBtns.length) return;
-
+        const btn = document.getElementById('mainActionBtn');
         if (user) {
-            let displayName = "عميلنا";
             try {
                 const userDoc = await db.collection("users").doc(user.uid).get();
-                if (userDoc.exists && userDoc.data().name) {
-                    displayName = userDoc.data().name;
-                }
-            } catch (e) {
-                console.warn("تحذير: تعذّر جلب بيانات المستخدم من Firestore", e);
-            }
-
-            allBtns.forEach(btn => {
-                btn.innerText = "أهلاً " + displayName + " - اعرف تفاصيل حسابك";
+                const name = userDoc.exists ? userDoc.data().name : "عميلنا";
+                btn.innerText = "أهلاً " + name + " - لوحة التحكم";
                 btn.onclick = () => window.location.href = '/dashboard';
-            });
+            } catch (e) { console.error(e); }
         } else {
-            allBtns.forEach(btn => {
-                btn.innerText = "تسجيل دخول / حساب جديد";
-                btn.onclick = () => { document.getElementById('authModal').style.display = 'flex'; };
-            });
+            btn.innerText = "تسجيل دخول / حساب جديد";
+            btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
         }
     }
 
-    // 3. التنفيذ بالترتيب الصحيح:
-    //    أولاً: setPersistence → ثم: onAuthStateChanged (مرة واحدة فقط)
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(() => {
-            auth.onAuthStateChanged((user) => {
-                // هنا الحكم الوحيد على حالة الـ UI
-                // لا localStorage، لا متغيرات خارجية
-                updateUI(user);
-            });
-        })
-        .catch((e) => {
-            console.error("خطأ في ضبط Persistence:", e);
-            // حتى لو فشل setPersistence، نراقب الحالة
-            auth.onAuthStateChanged((user) => {
-                updateUI(user);
-            });
-        });
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+        auth.onAuthStateChanged((user) => updateUI(user));
+    });
 
-    // 4. دوال تسجيل الدخول والتسجيل
+    // دوال التنقل داخل الـ Modal
     function showRegister() {
         document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
         document.getElementById('name').style.display = 'block';
         document.getElementById('actionBtn').innerText = "إنشاء الحساب";
         document.getElementById('actionBtn').onclick = registerUser;
-        document.getElementById('toggleText').innerHTML = 'لديك حساب بالفعل؟ <b>تسجيل الدخول</b>';
+        document.getElementById('toggleText').innerHTML = 'لديك حساب بالفعل؟ <b style="color:white;">تسجيل الدخول</b>';
         document.getElementById('toggleText').onclick = showLogin;
     }
 
@@ -1853,36 +1849,28 @@ document.addEventListener('click', function(e) {
         document.getElementById('name').style.display = 'none';
         document.getElementById('actionBtn').innerText = "دخول";
         document.getElementById('actionBtn').onclick = loginUser;
-        document.getElementById('toggleText').innerHTML = 'ليس لديك حساب؟ <b>إنشاء حساب</b>';
+        document.getElementById('toggleText').innerHTML = 'ليس لديك حساب؟ <b style="color:white;">إنشاء حساب</b>';
         document.getElementById('toggleText').onclick = showRegister;
     }
 
     async function loginUser() {
         const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
-        if (!phone || !pass) { alert("يرجى إدخال رقم الموبايل وكلمة المرور"); return; }
         try {
             await auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass);
-            document.getElementById('authModal').style.display = 'none';
             window.location.href = '/dashboard';
-        } catch (e) {
-            alert("خطأ في تسجيل الدخول: " + e.message);
-        }
+        } catch (e) { alert("خطأ: " + e.message); }
     }
 
     async function registerUser() {
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
-        if (!name || !phone || !pass) { alert("يرجى إدخال جميع البيانات"); return; }
         try {
             const res = await auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass);
             await db.collection("users").doc(res.user.uid).set({ name, phone });
-            document.getElementById('authModal').style.display = 'none';
             window.location.href = '/dashboard';
-        } catch (e) {
-            alert("خطأ في إنشاء الحساب: " + e.message);
-        }
+        } catch (e) { alert("خطأ: " + e.message); }
     }
 </script>
 
