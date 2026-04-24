@@ -19,7 +19,7 @@ export default function AdminDashboard() {
   // --- إعدادات كلمة المرور ---
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passInput, setPassInput] = useState("");
-  const ADMIN_PASSWORD = "123"; // 👈 غير الباسورد من هنا
+  const ADMIN_PASSWORD = "732005"; // 👈 غير الباسورد من هنا
 
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
