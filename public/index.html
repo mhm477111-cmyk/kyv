@@ -1795,26 +1795,33 @@ document.addEventListener('click', function(e) {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // تفعيل بقاء الجلسة مفتوحة محلياً
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .then(() => {
-      // بعد نجاح التفعيل نراقب الحالة
-      auth.onAuthStateChanged((user) => {
-        const btn = document.getElementById('mainActionBtn');
-        if (user) {
-          db.collection("users").doc(user.uid).get().then((doc) => {
-            const name = doc.exists ? doc.data().name : "عميلنا";
-            btn.innerText = "أهلاً " + name + " - دخول للوحة التحكم";
-            btn.onclick = () => window.location.href = '/dashboard';
-          });
-        } else {
-          btn.innerText = "تسجيل دخول / حساب جديد";
-          btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
-        }
-      });
-    });
+  // الحل النهائي: نستخدم LocalStorage كمؤشر سريع + Firebase للأمان
+  const btn = document.getElementById('mainActionBtn');
+  
+  // 1. تحديث فوري بناءً على الـ LocalStorage (لو العميل مسجل قبل كده)
+  if (localStorage.getItem("isLoggedIn") === "true") {
+      btn.innerText = "دخول للوحة التحكم";
+      btn.onclick = () => window.location.href = '/dashboard';
+  }
 
-  // دوال تسجيل الدخول وإنشاء الحساب
+  // 2. التحقق الفعلي من Firebase
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        localStorage.setItem("isLoggedIn", "true");
+        db.collection("users").doc(user.uid).get().then((doc) => {
+          const name = doc.exists ? doc.data().name : "عميلنا";
+          btn.innerText = "أهلاً " + name + " - لوحة التحكم";
+          btn.onclick = () => window.location.href = '/dashboard';
+        });
+      } else {
+        localStorage.removeItem("isLoggedIn");
+        btn.innerText = "تسجيل دخول / حساب جديد";
+        btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
+      }
+    });
+  });
+
   function showRegister() {
     document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
     document.getElementById('name').style.display = 'block';
@@ -1832,16 +1839,10 @@ document.addEventListener('click', function(e) {
 
     auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass)
       .then((userCredential) => {
+        localStorage.setItem("isLoggedIn", "true"); // تثبيت الدخول
         db.collection("users").doc(userCredential.user.uid).set({ 
-            name: name, 
-            phone: phone, 
-            planName: "غير مشترك", 
-            active: false,
-            paid: false
-        }).then(() => { 
-            alert("تم إنشاء الحساب بنجاح!"); 
-            window.location.href = '/dashboard'; 
-        });
+            name: name, phone: phone, planName: "غير مشترك", active: false, paid: false
+        }).then(() => window.location.href = '/dashboard');
       }).catch((err) => alert("خطأ: " + err.message));
   }
 
@@ -1851,7 +1852,10 @@ document.addEventListener('click', function(e) {
     if (!phone || !pass) return alert("يرجى إدخال البيانات");
     
     auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass)
-      .then(() => window.location.href = '/dashboard')
+      .then(() => {
+        localStorage.setItem("isLoggedIn", "true"); // تثبيت الدخول
+        window.location.href = '/dashboard';
+      })
       .catch((err) => alert("خطأ: " + err.message));
   }
 </script>
