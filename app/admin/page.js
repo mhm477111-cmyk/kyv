@@ -1,118 +1,105 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebaseConfig';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        // تعديل هنا: التأكد من تحويل أي تاريخ Timestamp إلى نص
-        setUsers(querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          let renewal = data.nextRenewal || "";
-          // لو التاريخ متخزن كـ Timestamp بتاع فايربيس
-          if (data.nextRenewal && typeof data.nextRenewal === 'object' && data.nextRenewal.seconds) {
-            renewal = new Date(data.nextRenewal.seconds * 1000).toISOString().split('T')[0];
-          }
-          return { id: doc.id, ...data, nextRenewal: renewal };
-        }));
-      } catch (err) {
-        console.error("خطأ في جلب البيانات:", err);
-      }
-    };
     fetchUsers();
   }, []);
 
+  const fetchUsers = async () => {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    setUsers(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
-    if (!editingUser) return;
-    
     const userRef = doc(db, "users", editingUser.id);
-    
     try {
-      // إرسال البيانات
       await updateDoc(userRef, {
         name: editingUser.name || "",
         phone: editingUser.phone || "",
-        planName: editingUser.planName || "غير مشترك",
-        nextRenewal: editingUser.nextRenewal || "", 
-        paid: !!editingUser.paid,
-        active: !!editingUser.paid 
+        planName: editingUser.planName || "",
+        price: Number(editingUser.price) || 0,
+        debt: Number(editingUser.debt) || 0,
+        startDate: editingUser.startDate || "",
+        endDate: editingUser.endDate || "",
+        durationMonths: Number(editingUser.durationMonths) || 0,
+        isPaid: !!editingUser.isPaid,
+        active: !!editingUser.isPaid
       });
-
-      alert("تم تحديث البيانات بنجاح!");
+      alert("تم التحديث!");
       setEditingUser(null);
-      // استخدام window.location.reload() هو الحل الأضمن لتحديث القائمة بعد التعديل
-      window.location.reload(); 
-    } catch (error) {
-      console.error("خطأ أثناء التحديث:", error);
-      alert("فشل التحديث: " + error.message);
+      fetchUsers();
+    } catch (err) { alert("خطأ: " + err.message); }
+  };
+
+  const handleDelete = async (id) => {
+    if (confirm("هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع!")) {
+      await deleteDoc(doc(db, "users", id));
+      fetchUsers();
     }
   };
 
+  const filteredUsers = users.filter(u => 
+    u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    u.phone?.includes(searchTerm)
+  );
+
   return (
     <div className="p-8 bg-black min-h-screen text-white">
-      <h1 className="text-3xl font-bold mb-8 text-yellow-500">لوحة تحكم MO CONTROL</h1>
+      <h1 className="text-3xl font-bold mb-6 text-yellow-500">لوحة تحكم الأدمن</h1>
+      
+      <input 
+        placeholder="بحث بالاسم أو الرقم..." 
+        className="w-full p-4 mb-6 bg-gray-900 rounded-2xl border border-yellow-600"
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
 
       <div className="grid gap-4">
-        {users.map(user => (
-          <div key={user.id} className="bg-gray-900 p-5 rounded-2xl border border-yellow-600/30 flex justify-between items-center">
+        {filteredUsers.map(user => (
+          <div key={user.id} className="bg-gray-900 p-5 rounded-2xl border border-gray-800 flex justify-between items-center">
             <div>
-              <p className="font-bold text-lg">{user.name}</p>
-              <p className="text-yellow-600 font-mono text-sm">{user.phone}</p>
-              <p className="text-gray-400 text-xs mt-1">الباقة: {user.planName || '---'}</p>
+              <p className="font-bold">{user.name}</p>
+              <p className="text-yellow-600 text-sm">{user.phone}</p>
             </div>
-            <button 
-              onClick={() => setEditingUser(user)} 
-              className="bg-yellow-600 px-6 py-2 rounded-xl text-black font-bold hover:bg-yellow-500 transition-all"
-            >
-              تعديل
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => setEditingUser(user)} className="bg-yellow-600 px-4 py-2 rounded-lg text-black font-bold">تعديل</button>
+              <button onClick={() => handleDelete(user.id)} className="bg-red-600 px-4 py-2 rounded-lg text-white">حذف</button>
+            </div>
           </div>
         ))}
       </div>
 
       {editingUser && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-          <form onSubmit={handleUpdate} className="bg-gray-900 p-8 rounded-3xl w-full max-w-md border border-yellow-600/50">
-            <h2 className="text-2xl mb-6 font-bold text-yellow-500">تعديل: {editingUser.name}</h2>
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 overflow-y-auto">
+          <form onSubmit={handleUpdate} className="bg-gray-900 p-8 rounded-3xl w-full max-w-lg border border-yellow-600">
+            <h2 className="text-xl mb-4 text-yellow-500 font-bold">تعديل بيانات: {editingUser.name}</h2>
             
-            <label className="text-gray-400 text-xs">الاسم</label>
-            <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.name || ''} onChange={e => setEditingUser({...editingUser, name: e.target.value})} />
-            
-            <label className="text-gray-400 text-xs">رقم الموبايل</label>
-            <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.phone || ''} onChange={e => setEditingUser({...editingUser, phone: e.target.value})} />
-            
-            <label className="text-gray-400 text-xs">اسم الباقة</label>
-            <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.planName || ''} onChange={e => setEditingUser({...editingUser, planName: e.target.value})} />
-            
-            <label className="text-gray-400 text-xs">تاريخ التجديد</label>
-            <input 
-              type="date" 
-              className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700 text-white" 
-              // التأكد إننا بنعرض التاريخ كـ نص فقط ليتناسب مع input type="date"
-              value={editingUser.nextRenewal ? editingUser.nextRenewal.toString().split('T')[0] : ''} 
-              onChange={e => setEditingUser({...editingUser, nextRenewal: e.target.value})} 
-            />
-            
-            <label className="flex items-center gap-3 mb-8 cursor-pointer text-lg font-bold">
-              <input 
-                type="checkbox" 
-                className="w-5 h-5" 
-                checked={!!editingUser.paid} 
-                onChange={e => setEditingUser({...editingUser, paid: e.target.checked})} 
-              />
-              تم دفع رسوم الباقة
+            <div className="grid grid-cols-2 gap-4">
+              <input className="bg-black p-3 rounded-xl border border-gray-700" placeholder="الاسم" value={editingUser.name || ''} onChange={e => setEditingUser({...editingUser, name: e.target.value})} />
+              <input className="bg-black p-3 rounded-xl border border-gray-700" placeholder="الهاتف" value={editingUser.phone || ''} onChange={e => setEditingUser({...editingUser, phone: e.target.value})} />
+              <input className="bg-black p-3 rounded-xl border border-gray-700" placeholder="الباقة" value={editingUser.planName || ''} onChange={e => setEditingUser({...editingUser, planName: e.target.value})} />
+              <input type="number" className="bg-black p-3 rounded-xl border border-gray-700" placeholder="السعر" value={editingUser.price || ''} onChange={e => setEditingUser({...editingUser, price: e.target.value})} />
+              <input type="number" className="bg-black p-3 rounded-xl border border-gray-700" placeholder="الدين" value={editingUser.debt || ''} onChange={e => setEditingUser({...editingUser, debt: e.target.value})} />
+              <input type="number" className="bg-black p-3 rounded-xl border border-gray-700" placeholder="عدد الشهور" value={editingUser.durationMonths || ''} onChange={e => setEditingUser({...editingUser, durationMonths: e.target.value})} />
+              <input type="date" className="bg-black p-3 rounded-xl border border-gray-700" value={editingUser.startDate || ''} onChange={e => setEditingUser({...editingUser, startDate: e.target.value})} />
+              <input type="date" className="bg-black p-3 rounded-xl border border-gray-700" value={editingUser.endDate || ''} onChange={e => setEditingUser({...editingUser, endDate: e.target.value})} />
+            </div>
+
+            <label className="flex items-center gap-3 my-6">
+              <input type="checkbox" checked={!!editingUser.isPaid} onChange={e => setEditingUser({...editingUser, isPaid: e.target.checked})} />
+              تم الدفع
             </label>
 
             <div className="flex gap-3">
-              <button type="submit" className="flex-1 bg-yellow-600 py-3 rounded-xl text-black font-bold hover:bg-yellow-500">حفظ</button>
-              <button type="button" onClick={() => setEditingUser(null)} className="flex-1 bg-gray-700 py-3 rounded-xl hover:bg-gray-600">إلغاء</button>
+              <button type="submit" className="flex-1 bg-yellow-600 py-3 rounded-xl text-black font-bold">حفظ</button>
+              <button type="button" onClick={() => setEditingUser(null)} className="flex-1 bg-gray-700 py-3 rounded-xl">إلغاء</button>
             </div>
           </form>
         </div>
