@@ -11,10 +11,7 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    // تحديث الصفحة عند الرجوع لها من المتصفح لضمان التحقق من الحالة
-    router.refresh();
-
-    // إصلاح مشكلة الخروج التلقائي بتثبيت الجلسة في المتصفح
+    // إصلاح مشكلة الخروج التلقائي بتثبيت الجلسة
     const initAuth = async () => {
       try {
         await setPersistence(auth, browserLocalPersistence);
@@ -26,25 +23,24 @@ export default function Dashboard() {
               
               if (docSnap.exists()) {
                 const data = docSnap.data();
-                
                 if (data.active === false) {
                   await signOut(auth);
-                  router.push('/?status=deleted');
+                  router.replace('/?status=deleted'); // استخدمنا replace لمنع الرجوع لصفحة الدخول
                 } else {
                   setUserData(data);
                   setLoading(false);
                 }
               } else {
                 await signOut(auth);
-                router.push('/?status=deleted');
+                router.replace('/?status=deleted');
               }
             } catch (error) {
               console.error("خطأ في جلب البيانات:", error);
               setLoading(false);
             }
           } else {
-            // لا يحول لصفحة التسجيل إلا إذا تأكدنا أن المستخدم غير موجود فعلاً
-            router.push('/auth');
+            // المستخدم غير مسجل دخول
+            router.replace('/auth'); 
           }
         });
         return unsubscribe;
@@ -61,7 +57,8 @@ export default function Dashboard() {
 
   const handleSignOut = async () => {
     await signOut(auth);
-    router.push('/');
+    // استخدام replace يمسح الداشبورد من تاريخ المتصفح
+    router.replace('/'); 
   };
 
   if (loading) return <div className="min-h-screen bg-black text-yellow-500 flex items-center justify-center font-bold text-xl">جاري تحميل بيانات MO CONTROL...</div>;
@@ -73,16 +70,6 @@ export default function Dashboard() {
     </div>
   );
 
-export const metadata = {
-  // هذا التعديل يمنع المتصفح من تخزين الصفحات في الـ Cache
-  other: {
-    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-    "Pragma": "no-cache",
-    "Expires": "0",
-  },
-};
-
-
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
       <header className="mb-10 border-b border-yellow-600/30 pb-6">
@@ -90,7 +77,6 @@ export const metadata = {
         <p className="text-gray-400 mt-2">مرحباً بك، {userData?.name || "عميلنا العزيز"}</p>
       </header>
 
-      {/* شبكة البيانات كاملة */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
         <InfoBox label="الاسم الكامل" value={userData?.name} />
         <InfoBox label="رقم الموبايل" value={userData?.phone} />
@@ -103,7 +89,6 @@ export const metadata = {
         <InfoBox label="مدة الاشتراك (شهر)" value={userData?.durationMonths} />
       </div>
 
-      {/* منطقة الأزرار */}
       <div className="flex flex-col gap-4 max-w-md">
         <button onClick={() => router.push('/')} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold text-lg transition-all">
           العودة للموقع الرئيسي
