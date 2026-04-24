@@ -1756,6 +1756,29 @@ document.addEventListener('click', function(e) {
 
 
 
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<button id="mainActionBtn" 
+        style="background: #ca8a04; color: black; padding: 12px 24px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(202, 138, 4, 0.3);">
+    جاري التحقق...
+</button>
+
+<div id="authModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:20px;">
+    <div id="modalBody" style="background:#111; padding:30px; border-radius:20px; border:1px solid #ca8a04; width:100%; max-width:400px; position:relative;">
+        <button onclick="document.getElementById('authModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer; font-size:20px;">✕</button>
+        <div id="loginForm">
+            <h2 id="modalTitle" style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
+            <input type="text" id="name" placeholder="الاسم" style="display:none; width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
+            <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
+            <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
+            <button id="actionBtn" onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:black;">دخول</button>
+            <p id="toggleText" style="text-align:center; color:white; cursor:pointer; margin-top:15px;" onclick="showRegister()">ليس لديك حساب؟ <b>إنشاء حساب</b></p>
+        </div>
+    </div>
+</div>
+
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
@@ -1771,28 +1794,25 @@ document.addEventListener('click', function(e) {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // تفعيل حفظ الجلسة فوراً
+  // 1. تفعيل حفظ الجلسة ليعمل الموقع بعد كل Refresh
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-  // دالة واحدة فقط وموحدة لتحديث الزرار
+  // 2. المراقبة الوحيدة لحالة المستخدم (هذا هو اللي بيثبت الزر)
   auth.onAuthStateChanged((user) => {
     const btn = document.getElementById('mainActionBtn');
-    
     if (user) {
-      // المستخدم مسجل
       db.collection("users").doc(user.uid).get().then((doc) => {
         const name = doc.exists ? doc.data().name : "عميلنا";
         btn.innerText = "أهلاً " + name + " - لوحة التحكم";
         btn.onclick = () => window.location.href = '/dashboard';
       });
     } else {
-      // المستخدم غير مسجل
       btn.innerText = "تسجيل دخول / حساب جديد";
       btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
     }
   });
 
-  // دوال التسجيل (بدون تغيير في منطقها)
+  // دوال التسجيل والدخول
   function showRegister() {
     document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
     document.getElementById('name').style.display = 'block';
