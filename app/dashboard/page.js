@@ -23,37 +23,43 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6 md:p-12">
-      {/* Header */}
       <header className="mb-10">
-        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-          MO CONTROL
-        </h1>
-        <p className="text-gray-400">أهلاً بك في لوحة تحكمك الخاصة</p>
+        <h1 className="text-3xl font-bold">مرحباً، {userData?.name || "عميلنا العزيز"} 👋</h1>
+        <p className="text-gray-400">لوحة تحكم MO CONTROL</p>
       </header>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-xl">
-          <h2 className="text-gray-400 text-sm mb-2">رقم الموبايل</h2>
-          <p className="text-2xl font-mono">{userData?.phone || "Loading..."}</p>
-        </div>
+      {/* Grid Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-2xl shadow-xl">
-          <h2 className="text-blue-100 text-sm mb-2">حالة الباقة</h2>
-          <p className="text-2xl font-bold">{userData?.planDetails?.name || "باقة أساسية"}</p>
+        {/* كارت حالة الباقة */}
+        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+          <h2 className="text-gray-400 text-sm">الباقة الحالية</h2>
+          <p className="text-xl font-bold mt-2">{userData?.planName || "غير محددة"}</p>
+          <span className={`inline-block mt-3 px-3 py-1 rounded-full text-xs ${userData?.active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+            {userData?.active ? "مُفعلة" : "غير مُفعلة"}
+          </span>
         </div>
+
+        {/* كارت حالة الدفع */}
+        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+          <h2 className="text-gray-400 text-sm">حالة الدفع</h2>
+          <p className="text-xl font-bold mt-2">{userData?.paid ? "تم الدفع ✅" : "لم يتم الدفع ❌"}</p>
+        </div>
+
+        {/* كارت تاريخ التجديد */}
+        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+          <h2 className="text-gray-400 text-sm">تاريخ التجديد القادم</h2>
+          <p className="text-xl font-bold mt-2">{userData?.nextRenewal || "---"}</p>
+        </div>
+
       </div>
 
-      {/* Action Area */}
-      <div className="mt-8 bg-gray-900 border border-gray-800 p-6 rounded-2xl">
-        <h3 className="text-lg font-semibold mb-4">إدارة الحساب</h3>
-        <button 
-          onClick={() => auth.signOut()}
-          className="bg-red-500 hover:bg-red-600 px-6 py-2 rounded-lg transition-all"
-        >
-          تسجيل الخروج
-        </button>
-      </div>
+      <button 
+        onClick={() => auth.signOut()}
+        className="mt-10 bg-red-500/10 text-red-400 border border-red-500/20 px-6 py-2 rounded-lg hover:bg-red-500/20 transition-all"
+      >
+        تسجيل الخروج
+      </button>
     </div>
   );
 }
