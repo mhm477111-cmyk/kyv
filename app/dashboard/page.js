@@ -91,10 +91,7 @@ export default function Dashboard() {
       </div>
 
       {/* منطقة الأزرار */}
-      <div className="flex flex-col gap-4 max-w-md">
-        <button onClick={() => router.push('/renewal')} className="w-full bg-yellow-600 hover:bg-yellow-500 text-black py-4 rounded-2xl font-bold text-lg transition-all">
-          تفعيل باقة الآن 🚀
-        </button>
+
         
         <button onClick={() => router.push('/')} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold text-lg transition-all">
           العودة للموقع الرئيسي
