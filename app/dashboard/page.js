@@ -92,5 +92,12 @@ export default function Dashboard() {
         </button>
       </div>
     </div>
+// أضف هذا الزرار داخل كود الـ Dashboard
+<button 
+  onClick={() => router.push('/')} 
+  className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-bold transition-all"
+>
+  العودة للموقع الرئيسي
+</button>
   );
 }
