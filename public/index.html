@@ -1769,11 +1769,12 @@ document.addEventListener('click', function(e) {
     <div id="modalBody" style="background:#111; padding:30px; border-radius:20px; border:1px solid #ca8a04; width:100%; max-width:400px; position:relative;">
         <button onclick="document.getElementById('authModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer; font-size:20px;">✕</button>
         <div id="loginForm">
-            <h2 style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
-            <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
-            <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
-            <button id="loginBtn" onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:black;">دخول</button>
-            <p style="text-align:center; color:white; cursor:pointer; margin-top:15px;" onclick="showRegister()">ليس لديك حساب؟ <b>إنشاء حساب</b></p>
+            <h2 id="modalTitle" style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
+            <input type="text" id="name" placeholder="الاسم" style="display:none; width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
+            <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
+            <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
+            <button id="actionBtn" onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:black;">دخول</button>
+            <p id="toggleText" style="text-align:center; color:white; cursor:pointer; margin-top:15px;" onclick="showRegister()">ليس لديك حساب؟ <b>إنشاء حساب</b></p>
         </div>
     </div>
 </div>
@@ -1793,39 +1794,55 @@ document.addEventListener('click', function(e) {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // تفعيل بقاء الجلسة مفتوحة (Persistence)
+  // تفعيل بقاء الجلسة (Persistence)
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-  // تفعيل الزرار الذكي فور تحميل الصفحة
+  // تحديث الزرار الرئيسي حسب حالة المستخدم
   auth.onAuthStateChanged((user) => {
     const btn = document.getElementById('mainActionBtn');
     if (user) {
-      // العميل مسجل: جلب اسمه من Firestore
       db.collection("users").doc(user.uid).get().then((doc) => {
         const name = doc.exists ? doc.data().name : "عميلنا";
         btn.innerText = "أهلاً " + name + " - دخول للوحة التحكم";
         btn.onclick = () => window.location.href = '/dashboard';
       });
     } else {
-      // العميل غير مسجل
       btn.innerText = "تسجيل دخول / حساب جديد";
       btn.onclick = () => document.getElementById('authModal').style.display = 'flex';
     }
   });
 
+  // تبديل شكل الفورم بين الدخول والإنشاء
+  function showRegister() {
+    document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
+    document.getElementById('name').style.display = 'block';
+    document.getElementById('actionBtn').innerText = "تسجيل";
+    document.getElementById('actionBtn').onclick = registerUser;
+    document.getElementById('toggleText').innerHTML = "لديك حساب؟ <b>تسجيل دخول</b>";
+    document.getElementById('toggleText').onclick = () => location.reload();
+  }
+
+  function registerUser() {
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const pass = document.getElementById('pass').value;
+    if (!name || !phone || !pass) return alert("يرجى ملء جميع البيانات");
+
+    auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass)
+      .then((userCredential) => {
+        db.collection("users").doc(userCredential.user.uid).set({ name, phone, planName: "غير مشترك", active: false })
+          .then(() => { alert("تم إنشاء الحساب بنجاح!"); window.location.href = '/dashboard'; });
+      }).catch((err) => alert("خطأ: " + err.message));
+  }
+
   function loginUser() {
-    const btn = document.getElementById('loginBtn');
     const phone = document.getElementById('phone').value;
     const pass = document.getElementById('pass').value;
     if (!phone || !pass) return alert("يرجى إدخال البيانات");
     
-    btn.innerHTML = "جاري الدخول...";
     auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass)
       .then(() => window.location.href = '/dashboard')
-      .catch((err) => {
-        alert("خطأ: " + err.message);
-        btn.innerHTML = "دخول";
-      });
+      .catch((err) => alert("خطأ: " + err.message));
   }
 </script>
 
