@@ -26,12 +26,11 @@ export default function AdminDashboard() {
     const userRef = doc(db, "users", editingUser.id);
     
     try {
-      // إرسال البيانات مع تأمين القيم (استخدام !! للتأكد من أنها boolean)
       await updateDoc(userRef, {
         name: editingUser.name || "",
         phone: editingUser.phone || "",
         planName: editingUser.planName || "غير مشترك",
-        nextRenewal: editingUser.nextRenewal || "",
+        nextRenewal: editingUser.nextRenewal || "", // يتم حفظه كما يختاره المتصفح (YYYY-MM-DD)
         paid: !!editingUser.paid,
         active: !!editingUser.paid 
       });
@@ -82,7 +81,13 @@ export default function AdminDashboard() {
             <input className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700" value={editingUser.planName || ''} onChange={e => setEditingUser({...editingUser, planName: e.target.value})} />
             
             <label className="text-gray-400 text-xs">تاريخ التجديد</label>
-            <input type="date" className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700 text-white" value={editingUser.nextRenewal || ''} onChange={e => setEditingUser({...editingUser, nextRenewal: e.target.value})} />
+            <input 
+              type="date" 
+              className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700 text-white" 
+              // التعديل هنا: استخدام split('T')[0] يضمن أخذ جزء التاريخ فقط
+              value={editingUser.nextRenewal ? editingUser.nextRenewal.split('T')[0] : ''} 
+              onChange={e => setEditingUser({...editingUser, nextRenewal: e.target.value})} 
+            />
             
             <label className="flex items-center gap-3 mb-8 cursor-pointer text-lg font-bold">
               <input 
