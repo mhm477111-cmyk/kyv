@@ -13,6 +13,9 @@ export default function Dashboard() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // عند نجاح تسجيل الدخول، بنثبت المؤشر
+        localStorage.setItem("isLoggedIn", "true");
+        
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -20,11 +23,24 @@ export default function Dashboard() {
         }
         setLoading(false);
       } else {
+        // لو مفيش مستخدم، بنمسح المؤشر ونطرد العميل
+        localStorage.removeItem("isLoggedIn");
         router.push('/auth');
       }
     });
     return () => unsubscribe();
   }, [router]);
+
+  // دالة تسجيل الخروج المعدلة
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem("isLoggedIn"); // مسح المؤشر فوراً
+      router.push('/');
+    } catch (error) {
+      console.error("خطأ في تسجيل الخروج:", error);
+    }
+  };
 
   const isSystemLive = userData?.active && userData?.paid;
 
@@ -32,25 +48,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
-      {/* Header */}
       <header className="mb-10 border-b border-yellow-600/30 pb-6">
         <h1 className="text-4xl font-bold text-yellow-500">MO CONTROL</h1>
         <p className="text-gray-400 mt-2">أهلاً بك، {userData?.name || "عميلنا العزيز"}</p>
       </header>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
+      <div className="grid grid-cols-1 md:grid-grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* حالة الخدمة */}
         <div className="bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-3xl shadow-[0_0_15px_rgba(202,138,4,0.2)]">
           <h2 className="text-yellow-600 font-bold text-sm mb-4">حالة الخدمة</h2>
           <p className="text-2xl font-bold mb-4">{userData?.planName || "غير مشترك"}</p>
-          
           {isSystemLive ? (
             <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs bg-green-500/20 text-green-400 border border-green-500/30">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
               SYSTEM LIVE ✅
             </span>
           ) : (
@@ -71,26 +80,16 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="mt-10 flex flex-col gap-4 max-w-md">
-        <button 
-          onClick={() => router.push('/renewal')} 
-          className="w-full bg-yellow-600 hover:bg-yellow-500 text-black py-4 rounded-2xl font-bold text-lg transition-all shadow-[0_0_20px_rgba(202,138,4,0.4)]"
-        >
+        <button onClick={() => router.push('/renewal')} className="w-full bg-yellow-600 hover:bg-yellow-500 text-black py-4 rounded-2xl font-bold text-lg transition-all">
           تفعيل باقة الآن 🚀
         </button>
 
-        <button 
-          onClick={() => router.push('/')} 
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold text-lg transition-all"
-        >
+        <button onClick={() => router.push('/')} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold text-lg transition-all">
           العودة للموقع الرئيسي
         </button>
 
-        <button 
-          onClick={() => signOut(auth)} 
-          className="w-full bg-transparent border border-gray-700 text-gray-400 py-3 rounded-2xl hover:border-red-900 hover:text-red-500 transition-all"
-        >
+        <button onClick={handleSignOut} className="w-full bg-transparent border border-gray-700 text-gray-400 py-3 rounded-2xl hover:border-red-900 hover:text-red-500 transition-all">
           تسجيل الخروج
         </button>
       </div>
