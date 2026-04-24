@@ -21,6 +21,9 @@ export default function Dashboard() {
     });
   }, [router]);
 
+  // الربط الأوتوماتيكي: السيستم بيكون Live فقط لو (مُفعل إدارياً + تم الدفع)
+  const isSystemLive = userData?.active && userData?.paid;
+
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
       {/* Header */}
@@ -32,12 +35,12 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        {/* كارت حالة الخدمة (مستقلة) */}
+        {/* كارت حالة الخدمة (أوتوماتيكي) */}
         <div className="bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-3xl shadow-[0_0_15px_rgba(202,138,4,0.2)]">
           <h2 className="text-yellow-600 font-bold text-sm mb-4">حالة الخدمة</h2>
           <p className="text-2xl font-bold mb-4">{userData?.planName || "---"}</p>
           
-          {userData?.active ? (
+          {isSystemLive ? (
             <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs bg-green-500/20 text-green-400 border border-green-500/30">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -46,6 +49,11 @@ export default function Dashboard() {
               SYSTEM LIVE ✅
             </span>
           ) : (
+            <span className="inline-block px-4 py-1 rounded-full text-xs bg-red-500/20 text-red-400 border border-red-500/30">
+              ● SYSTEM OFFLINE ❌
+            </span>
+          )}
+        </div>
 
         {/* كارت حالة الدفع */}
         <div className="bg-gray-900 border border-gray-800 p-6 rounded-3xl">
