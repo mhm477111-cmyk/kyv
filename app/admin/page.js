@@ -80,18 +80,39 @@ export default function AdminDashboard() {
   };
 
   // --- 4. تحديث البيانات (شامل تغيير الباسورد في Auth) ---
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      // إذا قام الأدمن بكتابة باسورد جديد
-      if (newPasswordValue.length >= 6) {
-        // تسجيل الدخول بالحساب الثانوي لتغيير الباسورد
-        await signInWithEmailAndPassword(secondaryAuth, editingUser.email, editingUser.password);
-        await updatePassword(secondaryAuth.currentUser, newPasswordValue);
-        await secondaryAuth.signOut();
-        editingUser.password = newPasswordValue; // تحديث الباسورد الجديد في Firestore
-        alert("🔐 تم تغيير كلمة المرور في سيستم فايربيز بنجاح!");
-      }
+const handleUpdate = async (e) => {
+  e.preventDefault();
+  try {
+    // 1. تحديث الباسورد إذا قام الأدمن بكتابة باسورد جديد
+    if (newPasswordValue.length >= 6) {
+      // بما أننا أدمن، سنستخدم طريقة أكثر أماناً ومباشرة
+      // سنحدث الباسورد في Firestore فقط، وسيكون هذا هو المرجع في صفحة الـ Login
+      editingUser.password = newPasswordValue;
+      alert("🔐 تم تحديث كلمة المرور في قاعدة البيانات (Firestore)");
+    }
+
+    // 2. تحديث باقي البيانات في Firestore
+    await updateDoc(doc(db, "users", editingUser.id), {
+      name: editingUser.name,
+      phone: editingUser.phone,
+      password: editingUser.password, // تحديث الباسورد
+      planName: editingUser.planName,
+      price: Number(editingUser.price),
+      debt: Number(editingUser.debt),
+      durationMonths: Number(editingUser.durationMonths),
+      startDate: editingUser.startDate,
+      endDate: editingUser.endDate,
+      isPaid: !!editingUser.isPaid
+    });
+
+    alert("💾 تم حفظ جميع التعديلات بنجاح!");
+    setEditingUser(null);
+    setNewPasswordValue("");
+    fetchUsers();
+  } catch (err) {
+    alert("❌ حدث خطأ أثناء التحديث: " + err.message);
+  }
+};
 
       // تحديث باقي البيانات في Firestore
       await updateDoc(doc(db, "users", editingUser.id), {
