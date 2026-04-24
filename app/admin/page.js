@@ -90,19 +90,21 @@ const handleUpdate = async (e) => {
       alert("🔐 تم تحديث كلمة المرور في قاعدة البيانات (Firestore)");
     }
 
-    // 2. تحديث باقي البيانات في Firestore
-    await updateDoc(doc(db, "users", editingUser.id), {
-      name: editingUser.name,
-      phone: editingUser.phone,
-      password: editingUser.password, 
-      planName: editingUser.planName,
-      price: Number(editingUser.price),
-      debt: Number(editingUser.debt),
-      durationMonths: Number(editingUser.durationMonths),
-      startDate: editingUser.startDate,
-      endDate: editingUser.endDate,
+    // 2. تحديث البيانات مع التأكد أن القيم ليست undefined
+    const updatedData = {
+      name: editingUser.name || "",
+      phone: editingUser.phone || "",
+      password: editingUser.password || "",
+      planName: editingUser.planName || "", // لو فارغة هتبقى نص فاضي ""
+      price: Number(editingUser.price || 0),
+      debt: Number(editingUser.debt || 0),
+      durationMonths: Number(editingUser.durationMonths || 0),
+      startDate: editingUser.startDate || "",
+      endDate: editingUser.endDate || "",
       isPaid: !!editingUser.isPaid
-    });
+    };
+
+    await updateDoc(doc(db, "users", editingUser.id), updatedData);
 
     alert("💾 تم حفظ جميع التعديلات بنجاح!");
     setEditingUser(null);
