@@ -1795,10 +1795,10 @@ document.addEventListener('click', function(e) {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // التعديل الجوهري هنا: ضمان تفعيل Persistence قبل أي شيء آخر
+  // تفعيل بقاء الجلسة مفتوحة محلياً
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .then(() => {
-      // بعد نجاح التفعيل، نراقب حالة العميل
+      // بعد نجاح التفعيل نراقب الحالة
       auth.onAuthStateChanged((user) => {
         const btn = document.getElementById('mainActionBtn');
         if (user) {
@@ -1814,6 +1814,7 @@ document.addEventListener('click', function(e) {
       });
     });
 
+  // دوال تسجيل الدخول وإنشاء الحساب
   function showRegister() {
     document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
     document.getElementById('name').style.display = 'block';
@@ -1831,8 +1832,16 @@ document.addEventListener('click', function(e) {
 
     auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass)
       .then((userCredential) => {
-        db.collection("users").doc(userCredential.user.uid).set({ name, phone, planName: "غير مشترك", active: false })
-          .then(() => { alert("تم إنشاء الحساب بنجاح!"); window.location.href = '/dashboard'; });
+        db.collection("users").doc(userCredential.user.uid).set({ 
+            name: name, 
+            phone: phone, 
+            planName: "غير مشترك", 
+            active: false,
+            paid: false
+        }).then(() => { 
+            alert("تم إنشاء الحساب بنجاح!"); 
+            window.location.href = '/dashboard'; 
+        });
       }).catch((err) => alert("خطأ: " + err.message));
   }
 
