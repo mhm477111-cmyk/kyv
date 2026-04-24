@@ -70,6 +70,24 @@ export default function Dashboard() {
     </div>
   );
 
+// أضف هذه المكتبة
+import { useRouter } from 'next/navigation';
+
+// داخل الـ Component بتاع الداشبورد
+const router = useRouter();
+
+useEffect(() => {
+  // ده بيخلي الداشبورد تتأكد من حالة الدخول حتى لو المتصفح جابها من الـ Cache
+  const handleRouteChange = () => {
+    // ممكن تعمل هنا تحديث بسيط لو محتاج
+  };
+
+  // لو بتستخدم Next.js App Router، الـ useEffect بيشتغل تلقائياً عند الرجوع
+  // لكن لو عايز تتأكد 100%، أضف السطر ده:
+  router.refresh(); 
+}, [router]);
+
+
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 font-sans">
       <header className="mb-10 border-b border-yellow-600/30 pb-6">
