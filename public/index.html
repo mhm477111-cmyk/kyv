@@ -1832,7 +1832,7 @@ document.addEventListener('click', function(e) {
             try {
                 const userDoc = await db.collection("users").doc(user.uid).get();
                 const name = userDoc.exists ? userDoc.data().name : "عميلنا";
-                btn.innerText = "أهلاً " + name + " - اعرف تفاصيل باقتك";
+                btn.innerText = "أهلاً " + name + " - اعرف تفاصيل حسابك";
                 btn.onclick = () => window.location.href = '/dashboard';
             } catch (e) { console.error(e); }
         } else {
