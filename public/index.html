@@ -1901,33 +1901,56 @@ document.addEventListener('click', function(e) {
     }
 </script>
 
-  <script>
-  // نتحقق من الرابط إذا كان يحتوي على status=deleted
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('status') === 'deleted') {
-    // هذا الجزء سيظهر نافذة مخصصة في وسط الصفحة
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(0,0,0,0.9)';
-    overlay.style.zIndex = '9999';
-    overlay.style.display = 'flex';
-    overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
+<script>
+  (function() {
+    const urlParams = new URLSearchParams(window.location.search);
     
-    overlay.innerHTML = `
-      <div style="background: #111; padding: 30px; border: 1px solid #dc2626; border-radius: 20px; text-align: center; color: white; max-width: 400px;">
-        <h2 style="color: #dc2626;">تم حذف حسابك</h2>
-        <p>عذراً، تم حذف حسابك من قبل الإدارة.</p>
-        <button onclick="window.open('https://wa.me/201112893086?text=مرحباً، تم إيقاف حسابي وأحتاج للمساعدة بخصوص MO CONTROL.', '_blank')" style="display:block; width:100%; padding:10px; margin: 10px 0; background: #16a34a; border:none; color:white; border-radius:10px; cursor:pointer;">تواصل مع الإدارة 💬</button>
-        <button onclick="window.location.href='/'" style="display:block; width:100%; padding:10px; background: #374151; border:none; color:white; border-radius:10px; cursor:pointer;">العودة للرئيسية</button>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-  }
+    // التحقق من وجود حالة الحذف
+    if (urlParams.get('status') === 'deleted') {
+      const overlay = document.createElement('div');
+      overlay.id = 'deleted-overlay'; // أضفنا ID للتحكم به
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0,0,0,0.95)';
+      overlay.style.zIndex = '9999';
+      overlay.style.display = 'flex';
+      overlay.style.justifyContent = 'center';
+      overlay.style.alignItems = 'center';
+      
+      overlay.innerHTML = `
+        <div style="background: #111; padding: 30px; border: 1px solid #dc2626; border-radius: 20px; text-align: center; color: white; max-width: 400px; width: 90%;">
+          <h2 style="color: #dc2626; margin-top: 0;">تم حذف حسابك</h2>
+          <p>عذراً، تم حذف حسابك من قبل الإدارة.</p>
+          
+          <button id="wa-btn" style="display:block; width:100%; padding:12px; margin: 15px 0; background: #16a34a; border:none; color:white; border-radius:10px; cursor:pointer; font-weight:bold;">
+            تواصل مع الإدارة 💬
+          </button>
+          
+          <button id="close-btn" style="display:block; width:100%; padding:12px; background: #374151; border:none; color:white; border-radius:10px; cursor:pointer; font-weight:bold;">
+            العودة للموقع
+          </button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      // 1. زر التواصل: يفتح الواتساب ويخفي الفورم دون ريفريش
+      document.getElementById('wa-btn').onclick = function() {
+        window.open('https://wa.me/201112893086?text=مرحباً، تم إيقاف حسابي وأحتاج للمساعدة بخصوص MO CONTROL.', '_blank');
+        document.getElementById('deleted-overlay').style.display = 'none';
+        // تنظيف الرابط من الـ status عشان لو عمل ريفريش بعدين ميرجعش يظهر
+        window.history.replaceState({}, document.title, "/");
+      };
+
+      // 2. زر العودة: يخفي الفورم فقط دون أي ريفريش
+      document.getElementById('close-btn').onclick = function() {
+        document.getElementById('deleted-overlay').style.display = 'none';
+        window.history.replaceState({}, document.title, "/");
+      };
+    }
+  })();
 </script>
   
 </body>
