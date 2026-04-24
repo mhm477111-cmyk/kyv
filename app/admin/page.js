@@ -11,7 +11,16 @@ export default function AdminDashboard() {
     const fetchUsers = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "users"));
-        setUsers(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        // تعديل هنا: التأكد من تحويل أي تاريخ Timestamp إلى نص
+        setUsers(querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          let renewal = data.nextRenewal || "";
+          // لو التاريخ متخزن كـ Timestamp بتاع فايربيس
+          if (data.nextRenewal && typeof data.nextRenewal === 'object' && data.nextRenewal.seconds) {
+            renewal = new Date(data.nextRenewal.seconds * 1000).toISOString().split('T')[0];
+          }
+          return { id: doc.id, ...data, nextRenewal: renewal };
+        }));
       } catch (err) {
         console.error("خطأ في جلب البيانات:", err);
       }
@@ -26,17 +35,19 @@ export default function AdminDashboard() {
     const userRef = doc(db, "users", editingUser.id);
     
     try {
+      // إرسال البيانات
       await updateDoc(userRef, {
         name: editingUser.name || "",
         phone: editingUser.phone || "",
         planName: editingUser.planName || "غير مشترك",
-        nextRenewal: editingUser.nextRenewal || "", // يتم حفظه كما يختاره المتصفح (YYYY-MM-DD)
+        nextRenewal: editingUser.nextRenewal || "", 
         paid: !!editingUser.paid,
         active: !!editingUser.paid 
       });
 
-      alert("تم تحديث البيانات وتفعيل الخدمة بنجاح!");
+      alert("تم تحديث البيانات بنجاح!");
       setEditingUser(null);
+      // استخدام window.location.reload() هو الحل الأضمن لتحديث القائمة بعد التعديل
       window.location.reload(); 
     } catch (error) {
       console.error("خطأ أثناء التحديث:", error);
@@ -84,8 +95,8 @@ export default function AdminDashboard() {
             <input 
               type="date" 
               className="w-full bg-black p-3 mb-4 rounded-xl border border-gray-700 text-white" 
-              // التعديل هنا: استخدام split('T')[0] يضمن أخذ جزء التاريخ فقط
-              value={editingUser.nextRenewal ? editingUser.nextRenewal.split('T')[0] : ''} 
+              // التأكد إننا بنعرض التاريخ كـ نص فقط ليتناسب مع input type="date"
+              value={editingUser.nextRenewal ? editingUser.nextRenewal.toString().split('T')[0] : ''} 
               onChange={e => setEditingUser({...editingUser, nextRenewal: e.target.value})} 
             />
             
