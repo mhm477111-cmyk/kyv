@@ -47,6 +47,7 @@ export default function Dashboard() {
         <p className="text-gray-400 mt-2">مرحباً بك، {userData?.name || "عميلنا العزيز"}</p>
       </header>
 
+      {/* شبكة البيانات */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
         <InfoBox label="الاسم الكامل" value={userData?.name} />
         <InfoBox label="رقم الموبايل" value={userData?.phone} />
@@ -59,10 +60,16 @@ export default function Dashboard() {
         <InfoBox label="مدة الاشتراك (شهر)" value={userData?.durationMonths} />
       </div>
 
+      {/* منطقة الأزرار */}
       <div className="flex flex-col gap-4 max-w-md">
         <button onClick={() => router.push('/renewal')} className="w-full bg-yellow-600 hover:bg-yellow-500 text-black py-4 rounded-2xl font-bold text-lg transition-all">
           تفعيل باقة الآن 🚀
         </button>
+        
+        <button onClick={() => router.push('/')} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold text-lg transition-all">
+          العودة للموقع الرئيسي
+        </button>
+
         <button onClick={handleSignOut} className="w-full bg-transparent border border-gray-700 text-gray-400 py-3 rounded-2xl hover:border-red-900 hover:text-red-500 transition-all">
           تسجيل الخروج
         </button>
