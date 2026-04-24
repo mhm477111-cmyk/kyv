@@ -1749,19 +1749,17 @@ document.addEventListener('click', function(e) {
 
 <div id="authModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:20px;">
     <div id="modalBody" style="background:#111; padding:30px; border-radius:20px; border:1px solid #ca8a04; width:100%; max-width:400px; position:relative;">
-        <button onclick="document.getElementById('authModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer;">✕</button>
+        <button onclick="document.getElementById('authModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer; font-size:20px;">✕</button>
         
         <h2 style="color:#ca8a04; text-align:center;">تسجيل الدخول</h2>
-        <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
-        <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px;">
+        <input type="tel" id="phone" placeholder="رقم الموبايل" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
+        <input type="password" id="pass" placeholder="كلمة المرور" style="width:100%; padding:10px; margin:10px 0; background:black; border:1px solid #333; color:white; border-radius:8px; box-sizing:border-box;">
         <button onclick="loginUser()" style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">دخول</button>
     </div>
 </div>
 
-
-
 <script>
-  // بيانات السيستم
+  // تهيئة Firebase مرة واحدة فقط
   const firebaseConfig = {
     apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
     authDomain: "mo-control-site.firebaseapp.com",
@@ -1771,42 +1769,10 @@ document.addEventListener('click', function(e) {
     appId: "1:116572656345:web:5f4b758daf21a9b7c164c8",
     measurementId: "G-T34HXXMMLD"
   };
-
-  // تهيئة الفايربيس (باستخدام نسخة الـ compat لتعمل داخل HTML العادي)
-  firebase.initializeApp(firebaseConfig);
   
-  function loginUser() {
-    const phone = document.getElementById('phone').value;
-    const pass = document.getElementById('pass').value;
-    
-    // تأكد أنك تستخدم نفس الإيميل الذي تسجل به في السيستم
-    const email = phone + "@mocontrol.com";
-
-    firebase.auth().signInWithEmailAndPassword(email, pass)
-      .then((userCredential) => {
-        // بمجرد الدخول الناجح، نغير محتوى النافذة
-        document.getElementById('modalBody').innerHTML = `
-          <div style="text-align:center; color:white;">
-            <h2 style="color:#ca8a04;">تم الدخول بنجاح!</h2>
-            <p>مرحباً بك في لوحة تحكم MO CONTROL</p>
-            <button onclick="window.location.href='/dashboard'" 
-                    style="width:100%; padding:12px; background:#ca8a04; border:none; border-radius:8px; margin-top:20px; font-weight:bold; cursor:pointer;">
-              انتقل إلى لوحة التحكم
-            </button>
-          </div>
-        `;
-      })
-      .catch((error) => {
-        alert("خطأ في تسجيل الدخول: " + error.message);
-      });
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
   }
-</script>
-
-
-
-<script>
-  // تهيئة Firebase
-  firebase.initializeApp({ /* بياناتك هنا كما هي */ });
 
   function loginUser() {
     const phone = document.getElementById('phone').value;
@@ -1815,22 +1781,20 @@ document.addEventListener('click', function(e) {
 
     firebase.auth().signInWithEmailAndPassword(email, pass)
       .then((userCredential) => {
-        // بمجرد الدخول، نقوم بجلب بيانات المستخدم من Firestore
         const userId = userCredential.user.uid;
         firebase.firestore().collection("users").doc(userId).get().then((doc) => {
           if (doc.exists) {
             const data = doc.data();
-            // عرض لوحة التحكم داخل نفس النافذة
             document.getElementById('modalBody').innerHTML = `
-              <div style="text-align:right; color:white;">
-                <h2 style="color:#ca8a04; text-align:center;">مرحباً بك يا ${data.name}</h2>
+              <div style="text-align:right; color:white; direction:rtl;">
+                <h2 style="color:#ca8a04; text-align:center;">أهلاً بك يا ${data.name || 'عميلنا'}</h2>
                 <div style="background:#222; padding:15px; border-radius:10px; margin:10px 0;">
-                  <p>حالة الاشتراك: <b>${data.planName}</b></p>
+                  <p>الباقة: <b>${data.planName || '---'}</b></p>
                   <p>الحالة: <b>${data.active ? 'نشط ✅' : 'غير نشط ❌'}</b></p>
-                  <p>تجديد الباقة: <b>${data.nextRenewal}</b></p>
+                  <p>تجديد: <b>${data.nextRenewal || '---'}</b></p>
                 </div>
                 <button onclick="firebase.auth().signOut().then(() => location.reload())" 
-                        style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white;">تسجيل خروج</button>
+                        style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer;">تسجيل خروج</button>
               </div>
             `;
           }
