@@ -16,71 +16,79 @@ export default function AdminDashboard() {
   };
 
   const handleCreateUser = async () => {
-    if (newUser.phone.length !== 11) return alert("خطأ: رقم الهاتف يجب أن يكون 11 رقماً!");
-    
+    if (newUser.phone.length !== 11) return alert("خطأ: الهاتف يجب أن يكون 11 رقماً!");
     try {
-      // إنشاء العميل مباشرة في Firestore (بدون Firebase Auth المعقد)
       const userRef = doc(collection(db, "users"));
-      await setDoc(userRef, {
-        ...newUser,
-        active: true,
-        isPaid: false,
-        debt: 0
-      });
-      alert("✅ تم إضافة العميل بنجاح");
+      await setDoc(userRef, { ...newUser, active: true, isPaid: false, debt: 0, price: 0, durationMonths: 0 });
+      alert("✅ تم إضافة العميل");
       fetchUsers();
     } catch (err) { alert("❌ خطأ: " + err.message); }
   };
 
+  const toggleStatus = async (user) => {
+    await updateDoc(doc(db, "users", user.id), { active: !user.active });
+    fetchUsers();
+  };
+
   const handleDelete = async (id) => {
-    if (confirm("هل أنت متأكد من حذف العميل نهائياً؟")) {
+    if (confirm("هل تريد الحذف النهائي؟")) {
       await deleteDoc(doc(db, "users", id));
-      alert("🗑️ تم حذف العميل نهائياً");
       fetchUsers();
     }
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    const userRef = doc(db, "users", editingUser.id);
-    await updateDoc(userRef, editingUser);
-    alert("💾 تم تحديث البيانات بنجاح");
+    await updateDoc(doc(db, "users", editingUser.id), editingUser);
+    alert("💾 تم الحفظ");
     setEditingUser(null);
     fetchUsers();
   };
 
   return (
     <div className="p-8 bg-black min-h-screen text-white">
-      <h1 className="text-3xl font-bold mb-8 text-yellow-500">لوحة التحكم (تحكم كامل)</h1>
-
+      <h1 className="text-2xl font-bold mb-6 text-yellow-500">لوحة الإدارة</h1>
+      
       {/* إنشاء عميل */}
-      <div className="bg-gray-900 p-6 rounded-2xl mb-8 border border-gray-700">
-        <input className="p-3 bg-black rounded-lg w-full mb-2" placeholder="الاسم" onChange={e => setNewUser({...newUser, name: e.target.value})} />
-        <input className="p-3 bg-black rounded-lg w-full mb-2" type="number" placeholder="رقم الهاتف (11 رقم)" onChange={e => setNewUser({...newUser, phone: e.target.value})} />
-        <input className="p-3 bg-black rounded-lg w-full mb-2" placeholder="الباسورد" onChange={e => setNewUser({...newUser, password: e.target.value})} />
-        <button onClick={handleCreateUser} className="bg-yellow-600 w-full py-3 rounded-lg font-bold text-black">إضافة العميل</button>
+      <div className="bg-gray-900 p-4 rounded-xl mb-6 grid gap-2">
+        <input placeholder="الاسم" className="p-2 bg-black rounded" onChange={e => setNewUser({...newUser, name: e.target.value})} />
+        <input placeholder="رقم الهاتف (11 رقم)" className="p-2 bg-black rounded" onChange={e => setNewUser({...newUser, phone: e.target.value})} />
+        <input placeholder="الباسورد" className="p-2 bg-black rounded" onChange={e => setNewUser({...newUser, password: e.target.value})} />
+        <button onClick={handleCreateUser} className="bg-yellow-600 p-2 rounded">إضافة</button>
       </div>
 
       {/* قائمة العملاء */}
-      <div className="grid gap-4">
+      <div className="grid gap-2">
         {users.map(user => (
-          <div key={user.id} className="bg-gray-900 p-4 rounded-xl flex justify-between items-center">
-            <span>{user.name} - {user.phone}</span>
+          <div key={user.id} className="bg-gray-800 p-4 rounded flex justify-between items-center">
+            <span>{user.name}</span>
             <div className="flex gap-2">
-              <button onClick={() => setEditingUser(user)} className="bg-blue-600 px-3 py-1 rounded">تعديل</button>
-              <button onClick={() => handleDelete(user.id)} className="bg-red-600 px-3 py-1 rounded">حذف</button>
+              <button onClick={() => toggleStatus(user)} className={user.active ? "bg-orange-600 px-2 rounded" : "bg-green-600 px-2 rounded"}>
+                {user.active ? "تعطيل" : "تفعيل"}
+              </button>
+              <button onClick={() => setEditingUser(user)} className="bg-blue-600 px-2 rounded">تعديل</button>
+              <button onClick={() => handleDelete(user.id)} className="bg-red-600 px-2 rounded">حذف</button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* مودال التعديل */}
+      {/* مودال التعديل الشامل */}
       {editingUser && (
-        <div className="fixed inset-0 bg-black/90 p-4 flex items-center justify-center">
-          <form onSubmit={handleUpdate} className="bg-gray-900 p-6 rounded-2xl w-full max-w-sm">
-            <input className="w-full p-2 bg-black mb-2" value={editingUser.name} onChange={e => setEditingUser({...editingUser, name: e.target.value})} />
-            <input className="w-full p-2 bg-black mb-2" value={editingUser.password} placeholder="تغيير الباسورد" onChange={e => setEditingUser({...editingUser, password: e.target.value})} />
-            <div className="flex gap-2">
+        <div className="fixed inset-0 bg-black/90 p-4 overflow-y-auto">
+          <form onSubmit={handleUpdate} className="bg-gray-900 p-6 rounded-2xl max-w-lg mx-auto">
+            <h2 className="mb-4 text-yellow-500">تعديل كامل بيانات {editingUser.name}</h2>
+            <div className="grid grid-cols-2 gap-2">
+              <input className="bg-black p-2 rounded" value={editingUser.name} onChange={e => setEditingUser({...editingUser, name: e.target.value})} />
+              <input className="bg-black p-2 rounded" value={editingUser.phone} onChange={e => setEditingUser({...editingUser, phone: e.target.value})} />
+              <input className="bg-black p-2 rounded" value={editingUser.planName || ''} onChange={e => setEditingUser({...editingUser, planName: e.target.value})} />
+              <input className="bg-black p-2 rounded" value={editingUser.price || ''} onChange={e => setEditingUser({...editingUser, price: e.target.value})} />
+              <input className="bg-black p-2 rounded" value={editingUser.debt || ''} onChange={e => setEditingUser({...editingUser, debt: e.target.value})} />
+              <input className="bg-black p-2 rounded" value={editingUser.startDate || ''} onChange={e => setEditingUser({...editingUser, startDate: e.target.value})} />
+              <input className="bg-black p-2 rounded" value={editingUser.endDate || ''} onChange={e => setEditingUser({...editingUser, endDate: e.target.value})} />
+              <input className="bg-black p-2 rounded" value={editingUser.durationMonths || ''} onChange={e => setEditingUser({...editingUser, durationMonths: e.target.value})} />
+            </div>
+            <div className="flex gap-2 mt-4">
               <button type="submit" className="bg-green-600 p-2 flex-1">حفظ</button>
               <button type="button" onClick={() => setEditingUser(null)} className="bg-gray-600 p-2 flex-1">إلغاء</button>
             </div>
