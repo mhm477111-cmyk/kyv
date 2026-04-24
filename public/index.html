@@ -1786,16 +1786,46 @@ document.addEventListener('click', function(e) {
   const db = firebase.firestore();
   const auth = firebase.auth();
 
-  function loginUser() {
+ function loginUser() {
     const phone = document.getElementById('phone').value;
     const pass = document.getElementById('pass').value;
-    auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass)
-      .then((user) => {
-        db.collection("users").doc(user.user.uid).get().then((doc) => {
-          const data = doc.data();
-          document.getElementById('modalBody').innerHTML = `<div style="text-align:right; color:white; direction:rtl;"><h2 style="color:#ca8a04; text-align:center;">أهلاً بك ${data.name}</h2><div style="background:#222; padding:15px; border-radius:10px; margin:10px 0;"><p>الباقة: <b>${data.planName || '---'}</b></p><p>الحالة: <b>${data.active ? 'نشط ✅' : 'غير نشط ❌'}</b></p></div><button onclick="auth.signOut().then(() => location.reload())" style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer;">تسجيل خروج</button></div>`;
+    const email = phone + "@mocontrol.com";
+
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+      .then((userCredential) => {
+        const userId = userCredential.user.uid;
+        // جلب كافة بيانات العميل من الـ Firestore
+        firebase.firestore().collection("users").doc(userId).get().then((doc) => {
+          if (doc.exists) {
+            const data = doc.data();
+            // عرض كافة التفاصيل داخل النافذة
+            document.getElementById('modalBody').innerHTML = `
+              <div style="text-align:right; color:white; direction:rtl; font-family:sans-serif;">
+                <h2 style="color:#ca8a04; text-align:center;">مرحباً بك، ${data.name || 'عميلنا العزيز'}</h2>
+                
+                <div style="background:#222; padding:15px; border-radius:10px; margin:10px 0; border:1px solid #333;">
+                  <p style="margin:5px 0;">رقم الهاتف: <b>${data.phone || '---'}</b></p>
+                  <p style="margin:5px 0;">نوع الباقة: <b>${data.planName || 'غير مشترك'}</b></p>
+                  <p style="margin:5px 0;">تاريخ التجديد: <b>${data.nextRenewal || 'لم يحدد'}</b></p>
+                  <p style="margin:5px 0;">حالة الحساب: 
+                    <span style="color: ${data.active ? '#22c55e' : '#ef4444'}; font-weight:bold;">
+                      ${data.active ? 'نشط ✅' : 'غير نشط ❌'}
+                    </span>
+                  </p>
+                </div>
+                
+                <button onclick="firebase.auth().signOut().then(() => location.reload())" 
+                        style="width:100%; padding:10px; background:#444; border:none; border-radius:8px; color:white; cursor:pointer; margin-top:10px;">
+                  تسجيل خروج
+                </button>
+              </div>
+            `;
+          }
         });
-      }).catch((err) => alert("خطأ تسجيل دخول: " + err.message));
+      })
+      .catch((error) => {
+        alert("خطأ في تسجيل الدخول: " + error.message);
+      });
   }
 
   function showRegister() {
