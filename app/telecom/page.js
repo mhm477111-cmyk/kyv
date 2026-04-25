@@ -8,19 +8,17 @@ import {
 import * as XLSX from 'xlsx';
 
 // ─────────────────────────────────────────────────────────────────
-// Hook: Debounce أي callback بفترة تأخير قابلة للضبط
-// يحل مشكلة الـ Writes المفرطة عند الكتابة في الـ Inputs
+// Hook: Debounce لتقليل استهلاك الـ Writes في Firebase
 // ─────────────────────────────────────────────────────────────────
 function useDebounceCallback(fn, delay = 1000) {
   const timer = useRef(null);
-  // نحتاج ref للـ fn نفسه لتجنب re-creation عند تغيير الـ dependencies
   const fnRef = useRef(fn);
   useEffect(() => { fnRef.current = fn; }, [fn]);
 
   return useCallback((...args) => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => fnRef.current(...args), delay);
-  }, [delay]); // delay فقط في الـ dependencies
+  }, [delay]);
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -69,18 +67,13 @@ export default function TelecomSystem() {
   const [showStats,    setShowStats]    = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // نحتفظ بـ ref للـ unsubscribe حتى نقدر نعمل manual refresh
   const unsubRef = useRef(null);
-
   const isHome4G = activeTab === 'Home4G';
 
   // ─────────────────────────────────────────────────────────────
-  // 1. READS محسّنة: query بـ where بدل snapshot على المجموعة كاملة
-  //    - يشتغل فقط لما يتغير activeTab أو activeCycle
-  //    - يوفر قراءات كتيرة جداً لأنه بيجيب البيانات المفلترة من Firebase
+  // 1. READS Optimization (Query with Where)
   // ─────────────────────────────────────────────────────────────
   const subscribeToLines = useCallback(() => {
-    // إلغاء الـ listener القديم قبل إنشاء واحد جديد
     if (unsubRef.current) unsubRef.current();
 
     const q = query(
@@ -100,24 +93,17 @@ export default function TelecomSystem() {
 
   useEffect(() => {
     const unsub = subscribeToLines();
-    return () => unsub(); // Cleanup عند الـ unmount أو تغيير الـ dependencies
+    return () => unsub();
   }, [subscribeToLines]);
 
-  // ─────────────────────────────────────────────────────────────
-  // 3. Manual Refresh: يعيد الاشتراك في الـ snapshot لمزامنة فورية
-  // ─────────────────────────────────────────────────────────────
   const handleManualRefresh = useCallback(() => {
     setIsRefreshing(true);
     subscribeToLines();
   }, [subscribeToLines]);
 
   // ─────────────────────────────────────────────────────────────
-  // 2. WRITES محسّنة بـ Debouncing (1000ms)
-  //    - تمنع إرسال طلبات للسيرفر مع كل ضغطة كيبورد
-  //    - تنتظر لحد ما المستخدم يوقف الكتابة
+  // 2. WRITES Optimization (Debouncing)
   // ─────────────────────────────────────────────────────────────
-
-  // تحديث بيانات الخط الرئيسي
   const _updateMasterLine = useCallback(async (lineId, field, value) => {
     const numFields = ['totalGB', 'totalMins', 'baseCost'];
     const val = numFields.includes(field) ? Number(value) : value;
@@ -125,7 +111,6 @@ export default function TelecomSystem() {
   }, []);
   const updateMasterLine = useDebounceCallback(_updateMasterLine);
 
-  // تحديث بيانات Home 4G
   const _updateHome4G = useCallback(async (lineId, field, value, currentData) => {
     const numFields = ['paidAmount', 'baseCost'];
     const updated = {
@@ -136,18 +121,13 @@ export default function TelecomSystem() {
   }, []);
   const updateHome4G = useDebounceCallback(_updateHome4G);
 
-  // تحديث بيانات المشترك
   const _updateSub = useCallback(async (lineId, subIndex, field, value, currentSubscribers, network) => {
-    const newSubs = currentSubscribers
-      ? [...currentSubscribers]
-      : makeSubsArray();
-
+    const newSubs = currentSubscribers ? [...currentSubscribers] : makeSubsArray();
     const numFields = ['gb', 'sentMB', 'mins', 'price', 'paidAmount'];
     const parsedValue = numFields.includes(field) ? Number(value) : value;
 
     newSubs[subIndex] = { ...newSubs[subIndex], [field]: parsedValue };
 
-    // تحديث السعر تلقائياً عند تغيير الجيجا
     if (field === 'gb') {
       newSubs[subIndex].price = PRICE_TABLE[network]?.[parsedValue] || 0;
     }
@@ -157,17 +137,13 @@ export default function TelecomSystem() {
   const updateSub = useDebounceCallback(_updateSub);
 
   // ─────────────────────────────────────────────────────────────
-  // Toggle handlers (فورية بدون debounce — أزرار لا inputs)
+  // Toggles & Immediate Actions
   // ─────────────────────────────────────────────────────────────
   const toggleField = useCallback(async (e, lineId, field, currentValue) => {
     e.stopPropagation();
     await updateDoc(doc(db, 'lines', lineId), { [field]: !currentValue });
   }, []);
 
-  // ─────────────────────────────────────────────────────────────
-  // 4. زر "الخلاص" — فوري بدون debounce لأنه action مقصود
-  //    يسوّي paidAmount = price على طول
-  // ─────────────────────────────────────────────────────────────
   const handleClearDebt = useCallback(async (lineId, subIndex, currentSubscribers, price) => {
     const newSubs = currentSubscribers ? [...currentSubscribers] : makeSubsArray();
     newSubs[subIndex] = { ...newSubs[subIndex], paidAmount: price };
@@ -175,7 +151,7 @@ export default function TelecomSystem() {
   }, []);
 
   // ─────────────────────────────────────────────────────────────
-  // CRUD
+  // CRUD & Excel
   // ─────────────────────────────────────────────────────────────
   const addNewLine = useCallback(async () => {
     try {
@@ -206,14 +182,11 @@ export default function TelecomSystem() {
       await deleteDoc(doc(db, 'lines', id));
   }, []);
 
-  // ─────────────────────────────────────────────────────────────
-  // Import / Export Excel
-  // ─────────────────────────────────────────────────────────────
   const exportToExcel = useCallback(() => {
     const rows = masterLines.map(line => ({
       ID: line.id,
       'صاحب الخط':             line.ownerName || '',
-      'الرقم':                  line.masterPhone || '',
+      'الرقم':                 line.masterPhone || '',
       'الشبكة':                 line.network || '',
       'السايكل':                line.cycle || '',
       'تاريخ التفعيل':          line.activationDate || '',
@@ -262,12 +235,11 @@ export default function TelecomSystem() {
       alert('تم استعادة البيانات بنجاح!');
     };
     reader.readAsArrayBuffer(file);
-    // Reset input value لتسمح بـ re-import نفس الملف
     e.target.value = '';
   }, []);
 
   // ─────────────────────────────────────────────────────────────
-  // Stats Calculations
+  // Stats
   // ─────────────────────────────────────────────────────────────
   const getLineStats = useCallback((line) => {
     if (line.network === 'Home4G') {
@@ -300,7 +272,6 @@ export default function TelecomSystem() {
       const s = getLineStats(line);
       totalProfit += s.profit;
       totalDebt   += s.debts;
-      // إضافة تكلفة الفاتورة غير المدفوعة للمديونية (للخطوط العادية فقط)
       if (line.network !== 'Home4G' && !line.billPaid) {
         totalDebt += Number(line.baseCost || 0);
       }
@@ -309,7 +280,7 @@ export default function TelecomSystem() {
   })();
 
   // ─────────────────────────────────────────────────────────────
-  // Search (Client-side على النتائج المفلترة مسبقاً من Firebase)
+  // Search
   // ─────────────────────────────────────────────────────────────
   const filteredLines = masterLines.filter(line => {
     if (!searchTerm) return true;
@@ -341,9 +312,8 @@ export default function TelecomSystem() {
         <h1 className="text-4xl font-black text-[#ca8a04]">MO CONTROL</h1>
       </header>
 
-      {/* ── أزرار التحكم العلوية ── */}
+      {/* ── Top Controls ── */}
       <div className="flex justify-center gap-3 mb-6">
-        {/* زر عرض/إخفاء الإحصائيات */}
         <button
           onClick={() => setShowStats(v => !v)}
           className="px-6 py-2 rounded-xl font-bold border-2 border-gray-700 text-gray-400
@@ -352,7 +322,6 @@ export default function TelecomSystem() {
           📊 {showStats ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}
         </button>
 
-        {/* 3. زر التحديث اليدوي */}
         <button
           onClick={handleManualRefresh}
           disabled={isRefreshing}
@@ -370,15 +339,15 @@ export default function TelecomSystem() {
         </button>
       </div>
 
-      {/* ── لوحة الإحصائيات ── */}
+      {/* ── Stats Panel ── */}
       {showStats && (
         <div className="max-w-4xl mx-auto mb-8 bg-[#111] border border-gray-800 rounded-3xl p-6">
           <h2 className="text-center text-sm font-bold text-[#ca8a04] mb-5 tracking-widest">ملخص عام</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             {[
               { label: 'اتصالات', count: globalStats.nets.Etisalat, color: 'text-green-400',  border: 'border-green-900' },
-              { label: 'فودافون', count: globalStats.nets.Vodafone,  color: 'text-red-400',    border: 'border-red-900' },
-              { label: 'وي',      count: globalStats.nets.WE,         color: 'text-blue-400',   border: 'border-blue-900' },
+              { label: 'فودافون', count: globalStats.nets.Vodafone,  color: 'text-red-400',   border: 'border-red-900' },
+              { label: 'وي',      count: globalStats.nets.WE,        color: 'text-blue-400',  border: 'border-blue-900' },
               { label: 'Home 4G', count: globalStats.nets.Home4G,    color: 'text-[#ca8a04]', border: 'border-[#ca8a04]/30' },
             ].map(n => (
               <div key={n.label} className={`bg-black/40 border ${n.border} rounded-2xl p-4 text-center`}>
@@ -451,7 +420,6 @@ export default function TelecomSystem() {
 
       {/* ── Lines List ── */}
       <div className="max-w-7xl mx-auto space-y-4">
-
         {filteredLines.length === 0 && (
           <div className="text-center text-gray-600 py-20">
             {searchTerm ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد خطوط. اضغط + لإضافة خط جديد'}
@@ -466,12 +434,11 @@ export default function TelecomSystem() {
 
           return (
             <div key={line.id} className="bg-[#111] border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
-
+              
               {/* ── Header Row ── */}
               <div
                 onClick={() => setExpandedLine(isOpen ? null : line.id)}
-                className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row
-                           items-center justify-between gap-4 transition-colors"
+                className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row items-center justify-between gap-4 transition-colors"
               >
                 {/* معلومات الخط */}
                 <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right">
@@ -493,8 +460,7 @@ export default function TelecomSystem() {
                 {/* إحصائيات الخط */}
                 {isH4G ? (
                   <div className="flex flex-row gap-2 w-full md:w-auto text-center">
-                    <StatBox label="الربح" value={`${stats.profit} ج`}
-                      color={stats.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
+                    <StatBox label="الربح" value={`${stats.profit} ج`} color={stats.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
                     <StatBox label="ديون" value={`${stats.debts} ج`} color="text-orange-500" />
                     <div className="bg-black/30 p-2 rounded-lg border border-[#ca8a04]/30 min-w-[80px]">
                       <p className="text-[8px] text-gray-500">حالة الدفع</p>
@@ -507,8 +473,7 @@ export default function TelecomSystem() {
                   </div>
                 ) : (
                   <div className="flex flex-row flex-wrap gap-2 w-full md:w-auto text-center items-center">
-                    <StatBox label="الربح"        value={`${stats.profit} ج`}
-                      color={stats.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
+                    <StatBox label="الربح"        value={`${stats.profit} ج`} color={stats.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
                     <StatBox label="ديون"         value={`${stats.debts} ج`}        color="text-orange-500" />
                     <StatBox label="جيجا متبقية"  value={`${stats.remainingGB} GB`}  color="text-blue-400" />
                     <StatBox label="دقائق متبقية" value={`${stats.remainingMins} د`} color="text-green-400" />
@@ -556,7 +521,7 @@ export default function TelecomSystem() {
                         { label: 'رقم الخصم',    field: 'discountPhone',   cls: 'text-white' },
                         { label: 'اسم المشترك',  field: 'subscriberName',  cls: 'text-white' },
                         { label: 'رقم تواصل',    field: 'contactPhone',    cls: 'text-white' },
-                        { label: 'الباقة',        field: 'package',         cls: 'text-[#ca8a04]' },
+                        { label: 'الباقة',       field: 'package',         cls: 'text-[#ca8a04]' },
                       ].map(({ label, field, cls }) => (
                         <div key={field} className="flex flex-col gap-1">
                           <label className="text-[9px] text-gray-500 text-center">{label}</label>
@@ -569,7 +534,6 @@ export default function TelecomSystem() {
                         </div>
                       ))}
 
-                      {/* حالة الدفع */}
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">حالة الدفع</label>
                         <select
@@ -588,7 +552,6 @@ export default function TelecomSystem() {
                         </select>
                       </div>
 
-                      {/* المبلغ المدفوع */}
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">المبلغ المدفوع</label>
                         <input
@@ -600,7 +563,6 @@ export default function TelecomSystem() {
                         />
                       </div>
 
-                      {/* التكلفة */}
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">التكلفة</label>
                         <input
@@ -619,7 +581,7 @@ export default function TelecomSystem() {
               {/* ── Expanded: Normal Lines ── */}
               {isOpen && !isH4G && (
                 <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
-
+                  
                   {/* معلومات الخط الرئيسي */}
                   <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8 bg-[#161616] p-4 rounded-2xl border border-gray-800">
                     {[
@@ -678,7 +640,7 @@ export default function TelecomSystem() {
                             <input
                               defaultValue={sub.name}
                               onChange={(e) => updateSub(line.id, index, 'name', e.target.value, line.subscribers, line.network)}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full text-center"
                             />
                           </SubField>
 
@@ -687,54 +649,45 @@ export default function TelecomSystem() {
                             <input
                               defaultValue={sub.phone}
                               onChange={(e) => updateSub(line.id, index, 'phone', e.target.value, line.subscribers, line.network)}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full text-center"
                             />
                           </SubField>
 
-                          {/* باقة GB */}
-                          <SubField label="باقة GB">
-                            <select
-                              defaultValue={sub.gb}
-                              onChange={(e) => updateSub(line.id, index, 'gb', e.target.value, line.subscribers, line.network)}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none w-full"
-                            >
-                              <option value="0">0</option>
-                              {Object.keys(PRICE_TABLE[line.network] || {}).map(g => (
-                                <option key={g} value={g}>{g}</option>
-                              ))}
-                            </select>
-                          </SubField>
-
-                          {/* الدقائق */}
-                          <SubField label="الدقائق">
+                          {/* الجيجا */}
+                          <SubField label="GB">
                             <input
                               type="number"
-                              defaultValue={sub.mins}
-                              onChange={(e) => updateSub(line.id, index, 'mins', e.target.value, line.subscribers, line.network)}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
+                              defaultValue={sub.gb}
+                              onChange={(e) => updateSub(line.id, index, 'gb', e.target.value, line.subscribers, line.network)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none w-full text-center"
                             />
                           </SubField>
 
-                          {/* إجمالي MB (مخفي على موبايل) */}
-                          <SubField label="إجمالي MB" hidden>
-                            <span className="text-[12px] font-bold p-2 text-gray-500">{totalMB}</span>
-                          </SubField>
-
-                          {/* مُرسل MB */}
-                          <SubField label="مُرسل MB">
+                          {/* MB المحولة */}
+                          <SubField label="MB محولة">
                             <input
                               type="number"
                               defaultValue={sub.sentMB}
                               onChange={(e) => updateSub(line.id, index, 'sentMB', e.target.value, line.subscribers, line.network)}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-purple-400 outline-none w-full text-center"
                             />
                           </SubField>
 
-                          {/* متبقي MB (مخفي على موبايل) */}
-                          <SubField label="متبقي MB" hidden>
-                            <span className={`text-[12px] font-bold p-2 ${remainMB < 0 ? 'text-red-500' : 'text-green-500'}`}>
+                          {/* MB المتبقية */}
+                          <SubField label="MB باقية">
+                            <div className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-gray-400 w-full">
                               {remainMB}
-                            </span>
+                            </div>
+                          </SubField>
+
+                          {/* الدقائق */}
+                          <SubField label="دقائق">
+                            <input
+                              type="number"
+                              defaultValue={sub.mins}
+                              onChange={(e) => updateSub(line.id, index, 'mins', e.target.value, line.subscribers, line.network)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-green-400 outline-none w-full text-center"
+                            />
                           </SubField>
 
                           {/* السعر */}
@@ -743,7 +696,7 @@ export default function TelecomSystem() {
                               type="number"
                               defaultValue={sub.price}
                               onChange={(e) => updateSub(line.id, index, 'price', e.target.value, line.subscribers, line.network)}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-orange-400 outline-none w-full text-center"
                             />
                           </SubField>
 
@@ -753,26 +706,37 @@ export default function TelecomSystem() {
                               type="number"
                               defaultValue={sub.paidAmount}
                               onChange={(e) => updateSub(line.id, index, 'paidAmount', e.target.value, line.subscribers, line.network)}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-yellow-400 outline-none w-full text-center"
                             />
                           </SubField>
 
-                          {/* 4. زر "الخلاص" — فوري بدون debounce */}
-                          <button
-                            onClick={() => handleClearDebt(line.id, index, line.subscribers, sub.price)}
-                            title={isPaid ? 'تم السداد' : `تسوية الدين: ${debt} ج`}
-                            className={`text-[10px] font-bold mt-4 h-8 rounded-lg transition-all px-1
-                              ${isPaid
-                                ? 'text-green-500 bg-green-500/10 border border-green-900'
-                                : 'text-red-500 bg-red-500/10 border border-red-900 hover:bg-red-500/20'
+                          {/* المديونية */}
+                          <SubField label="ديون">
+                            <div className={`bg-black border rounded-lg p-2 text-[12px] font-bold w-full ${isPaid ? 'border-green-900 text-green-500' : 'border-red-900 text-red-500'}`}>
+                              {debt > 0 ? debt : 0}
+                            </div>
+                          </SubField>
+
+                          {/* زر الخلاص */}
+                          <div className="flex flex-col gap-1 w-full justify-end">
+                            <button
+                              onClick={() => handleClearDebt(line.id, index, line.subscribers, sub.price)}
+                              disabled={isPaid || Number(sub.price) === 0}
+                              className={`p-2 rounded-lg text-[10px] font-bold transition-all w-full h-[38px] mt-[14px] ${
+                                isPaid || Number(sub.price) === 0
+                                  ? 'bg-gray-800 text-gray-600 cursor-not-allowed border border-gray-700'
+                                  : 'bg-green-600 text-white hover:bg-green-500 border border-green-500'
                               }`}
-                          >
-                            {isPaid ? 'خالص ✓' : `باقي ${debt}`}
-                          </button>
+                            >
+                              {isPaid ? 'خالص' : 'تصفية'}
+                            </button>
+                          </div>
+
                         </div>
                       );
                     })}
                   </div>
+
                 </div>
               )}
             </div>
@@ -780,37 +744,49 @@ export default function TelecomSystem() {
         })}
       </div>
 
-      {/* ── Bottom Action Buttons ── */}
-      <div className="max-w-7xl mx-auto mt-10 pb-8 flex justify-end gap-3">
-        <button
-          onClick={exportToExcel}
-          title="تصدير Excel"
-          className="bg-green-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all"
-        >📥</button>
-
-        <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
-        <label
-          htmlFor="importFile"
-          title="استيراد Excel"
-          className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all"
-        >📤</label>
-
+      {/* ── Floating Action Buttons (Add & Export/Import) ── */}
+      <div className="fixed bottom-6 left-6 flex flex-col gap-3 z-50">
         <button
           onClick={addNewLine}
+          className="w-14 h-14 bg-[#ca8a04] text-black rounded-full flex items-center justify-center text-3xl
+                     shadow-lg hover:bg-yellow-500 hover:scale-110 transition-all font-black"
           title="إضافة خط جديد"
-          className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center"
-        >+</button>
+        >
+          +
+        </button>
+        <button
+          onClick={exportToExcel}
+          className="w-14 h-14 bg-green-700 text-white rounded-full flex items-center justify-center text-xl
+                     shadow-lg hover:bg-green-600 hover:scale-110 transition-all"
+          title="تصدير إلى Excel"
+        >
+          📥
+        </button>
+        <label
+          className="w-14 h-14 bg-blue-700 text-white rounded-full flex items-center justify-center text-xl
+                     shadow-lg hover:bg-blue-600 hover:scale-110 transition-all cursor-pointer"
+          title="استيراد من Excel"
+        >
+          📤
+          <input
+            type="file"
+            accept=".xlsx, .xls"
+            onChange={importFromExcel}
+            className="hidden"
+          />
+        </label>
       </div>
+
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Helper Components
+// Helper Components (StatBox, ToggleBtn, SubField)
 // ─────────────────────────────────────────────────────────────────
 function StatBox({ label, value, color }) {
   return (
-    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[75px]">
+    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
       <p className="text-[8px] text-gray-500">{label}</p>
       <p className={`font-bold text-xs ${color}`}>{value}</p>
     </div>
@@ -819,20 +795,22 @@ function StatBox({ label, value, color }) {
 
 function ToggleBtn({ label, active, onText, offText, onBorder, offBorder, onClick }) {
   return (
-    <button
-      onClick={onClick}
-      className={`p-2 rounded-lg border min-w-[75px] transition-all ${active ? onBorder : offBorder}`}
-    >
+    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px] flex flex-col gap-1 items-center justify-center">
       <p className="text-[8px] text-gray-500">{label}</p>
-      <p className="font-bold text-xs">{active ? onText : offText}</p>
-    </button>
+      <button
+        onClick={onClick}
+        className={`text-[10px] px-2 py-1 rounded border ${active ? onBorder : offBorder} w-full transition-colors`}
+      >
+        {active ? onText : offText}
+      </button>
+    </div>
   );
 }
 
-function SubField({ label, children, hidden = false }) {
+function SubField({ label, children }) {
   return (
-    <div className={`flex flex-col gap-1 ${hidden ? 'hidden md:flex' : ''}`}>
-      <label className="text-[9px] text-gray-500">{label}</label>
+    <div className="flex flex-col gap-1 w-full items-center">
+      <label className="text-[9px] text-gray-500 text-center">{label}</label>
       {children}
     </div>
   );
