@@ -36,22 +36,29 @@ const NETWORKS = [
   { key: 'Home4G',   label: '🏠 Home 4G', color: 'text-[#ca8a04]', border: 'border-[#ca8a04]/40', bg: 'bg-yellow-900/10', accent: '#ca8a04' },
 ];
 
+// السايكلات الأصلية للخطوط
 const CYCLES = ['1', '15'];
+
+// السايكلات الجديدة لعملاء الخارج
+const ABROAD_CYCLES = ['1', '15'];
 
 // ─────────────────────────────────────────────────────────────────
 // Factory Functions
 // ─────────────────────────────────────────────────────────────────
-const makeHome4G    = () => ({ ownerName: '', linePhone: '', discountPhone: '', subscriberName: '', contactPhone: '', package: '', paymentStatus: 'غير مدفوع', paidAmount: 0, baseCost: 0 });
-const makeSub       = () => ({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 });
-const makeSubsArray = () => Array(7).fill(null).map(makeSub);
+const makeHome4G      = () => ({ ownerName: '', linePhone: '', discountPhone: '', subscriberName: '', contactPhone: '', package: '', paymentStatus: 'غير مدفوع', paidAmount: 0, baseCost: 0 });
+const makeSub         = () => ({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 });
+const makeSubsArray   = () => Array(7).fill(null).map(makeSub);
+
+// مشترك خارج (بدون MB، بدل منها اسم التاجر)
+const makeAbroadSub   = () => ({ name: '', phone: '', gb: 0, mins: 1500, price: 0, paidAmount: 0, traderName: '' });
+const makeAbroadArray = () => Array(7).fill(null).map(makeAbroadSub);
 
 // ─────────────────────────────────────────────────────────────────
-// Excel Export Helper — مرتب ومنسّق
+// Excel Export Helper
 // ─────────────────────────────────────────────────────────────────
 function buildFormattedExcel(allLines) {
   const wb = XLSX.utils.book_new();
 
-  // تجميع الخطوط حسب شبكة + سايكل
   const groups = {};
   allLines.forEach(line => {
     const key = `${line.network || 'Unknown'} سايكل ${line.cycle || '?'}`;
@@ -59,22 +66,21 @@ function buildFormattedExcel(allLines) {
     groups[key].push(line);
   });
 
-  // ─── ألوان بـ ARGB ───────────────────────────────────────────
   const COLORS = {
-    headerBg:    'FF1565C0',  // أزرق داكن
+    headerBg:    'FF1565C0',
     headerFg:    'FFFFFFFF',
-    colHdrBg:    'FF1976D2',  // أزرق متوسط
+    colHdrBg:    'FF1976D2',
     colHdrFg:    'FFFFFFFF',
-    paidBg:      'FFE8F5E9',  // أخضر فاتح
+    paidBg:      'FFE8F5E9',
     paidFg:      'FF1B5E20',
-    unpaidBg:    'FFFFEBEE',  // أحمر فاتح
+    unpaidBg:    'FFFFEBEE',
     unpaidFg:    'FFB71C1C',
-    partialBg:   'FFFFF8E1',  // أصفر فاتح
+    partialBg:   'FFFFF8E1',
     partialFg:   'FFE65100',
-    totalBg:     'FF0D47A1',  // أزرق غامق
+    totalBg:     'FF0D47A1',
     totalFg:     'FFFFFFFF',
-    lineBg:      'FFE3F2FD',  // أزرق فاتح جداً
-    emptyBg:     'FFF5F5F5',  // رمادي
+    lineBg:      'FFE3F2FD',
+    emptyBg:     'FFF5F5F5',
     altBg:       'FFFAFAFA',
     white:       'FFFFFFFF',
     doneBg:      'FFE8F5E9',
@@ -83,7 +89,6 @@ function buildFormattedExcel(allLines) {
     notDoneFg:   'FFB71C1C',
   };
 
-  // ─── دوال مساعدة ────────────────────────────────────────────
   const cellStyle = (bgColor, fgColor = 'FF000000', bold = false, sz = 11, hAlign = 'center') => ({
     fill:   { patternType: 'solid', fgColor: { rgb: bgColor } },
     font:   { bold, color: { rgb: fgColor }, sz, name: 'Cairo' },
@@ -108,14 +113,12 @@ function buildFormattedExcel(allLines) {
     },
   });
 
-  // عرض الأعمدة
   const COL_WIDTHS = [8, 8, 9, 12, 20, 12, 12, 14, 14, 18, 20, 20, 14, 10];
-  // الأعمدة: الباقة | الدقا | السعر | الدفع | العميل | Total Giga | Total Min | Total Price | P&L | رقم البيرنت | تفاصيل صاحب الخط | تفاصيل2 | تاريخ التفعيل | 4G
 
   Object.entries(groups).forEach(([sheetName, lines]) => {
-    const aoa   = [];   // array of arrays للبيانات
-    const rowStyles = []; // array of arrays للستايلات
-    const merges  = [];   // دمج الخلايا
+    const aoa   = [];
+    const rowStyles = [];
+    const merges  = [];
     const rowHeights = [];
 
     const pushRow = (cells, styles, height = 20) => {
@@ -129,7 +132,6 @@ function buildFormattedExcel(allLines) {
       const isH4G       = line.network === 'Home4G';
       const h           = line.home4gData || makeHome4G();
 
-      // حسابات الخط
       const baseCost    = Number(line.baseCost || 0);
       const totalPrice  = isH4G ? Number(h.paidAmount || 0) : subs.reduce((a, s) => a + Number(s.price || 0), 0);
       const totalPaid   = isH4G ? Number(h.paidAmount || 0) : subs.reduce((a, s) => a + Number(s.paidAmount || 0), 0);
@@ -140,11 +142,8 @@ function buildFormattedExcel(allLines) {
       const profitLoss  = totalPaid - baseCost;
       const plSign      = profitLoss >= 0 ? '+' : '';
 
-      const startRow    = aoa.length; // نحتاجه للـ merge
+      const startRow    = aoa.length;
 
-      // ════════════════════════════════════════════════════════
-      // صف 1: هيدر الخط الرئيسي
-      // ════════════════════════════════════════════════════════
       const ownerDisplay = isH4G
         ? `🏠 ${h.ownerName || 'بدون اسم'} — ${h.linePhone || ''}`
         : line.ownerName || 'بدون اسم';
@@ -165,7 +164,7 @@ function buildFormattedExcel(allLines) {
           line.activationDate || (isH4G ? (h.package || '') : ''),
         ],
         [
-          cellStyle(COLORS.headerBg, COLORS.headerFg, true, 14, 'right'), // col1 — اسم
+          cellStyle(COLORS.headerBg, COLORS.headerFg, true, 14, 'right'),
           cellStyle(COLORS.headerBg, COLORS.headerFg, false, 10),
           cellStyle(COLORS.headerBg, COLORS.headerFg, false, 10),
           cellStyle(COLORS.headerBg, COLORS.headerFg, false, 10),
@@ -173,11 +172,7 @@ function buildFormattedExcel(allLines) {
           cellStyle(COLORS.headerBg, COLORS.headerFg, true, 10),
           cellStyle(COLORS.headerBg, COLORS.headerFg, true, 10),
           cellStyle(COLORS.headerBg, COLORS.headerFg, true, 11),
-          cellStyle(
-            COLORS.headerBg,
-            profitLoss >= 0 ? 'FF81C784' : 'FFEF9A9A',
-            true, 12
-          ),
+          cellStyle(COLORS.headerBg, profitLoss >= 0 ? 'FF81C784' : 'FFEF9A9A', true, 12),
           cellStyle(COLORS.headerBg, COLORS.headerFg, true, 10),
           cellStyle(line.billPaid    ? COLORS.doneBg : COLORS.notDoneBg, line.billPaid    ? COLORS.doneFg : COLORS.notDoneFg, true, 10),
           cellStyle(line.voucherSent ? COLORS.doneBg : COLORS.notDoneBg, line.voucherSent ? COLORS.doneFg : COLORS.notDoneFg, true, 10),
@@ -187,12 +182,8 @@ function buildFormattedExcel(allLines) {
         28
       );
 
-      // merge الاسم من col1 إلى col5
       merges.push({ s: { r: startRow, c: 0 }, e: { r: startRow, c: 4 } });
 
-      // ════════════════════════════════════════════════════════
-      // صف 2: هيدر الأعمدة
-      // ════════════════════════════════════════════════════════
       pushRow(
         ['الباقة','الدقا','السعر','الدفع','العميل','Total Giga','Total Min','Total Price','P & L','رقم البيرنت','تفاصيل صاحب الخط','','تاريخ التفعيل','4G'],
         Array(14).fill(cellStyle(COLORS.colHdrBg, COLORS.colHdrFg, true, 9)),
@@ -200,9 +191,6 @@ function buildFormattedExcel(allLines) {
       );
 
       if (!isH4G) {
-        // ════════════════════════════════════════════════════════
-        // صفوف المشتركين
-        // ════════════════════════════════════════════════════════
         subs.forEach((sub, si) => {
           const isEmpty   = !sub.name && !sub.phone && !sub.gb;
           const paid      = Number(sub.paidAmount || 0);
@@ -219,7 +207,6 @@ function buildFormattedExcel(allLines) {
           const baseStyle = (bold = false, sz = 10, hAlign = 'center') =>
             cellStyle(rowBg, 'FF212121', bold, sz, hAlign);
 
-          // تحديد ستايل خلية الدفع
           let payStyle, payVal;
           if (isEmpty) {
             payStyle = cellStyle(COLORS.emptyBg, 'FFBDBDBD', false, 9);
@@ -240,48 +227,22 @@ function buildFormattedExcel(allLines) {
 
           pushRow(
             [
-              sub.gb || '',
-              sub.mins || '',
-              price || '',
-              payVal,
-              sub.name || '',
-              totalMB || '',
-              sub.mins || '',
-              price || '',
-              remainMB || '',
-              '',  // رقم البيرنت — بيانات الخط مش المشترك
-              sub.phone || '',
-              '',
-              '',
-              '',
+              sub.gb || '', sub.mins || '', price || '', payVal, sub.name || '',
+              totalMB || '', sub.mins || '', price || '', remainMB || '',
+              '', sub.phone || '', '', '', '',
             ],
             [
-              baseStyle(),
-              baseStyle(),
-              baseStyle(),
-              payStyle,
+              baseStyle(), baseStyle(), baseStyle(), payStyle,
               baseStyle(true, 11, 'right'),
-              baseStyle(false, 9),
-              baseStyle(false, 9),
-              baseStyle(false, 9),
-              cellStyle(
-                rowBg,
-                remainMB < 0 ? 'FFEF5350' : 'FF43A047',
-                false, 9
-              ),
-              baseStyle(false, 9),
-              baseStyle(false, 10, 'center'),
-              baseStyle(false, 9),
-              baseStyle(false, 9),
-              baseStyle(false, 9),
+              baseStyle(false, 9), baseStyle(false, 9), baseStyle(false, 9),
+              cellStyle(rowBg, remainMB < 0 ? 'FFEF5350' : 'FF43A047', false, 9),
+              baseStyle(false, 9), baseStyle(false, 10, 'center'),
+              baseStyle(false, 9), baseStyle(false, 9), baseStyle(false, 9),
             ],
             20
           );
         });
       } else {
-        // ════════════════════════════════════════════════════════
-        // صف Home4G — مشترك واحد
-        // ════════════════════════════════════════════════════════
         const hPaid   = Number(h.paidAmount || 0);
         const hCost   = Number(h.baseCost || 0);
         const hDebt   = hCost - hPaid;
@@ -292,13 +253,8 @@ function buildFormattedExcel(allLines) {
         pushRow(
           [
             h.package || '', '', hCost || '', hStatus,
-            h.subscriberName || '',
-            '', '', hPaid || '', hDebt > 0 ? `-${hDebt}` : '✓',
-            h.linePhone || '',
-            h.ownerName || '',
-            h.discountPhone || '',
-            h.contactPhone || '',
-            '🏠',
+            h.subscriberName || '', '', '', hPaid || '', hDebt > 0 ? `-${hDebt}` : '✓',
+            h.linePhone || '', h.ownerName || '', h.discountPhone || '', h.contactPhone || '', '🏠',
           ],
           [
             cellStyle(COLORS.lineBg, 'FF212121', false, 10),
@@ -320,49 +276,33 @@ function buildFormattedExcel(allLines) {
         );
       }
 
-      // ════════════════════════════════════════════════════════
-      // صف التوتال
-      // ════════════════════════════════════════════════════════
       pushRow(
         [
           'الإجمالي', '', '', '',
           `${isH4G ? 1 : subs.filter(s => s.name || s.phone).length} مشترك`,
-          `${isH4G ? 0 : usedGB} GB`,
-          isH4G ? '' : `${usedMins}`,
+          `${isH4G ? 0 : usedGB} GB`, isH4G ? '' : `${usedMins}`,
           `ج.م. ${totalPrice.toLocaleString('ar-EG')}`,
           `ج.م. ${plSign}${profitLoss.toLocaleString('ar-EG')}`,
           '', '', '', '', '',
         ],
         [
-          thickCellStyle(COLORS.totalBg),
-          thickCellStyle(COLORS.totalBg),
-          thickCellStyle(COLORS.totalBg),
-          thickCellStyle(COLORS.totalBg),
+          thickCellStyle(COLORS.totalBg), thickCellStyle(COLORS.totalBg),
+          thickCellStyle(COLORS.totalBg), thickCellStyle(COLORS.totalBg),
           thickCellStyle(COLORS.totalBg, COLORS.totalFg, true, 10),
           thickCellStyle(COLORS.totalBg, COLORS.totalFg, true, 10),
           thickCellStyle(COLORS.totalBg, COLORS.totalFg, false, 10),
           thickCellStyle(COLORS.totalBg, COLORS.totalFg, true, 11),
-          thickCellStyle(
-            COLORS.totalBg,
-            profitLoss >= 0 ? 'FF81C784' : 'FFEF9A9A',
-            true, 12
-          ),
+          thickCellStyle(COLORS.totalBg, profitLoss >= 0 ? 'FF81C784' : 'FFEF9A9A', true, 12),
           ...Array(5).fill(thickCellStyle(COLORS.totalBg)),
         ],
         24
       );
 
-      // merge الإجمالي من col1 إلى col4
       merges.push({ s: { r: aoa.length - 1, c: 0 }, e: { r: aoa.length - 1, c: 3 } });
-
-      // صف فارغ فاصل
       pushRow(Array(14).fill(''), Array(14).fill(cellStyle('FFFFFFFF', 'FFFFFFFF')), 8);
     });
 
-    // ── إنشاء الشيت ──────────────────────────────────────────
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-
-    // تطبيق الستايلات
     aoa.forEach((rowArr, ri) => {
       rowArr.forEach((_, ci) => {
         const cellRef = XLSX.utils.encode_cell({ r: ri, c: ci });
@@ -370,24 +310,14 @@ function buildFormattedExcel(allLines) {
         ws[cellRef].s = rowStyles[ri][ci];
       });
     });
-
-    // عرض الأعمدة
     ws['!cols'] = COL_WIDTHS.map(w => ({ wch: w }));
-
-    // ارتفاع الصفوف
     ws['!rows'] = rowHeights.map(h => ({ hpt: h }));
-
-    // الدمج
     ws['!merges'] = merges;
-
-    // RTL
     if (!ws['!sheetView']) ws['!sheetView'] = {};
     ws['!sheetViews'] = [{ rightToLeft: true }];
-
     XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0, 31));
   });
 
-  // شيت backup خام للاستيراد
   const backupRows = allLines.map(line => ({
     ID: line.id,
     'صاحب الخط': line.ownerName || '',
@@ -414,23 +344,29 @@ function buildFormattedExcel(allLines) {
 // Main Component
 // ─────────────────────────────────────────────────────────────────
 export default function TelecomSystem() {
-  const [activeTab,    setActiveTab]    = useState('Etisalat');
-  const [activeCycle,  setActiveCycle]  = useState('1');
-  const [expandedLine, setExpandedLine] = useState(null);
-  const [searchTerm,   setSearchTerm]   = useState('');
-  const [masterLines,  setMasterLines]  = useState([]);
-  const [allLines,     setAllLines]     = useState([]);  // كل الخطوط للـ export
-  const [showStats,    setShowStats]    = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showSubsList, setShowSubsList] = useState(false);
-  const [subsFilter,   setSubsFilter]   = useState('all');
+  const [activeTab,      setActiveTab]      = useState('Etisalat');
+  const [activeCycle,    setActiveCycle]    = useState('1');
+  // وضع عملاء الخارج
+  const [abroadMode,     setAbroadMode]     = useState(false);   // هل نحن في وضع الخارج؟
+  const [abroadCycle,    setAbroadCycle]    = useState('1');     // سايكل الخارج
+  const [expandedLine,   setExpandedLine]   = useState(null);
+  const [expandedAbroad, setExpandedAbroad] = useState(null);
+  const [searchTerm,     setSearchTerm]     = useState('');
+  const [masterLines,    setMasterLines]    = useState([]);
+  const [allLines,       setAllLines]       = useState([]);
+  const [abroadClients,  setAbroadClients]  = useState([]);      // عملاء الخارج الحاليين
+  const [showStats,      setShowStats]      = useState(false);
+  const [isRefreshing,   setIsRefreshing]   = useState(false);
+  const [showSubsList,   setShowSubsList]   = useState(false);
+  const [subsFilter,     setSubsFilter]     = useState('all');
 
-  const unsubRef    = useRef(null);
-  const unsubAllRef = useRef(null);
-  const isHome4G    = activeTab === 'Home4G';
-  const netMeta     = NETWORKS.find(n => n.key === activeTab);
+  const unsubRef       = useRef(null);
+  const unsubAllRef    = useRef(null);
+  const unsubAbroadRef = useRef(null);
+  const isHome4G       = activeTab === 'Home4G';
+  const netMeta        = NETWORKS.find(n => n.key === activeTab);
 
-  // ── Reads — الخطوط الحالية (شبكة+سايكل) ─────────────────────
+  // ── Subscribe to main lines ─────────────────────────────────────
   const subscribeToLines = useCallback(() => {
     if (unsubRef.current) unsubRef.current();
     const q = query(
@@ -446,7 +382,23 @@ export default function TelecomSystem() {
     return unsub;
   }, [activeTab, activeCycle]);
 
-  // ── Reads — كل الخطوط للـ export ─────────────────────────────
+  // ── Subscribe to abroad clients ────────────────────────────────
+  const subscribeToAbroad = useCallback(() => {
+    if (unsubAbroadRef.current) unsubAbroadRef.current();
+    if (isHome4G) return () => {};
+    const q = query(
+      collection(db, 'abroadClients'),
+      where('network', '==', activeTab),
+      where('cycle',   '==', abroadCycle)
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      setAbroadClients(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    unsubAbroadRef.current = unsub;
+    return unsub;
+  }, [activeTab, abroadCycle, isHome4G]);
+
+  // ── All lines for export ───────────────────────────────────────
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'lines'), (snap) => {
       setAllLines(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -459,6 +411,11 @@ export default function TelecomSystem() {
     const unsub = subscribeToLines();
     return () => unsub();
   }, [subscribeToLines]);
+
+  useEffect(() => {
+    const unsub = subscribeToAbroad();
+    return () => unsub();
+  }, [subscribeToAbroad]);
 
   const handleManualRefresh = useCallback(() => {
     setIsRefreshing(true);
@@ -487,6 +444,15 @@ export default function TelecomSystem() {
   }, []);
   const updateSub = useDebounceCallback(_updateSub);
 
+  // ── Abroad client updates ──────────────────────────────────────
+  const _updateAbroadClient = useCallback(async (clientId, field, value, currentSubs) => {
+    const parsed = ['gb','mins','price','paidAmount'].includes(field) ? Number(value) : value;
+    const updatedSub = { ...currentSubs, [field]: parsed };
+    if (field === 'gb') updatedSub.price = PRICE_TABLE[activeTab]?.[parsed] || 0;
+    await updateDoc(doc(db, 'abroadClients', clientId), updatedSub);
+  }, [activeTab]);
+  const updateAbroadClient = useDebounceCallback(_updateAbroadClient);
+
   // ── Instant handlers ───────────────────────────────────────────
   const toggleField = useCallback(async (e, lineId, field, current) => {
     e.stopPropagation();
@@ -499,6 +465,10 @@ export default function TelecomSystem() {
     await updateDoc(doc(db, 'lines', lineId), { subscribers: newSubs });
   }, []);
 
+  const handleClearAbroadDebt = useCallback(async (clientId, price) => {
+    await updateDoc(doc(db, 'abroadClients', clientId), { paidAmount: price });
+  }, []);
+
   // ── CRUD ───────────────────────────────────────────────────────
   const addNewLine = useCallback(async () => {
     try {
@@ -508,25 +478,46 @@ export default function TelecomSystem() {
     } catch { alert('خطأ في الاتصال بقاعدة البيانات'); }
   }, [activeTab, activeCycle, isHome4G]);
 
+  const addNewAbroadClient = useCallback(async () => {
+    try {
+      await addDoc(collection(db, 'abroadClients'), {
+        network: activeTab,
+        cycle: abroadCycle,
+        name: 'عميل جديد',
+        phone: '',
+        gb: 0,
+        mins: 1500,
+        price: 0,
+        paidAmount: 0,
+        traderName: '',
+      });
+    } catch { alert('خطأ في الاتصال بقاعدة البيانات'); }
+  }, [activeTab, abroadCycle]);
+
   const deleteLine = useCallback(async (e, id) => {
     e.stopPropagation();
     if (window.confirm('هل تريد حذف هذا الخط نهائياً؟'))
       await deleteDoc(doc(db, 'lines', id));
   }, []);
 
-  // ── Export — منسّق ────────────────────────────────────────────
+  const deleteAbroadClient = useCallback(async (e, id) => {
+    e.stopPropagation();
+    if (window.confirm('هل تريد حذف هذا العميل نهائياً؟'))
+      await deleteDoc(doc(db, 'abroadClients', id));
+  }, []);
+
+  // ── Export ─────────────────────────────────────────────────────
   const exportToExcel = useCallback(() => {
     const wb = buildFormattedExcel(allLines);
     XLSX.writeFile(wb, 'MO_CONTROL_Export.xlsx');
   }, [allLines]);
 
-  // ── Import ────────────────────────────────────────────────────
+  // ── Import ─────────────────────────────────────────────────────
   const importFromExcel = useCallback((e) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = async (evt) => {
       const wb   = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-      // نقرأ من شيت Backup
       const sheetName = wb.SheetNames.includes('Backup') ? 'Backup' : wb.SheetNames[wb.SheetNames.length - 1];
       const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
       for (const item of rows) {
@@ -556,7 +547,6 @@ export default function TelecomSystem() {
     return { profit: collected-Number(line.baseCost||0), debts: Math.max(0,prices-collected), remainingGB: Number(line.totalGB||0)-usedGB, remainingMins: Number(line.totalMins||0)-usedMins };
   }, []);
 
-  // ── Global Stats — المديونية = الفواتير غير المدفوعة فقط ───────
   const globalStats = (() => {
     const nets = { Etisalat:0, Vodafone:0, WE:0, Home4G:0 }; let totalProfit=0, totalDebt=0;
     masterLines.forEach(line => {
@@ -602,9 +592,9 @@ export default function TelecomSystem() {
   const countPartial = allSubscribers.filter(s => s.paidAmount > 0 && s.debt > 0).length;
 
   const subsStats = {
-    totalDebt: allSubscribers.filter(s => s.debt > 0).reduce((a,s) => a + Math.max(0, s.debt), 0),
-    totalPaid: allSubscribers.filter(s => s.debt > 0).reduce((a,s) => a + s.paidAmount, 0),
-    totalPrice:allSubscribers.filter(s => s.debt > 0).reduce((a,s) => a + s.price, 0),
+    totalDebt:  allSubscribers.filter(s => s.debt > 0).reduce((a,s) => a + Math.max(0, s.debt), 0),
+    totalPaid:  allSubscribers.filter(s => s.debt > 0).reduce((a,s) => a + s.paidAmount, 0),
+    totalPrice: allSubscribers.filter(s => s.debt > 0).reduce((a,s) => a + s.price, 0),
   };
 
   // ── Search ─────────────────────────────────────────────────────
@@ -637,6 +627,13 @@ export default function TelecomSystem() {
     totalPaid:  filteredSubs.reduce((a,s) => a + s.paidAmount, 0),
     totalDebt:  filteredSubs.reduce((a,s) => a + Math.max(0, s.debt), 0),
   };
+
+  // ── Abroad filtered ────────────────────────────────────────────
+  const filteredAbroad = abroadClients.filter(c => {
+    if (!searchTerm) return true;
+    const s = searchTerm.toLowerCase();
+    return c.name?.toLowerCase().includes(s) || c.phone?.includes(searchTerm) || c.traderName?.toLowerCase().includes(s);
+  });
 
   // ─────────────────────────────────────────────────────────────
   // Render
@@ -704,192 +701,424 @@ export default function TelecomSystem() {
       <div className="flex justify-center gap-3 mb-4 flex-wrap">
         {NETWORKS.map(net => (
           <button key={net.key}
-            onClick={() => { setActiveTab(net.key); setExpandedLine(null); setShowSubsList(false); setSubsFilter('all'); }}
+            onClick={() => { setActiveTab(net.key); setExpandedLine(null); setExpandedAbroad(null); setShowSubsList(false); setSubsFilter('all'); setAbroadMode(false); }}
             className={`px-6 py-3 rounded-2xl font-bold border-2 transition-all ${activeTab===net.key?'border-[#ca8a04] bg-[#ca8a04] text-black':'border-gray-800 text-gray-500 hover:border-gray-600'}`}>
             {net.label}
           </button>
         ))}
       </div>
 
-      {/* Cycle Tabs */}
-      <div className="flex justify-center gap-3 mb-10">
-        {CYCLES.map(cyc => (
-          <button key={cyc} onClick={() => { setActiveCycle(cyc); setExpandedLine(null); setSubsFilter('all'); }}
-            className={`px-8 py-2 rounded-xl font-bold transition-all ${activeCycle===cyc?'bg-blue-600 text-white':'bg-[#111] text-gray-500 border border-gray-800 hover:border-gray-600'}`}>
-            سايكل {cyc}
-          </button>
-        ))}
-      </div>
+      {/* ══════════════════════════════════════════════════════════════
+          Cycle / Abroad Mode Tabs
+          ══════════════════════════════════════════════════════════════ */}
+      <div className="flex justify-center gap-2 mb-10 flex-wrap">
 
-      {/* Lines */}
-      <div className="max-w-7xl mx-auto space-y-4">
-        {filteredLines.length===0 && (
-          <div className="text-center text-gray-600 py-20">
-            {searchTerm ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد خطوط. اضغط + لإضافة خط جديد'}
-          </div>
+        {/* سايكل 1 */}
+        <button
+          onClick={() => { setAbroadMode(false); setActiveCycle('1'); setExpandedLine(null); setSubsFilter('all'); }}
+          className={`px-6 py-2.5 rounded-xl font-bold transition-all text-sm border-2 ${!abroadMode && activeCycle==='1' ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#111] text-gray-500 border-gray-800 hover:border-gray-600'}`}>
+          سايكل 1
+        </button>
+
+        {/* سايكل 15 */}
+        <button
+          onClick={() => { setAbroadMode(false); setActiveCycle('15'); setExpandedLine(null); setSubsFilter('all'); }}
+          className={`px-6 py-2.5 rounded-xl font-bold transition-all text-sm border-2 ${!abroadMode && activeCycle==='15' ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#111] text-gray-500 border-gray-800 hover:border-gray-600'}`}>
+          سايكل 15
+        </button>
+
+        {/* فاصل */}
+        {!isHome4G && (
+          <div className="w-px h-10 bg-gray-800 mx-1 self-center" />
         )}
 
-        {filteredLines.map(line => {
-          const stats  = getLineStats(line);
-          const isOpen = expandedLine === line.id;
-          const h      = line.home4gData || makeHome4G();
-          const isH4G  = line.network === 'Home4G';
+        {/* عملاء الخارج 1 */}
+        {!isHome4G && (
+          <button
+            onClick={() => { setAbroadMode(true); setAbroadCycle('1'); setExpandedAbroad(null); }}
+            className={`px-6 py-2.5 rounded-xl font-bold transition-all text-sm border-2 ${abroadMode && abroadCycle==='1' ? 'bg-white text-black border-white' : 'bg-[#111] text-gray-400 border-gray-700 hover:border-gray-500 hover:text-white'}`}>
+            ✈️ عملاء الخارج 1
+          </button>
+        )}
 
-          return (
-            <div key={line.id} className="bg-[#111] border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
-
-              {/* Header Row */}
-              <div onClick={() => setExpandedLine(isOpen?null:line.id)}
-                className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row items-center justify-between gap-4 transition-colors">
-
-                <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right">
-                  <p className="text-[9px] text-gray-500 uppercase mb-1">{isH4G?'صاحب البرينت / رقم الخط':'صاحب الخط / الرقم / التفعيل'}</p>
-                  <p className="font-bold text-white text-sm truncate">
-                    {isH4G?`${h.ownerName||'بدون اسم'} - ${h.linePhone||'0000'}`:`${line.ownerName||'بدون اسم'} - ${line.masterPhone||'0000'}`}
-                  </p>
-                  <p className="text-[10px] text-[#ca8a04] font-bold mt-1">
-                    {isH4G?`باقة: ${h.package||'غير محددة'}`:`تفعيل: ${line.activationDate||'غير محدد'}`}
-                  </p>
-                </div>
-
-                {isH4G ? (
-                  <div className="flex flex-row gap-2 w-full md:w-auto text-center">
-                    <StatBox label="الربح" value={`${stats.profit} ج`} color={stats.profit>=0?'text-green-500':'text-red-500'} />
-                    <StatBox label="ديون"  value={`${stats.debts} ج`}  color="text-orange-500" />
-                    <div className="bg-black/30 p-2 rounded-lg border border-[#ca8a04]/30 min-w-[80px]">
-                      <p className="text-[8px] text-gray-500">حالة الدفع</p>
-                      <p className={`font-bold text-xs ${h.paymentStatus==='مدفوع'?'text-green-500':h.paymentStatus==='جزئي'?'text-yellow-400':'text-red-400'}`}>{h.paymentStatus||'غير مدفوع'}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-row flex-wrap gap-2 w-full md:w-auto text-center items-center">
-                    <StatBox label="الربح"        value={`${stats.profit} ج`}        color={stats.profit>=0?'text-green-500':'text-red-500'} />
-                    <StatBox label="ديون"         value={`${stats.debts} ج`}         color="text-orange-500" />
-                    <StatBox label="جيجا متبقية"  value={`${stats.remainingGB} GB`}  color="text-blue-400" />
-                    <StatBox label="دقائق متبقية" value={`${stats.remainingMins} د`} color="text-green-400" />
-                    <ToggleBtn label="الفاتورة" active={line.billPaid}    onText="مدفوعة ✓"  offText="غير مدفوعة" onBorder="border-green-700 bg-green-900/30 text-green-400"  offBorder="border-red-900 bg-red-900/20 text-red-400"       onClick={(e)=>toggleField(e,line.id,'billPaid',line.billPaid)} />
-                    <ToggleBtn label="فواتشر"   active={line.voucherSent} onText="اتباعت ✓" offText="لسه"        onBorder="border-cyan-700 bg-cyan-900/30 text-cyan-400"    offBorder="border-gray-700 bg-gray-900/20 text-gray-500"    onClick={(e)=>toggleField(e,line.id,'voucherSent',line.voucherSent)} />
-                    <ToggleBtn label="TOD"      active={line.todSent}     onText="اتباعت ✓" offText="لسه"        onBorder="border-yellow-600 bg-yellow-900/30 text-yellow-400" offBorder="border-gray-700 bg-gray-900/20 text-gray-500"  onClick={(e)=>toggleField(e,line.id,'todSent',line.todSent)} />
-                  </div>
-                )}
-
-                <button onClick={(e)=>deleteLine(e,line.id)} className="text-gray-600 hover:text-red-500 transition-colors flex-shrink-0">🗑️</button>
-              </div>
-
-              {/* Expanded: Home4G */}
-              {isOpen && isH4G && (
-                <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
-                  <p className="text-xs text-[#ca8a04] font-bold mb-4 flex items-center gap-2"><span>🏠</span> بيانات خط Home 4G</p>
-                  <div className="overflow-x-auto">
-                    <div className="grid grid-cols-9 gap-2 items-end bg-[#111] p-4 rounded-2xl border border-[#ca8a04]/30 min-w-[1100px]">
-                      {[
-                        { label:'صاحب البرينت', field:'ownerName',     cls:'text-white' },
-                        { label:'رقم خط الهوم', field:'linePhone',      cls:'text-white' },
-                        { label:'رقم الخصم',    field:'discountPhone',  cls:'text-white' },
-                        { label:'اسم المشترك',  field:'subscriberName', cls:'text-white' },
-                        { label:'رقم تواصل',    field:'contactPhone',   cls:'text-white' },
-                        { label:'الباقة',        field:'package',        cls:'text-[#ca8a04]' },
-                      ].map(({ label, field, cls }) => (
-                        <div key={field} className="flex flex-col gap-1">
-                          <label className="text-[9px] text-gray-500 text-center">{label}</label>
-                          <input defaultValue={h[field]||''} onChange={(e)=>updateHome4G(line.id,field,e.target.value,h)}
-                            className={`bg-black border border-gray-800 rounded-lg p-2 text-[12px] ${cls} outline-none focus:border-[#ca8a04] text-center`} />
-                        </div>
-                      ))}
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-gray-500 text-center">حالة الدفع</label>
-                        <select value={h.paymentStatus} onChange={(e)=>updateHome4G(line.id,'paymentStatus',e.target.value,h)}
-                          className={`bg-black border border-gray-800 rounded-lg p-2 text-[12px] outline-none focus:border-[#ca8a04] text-center font-bold ${h.paymentStatus==='مدفوع'?'text-green-500':h.paymentStatus==='جزئي'?'text-yellow-400':'text-red-400'}`}>
-                          <option value="غير مدفوع">غير مدفوع</option>
-                          <option value="مدفوع">مدفوع</option>
-                          <option value="جزئي">جزئي</option>
-                        </select>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-gray-500 text-center">المبلغ المدفوع</label>
-                        <input type="number" defaultValue={h.paidAmount} onChange={(e)=>updateHome4G(line.id,'paidAmount',e.target.value,h)}
-                          className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-green-400 outline-none focus:border-[#ca8a04] text-center" />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-gray-500 text-center">التكلفة</label>
-                        <input type="number" defaultValue={h.baseCost} onChange={(e)=>updateHome4G(line.id,'baseCost',e.target.value,h)}
-                          className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-orange-400 outline-none focus:border-[#ca8a04] text-center" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Expanded: Normal Line */}
-              {isOpen && !isH4G && (
-                <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
-                  <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8 bg-[#161616] p-4 rounded-2xl border border-gray-800">
-                    {[
-                      { l:'الاسم',           k:'ownerName',      t:'text' },
-                      { l:'الرقم',           k:'masterPhone',    t:'text' },
-                      { l:'تاريخ التفعيل',  k:'activationDate', t:'text' },
-                      { l:'إجمالي الجيجا',  k:'totalGB',        t:'number' },
-                      { l:'إجمالي الدقائق', k:'totalMins',      t:'number' },
-                      { l:'التكلفة',         k:'baseCost',       t:'number' },
-                    ].map(({ l, k, t }) => (
-                      <div key={k} className="flex flex-col gap-2">
-                        <label className="text-[11px] font-bold text-gray-500 px-1">{l}</label>
-                        <input type={t} placeholder={k==='activationDate'?'مثال: 1/4':''} defaultValue={line[k]||''}
-                          onChange={(e)=>updateMasterLine(line.id,k,e.target.value)}
-                          className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none focus:border-[#ca8a04] transition-colors" />
-                      </div>
-                    ))}
-                    <div className="flex flex-col gap-2">
-                      <label className="text-[11px] font-bold text-gray-500 px-1">الفاتورة</label>
-                      <button onClick={(e)=>toggleField(e,line.id,'billPaid',line.billPaid)}
-                        className={`rounded-lg p-3 text-sm font-bold border-2 transition-all h-full ${line.billPaid?'border-green-600 bg-green-900/40 text-green-400':'border-red-900 bg-red-900/20 text-red-400'}`}>
-                        {line.billPaid?'مدفوعة ✓':'غير مدفوعة ✗'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 overflow-x-auto">
-                    {Array.from({length:7}).map((_,index) => {
-                      const sub      = (line.subscribers||[])[index] || makeSub();
-                      const totalMB  = Number(sub.gb||0)*1024;
-                      const remainMB = totalMB - Number(sub.sentMB||0);
-                      const debt     = Number(sub.price||0) - Number(sub.paidAmount||0);
-                      const isPaid   = debt <= 0;
-                      return (
-                        <div key={index} className="grid grid-cols-2 md:grid-cols-10 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 text-center hover:border-gray-700 transition-all min-w-[900px]">
-                          <SubField label="الاسم"><input defaultValue={sub.name} onChange={(e)=>updateSub(line.id,index,'name',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
-                          <SubField label="الرقم"><input defaultValue={sub.phone} onChange={(e)=>updateSub(line.id,index,'phone',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
-                          <SubField label="باقة GB">
-                            <select defaultValue={sub.gb} onChange={(e)=>updateSub(line.id,index,'gb',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none w-full">
-                              <option value="0">0</option>
-                              {Object.keys(PRICE_TABLE[line.network]||{}).map(g=><option key={g} value={g}>{g}</option>)}
-                            </select>
-                          </SubField>
-                          <SubField label="الدقائق"><input type="number" defaultValue={sub.mins} onChange={(e)=>updateSub(line.id,index,'mins',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
-                          <SubField label="إجمالي MB" hidden><span className="text-[12px] font-bold p-2 text-gray-500">{totalMB}</span></SubField>
-                          <SubField label="مُرسل MB"><input type="number" defaultValue={sub.sentMB} onChange={(e)=>updateSub(line.id,index,'sentMB',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
-                          <SubField label="متبقي MB" hidden><span className={`text-[12px] font-bold p-2 ${remainMB<0?'text-red-500':'text-green-500'}`}>{remainMB}</span></SubField>
-                          <SubField label="السعر"><input type="number" defaultValue={sub.price} onChange={(e)=>updateSub(line.id,index,'price',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
-                          <SubField label="المدفوع"><input type="number" defaultValue={sub.paidAmount} onChange={(e)=>updateSub(line.id,index,'paidAmount',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
-                          <button onClick={()=>handleClearDebt(line.id,index,line.subscribers,sub.price)}
-                            className={`text-[10px] font-bold mt-4 h-8 rounded-lg transition-all px-1 ${isPaid?'text-green-500 bg-green-500/10 border border-green-900':'text-red-500 bg-red-500/10 border border-red-900 hover:bg-red-500/20'}`}>
-                            {isPaid?'خالص ✓':`باقي ${debt}`}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {/* عملاء الخارج 15 */}
+        {!isHome4G && (
+          <button
+            onClick={() => { setAbroadMode(true); setAbroadCycle('15'); setExpandedAbroad(null); }}
+            className={`px-6 py-2.5 rounded-xl font-bold transition-all text-sm border-2 ${abroadMode && abroadCycle==='15' ? 'bg-white text-black border-white' : 'bg-[#111] text-gray-400 border-gray-700 hover:border-gray-500 hover:text-white'}`}>
+            ✈️ عملاء الخارج 15
+          </button>
+        )}
       </div>
 
       {/* ══════════════════════════════════════════════════════════════
-          قسم "العملاء اللي عليهم فلوس"
+          عرض عملاء الخارج
           ══════════════════════════════════════════════════════════════ */}
-      {!isHome4G && (
+      {abroadMode && !isHome4G ? (
+        <div className="max-w-7xl mx-auto">
+
+          {/* Summary bar */}
+          <div className="mb-4 flex items-center justify-between bg-[#111] border border-gray-800 rounded-2xl px-5 py-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">✈️</span>
+              <div>
+                <p className={`font-black text-sm ${netMeta?.color}`}>
+                  عملاء الخارج — {netMeta?.label} سايكل {abroadCycle}
+                </p>
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  {filteredAbroad.length} عميل &nbsp;·&nbsp;
+                  إجمالي الديون: <span className="text-red-400 font-bold">{filteredAbroad.filter(c=>Number(c.price||0)>Number(c.paidAmount||0)).reduce((a,c)=>a+Number(c.price||0)-Number(c.paidAmount||0),0)} ج</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* No results */}
+          {filteredAbroad.length === 0 && (
+            <div className="text-center text-gray-600 py-20">
+              {searchTerm ? 'لا توجد نتائج مطابقة للبحث' : 'لا يوجد عملاء خارج. اضغط + لإضافة عميل جديد'}
+            </div>
+          )}
+
+          {/* Abroad client cards */}
+          <div className="space-y-3">
+            {filteredAbroad.map((client) => {
+              const debt    = Number(client.price||0) - Number(client.paidAmount||0);
+              const isPaid  = debt <= 0 && Number(client.price||0) > 0;
+              const isPartialPay = Number(client.paidAmount||0) > 0 && debt > 0;
+              const isOpen  = expandedAbroad === client.id;
+
+              return (
+                <div key={client.id} className="bg-[#111] border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
+
+                  {/* Header row */}
+                  <div
+                    onClick={() => setExpandedAbroad(isOpen ? null : client.id)}
+                    className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row items-center justify-between gap-4 transition-colors"
+                  >
+                    <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-72 text-center md:text-right">
+                      <p className="text-[9px] text-gray-500 uppercase mb-1">الاسم / الرقم</p>
+                      <p className="font-bold text-white text-sm truncate">
+                        {client.name || 'بدون اسم'} — {client.phone || '0000'}
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-1 truncate">
+                        التاجر: <span className="text-[#ca8a04] font-bold">{client.traderName || 'غير محدد'}</span>
+                      </p>
+                    </div>
+
+                    <div className="flex flex-row flex-wrap gap-2 items-center">
+                      <StatBox label="الباقة"    value={`${client.gb||0} GB`}      color="text-blue-400" />
+                      <StatBox label="الدقائق"   value={`${client.mins||0} د`}     color="text-gray-300" />
+                      <StatBox label="السعر"     value={`${client.price||0} ج`}    color="text-gray-200" />
+                      <StatBox label="المدفوع"   value={`${client.paidAmount||0} ج`} color="text-yellow-400" />
+                      <div className={`p-2 rounded-lg border min-w-[75px] text-center ${isPaid?'border-green-700 bg-green-900/20':'isPartialPay'?'border-yellow-700 bg-yellow-900/20':'border-red-900 bg-red-900/20'}`}>
+                        <p className="text-[8px] text-gray-500">الدين</p>
+                        <p className={`font-bold text-xs ${isPaid?'text-green-400':isPartialPay?'text-yellow-400':'text-red-400'}`}>
+                          {isPaid ? 'خالص ✓' : `${debt} ج`}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleClearAbroadDebt(client.id, client.price); }}
+                        className={`text-[10px] font-bold px-3 py-2 rounded-lg transition-all border ${isPaid?'text-green-500 bg-green-500/10 border-green-900':'text-red-400 bg-red-500/10 border-red-900 hover:bg-red-500/20'}`}>
+                        {isPaid ? 'خالص ✓' : 'خلّص ✓'}
+                      </button>
+                    </div>
+
+                    <button onClick={(e) => deleteAbroadClient(e, client.id)} className="text-gray-600 hover:text-red-500 transition-colors flex-shrink-0">🗑️</button>
+                  </div>
+
+                  {/* Expanded: edit form */}
+                  {isOpen && (
+                    <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
+                      <p className="text-xs text-white font-bold mb-4 flex items-center gap-2">
+                        <span>✈️</span> بيانات عميل الخارج
+                      </p>
+                      <div className="overflow-x-auto">
+                        <div className="grid grid-cols-8 gap-3 items-end bg-[#111] p-4 rounded-2xl border border-gray-800 min-w-[900px]">
+
+                          {/* الاسم */}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">الاسم</label>
+                            <input
+                              defaultValue={client.name}
+                              onChange={(e) => updateAbroadClient(client.id, 'name', e.target.value, client)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none focus:border-[#ca8a04] text-center"
+                            />
+                          </div>
+
+                          {/* الرقم */}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">الرقم</label>
+                            <input
+                              defaultValue={client.phone}
+                              onChange={(e) => updateAbroadClient(client.id, 'phone', e.target.value, client)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none focus:border-[#ca8a04] text-center"
+                            />
+                          </div>
+
+                          {/* اسم التاجر */}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">اسم التاجر</label>
+                            <input
+                              defaultValue={client.traderName}
+                              onChange={(e) => updateAbroadClient(client.id, 'traderName', e.target.value, client)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-[#ca8a04] outline-none focus:border-[#ca8a04] text-center"
+                            />
+                          </div>
+
+                          {/* باقة GB */}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">باقة GB</label>
+                            <select
+                              defaultValue={client.gb}
+                              onChange={(e) => updateAbroadClient(client.id, 'gb', e.target.value, client)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none focus:border-[#ca8a04] text-center"
+                            >
+                              <option value="0">0</option>
+                              {Object.keys(PRICE_TABLE[activeTab]||{}).map(g => (
+                                <option key={g} value={g}>{g}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* الدقائق */}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">الدقائق</label>
+                            <input
+                              type="number"
+                              defaultValue={client.mins}
+                              onChange={(e) => updateAbroadClient(client.id, 'mins', e.target.value, client)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none focus:border-[#ca8a04] text-center"
+                            />
+                          </div>
+
+                          {/* السعر */}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">السعر</label>
+                            <input
+                              type="number"
+                              defaultValue={client.price}
+                              onChange={(e) => updateAbroadClient(client.id, 'price', e.target.value, client)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none focus:border-[#ca8a04] text-center"
+                            />
+                          </div>
+
+                          {/* المدفوع */}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">المدفوع</label>
+                            <input
+                              type="number"
+                              defaultValue={client.paidAmount}
+                              onChange={(e) => updateAbroadClient(client.id, 'paidAmount', e.target.value, client)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-green-400 outline-none focus:border-[#ca8a04] text-center"
+                            />
+                          </div>
+
+                          {/* زر خلّص */}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">الحالة</label>
+                            <button
+                              onClick={() => handleClearAbroadDebt(client.id, client.price)}
+                              className={`rounded-lg p-2 text-[12px] font-bold border-2 transition-all ${isPaid?'border-green-600 bg-green-900/40 text-green-400':'border-red-900 bg-red-900/20 text-red-400 hover:bg-red-900/40'}`}>
+                              {isPaid ? 'خالص ✓' : `باقي ${debt} ج`}
+                            </button>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Abroad total footer */}
+          {filteredAbroad.length > 0 && (
+            <div className="mt-4 bg-[#111] border border-gray-800 rounded-2xl p-4 flex flex-wrap gap-4 justify-between items-center">
+              <p className="text-[11px] text-gray-500 font-bold">إجمالي عملاء الخارج ({filteredAbroad.length} عميل)</p>
+              <div className="flex gap-4 flex-wrap">
+                <span className="text-sm text-gray-300 font-bold">إجمالي الأسعار: <span className="text-white">{filteredAbroad.reduce((a,c)=>a+Number(c.price||0),0)} ج</span></span>
+                <span className="text-sm text-yellow-400 font-bold">المدفوع: {filteredAbroad.reduce((a,c)=>a+Number(c.paidAmount||0),0)} ج</span>
+                <span className="text-sm text-red-400 font-bold">الديون: {filteredAbroad.filter(c=>Number(c.price||0)>Number(c.paidAmount||0)).reduce((a,c)=>a+Number(c.price||0)-Number(c.paidAmount||0),0)} ج</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+      ) : (
+        /* ══════════════════════════════════════════════════════════════
+           العرض الأصلي للخطوط
+           ══════════════════════════════════════════════════════════════ */
+        <div className="max-w-7xl mx-auto space-y-4">
+          {filteredLines.length===0 && (
+            <div className="text-center text-gray-600 py-20">
+              {searchTerm ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد خطوط. اضغط + لإضافة خط جديد'}
+            </div>
+          )}
+
+          {filteredLines.map(line => {
+            const stats  = getLineStats(line);
+            const isOpen = expandedLine === line.id;
+            const h      = line.home4gData || makeHome4G();
+            const isH4G  = line.network === 'Home4G';
+
+            return (
+              <div key={line.id} className="bg-[#111] border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
+
+                {/* Header Row */}
+                <div onClick={() => setExpandedLine(isOpen?null:line.id)}
+                  className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row items-center justify-between gap-4 transition-colors">
+
+                  <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right">
+                    <p className="text-[9px] text-gray-500 uppercase mb-1">{isH4G?'صاحب البرينت / رقم الخط':'صاحب الخط / الرقم / التفعيل'}</p>
+                    <p className="font-bold text-white text-sm truncate">
+                      {isH4G?`${h.ownerName||'بدون اسم'} - ${h.linePhone||'0000'}`:`${line.ownerName||'بدون اسم'} - ${line.masterPhone||'0000'}`}
+                    </p>
+                    <p className="text-[10px] text-[#ca8a04] font-bold mt-1">
+                      {isH4G?`باقة: ${h.package||'غير محددة'}`:`تفعيل: ${line.activationDate||'غير محدد'}`}
+                    </p>
+                  </div>
+
+                  {isH4G ? (
+                    <div className="flex flex-row gap-2 w-full md:w-auto text-center">
+                      <StatBox label="الربح" value={`${stats.profit} ج`} color={stats.profit>=0?'text-green-500':'text-red-500'} />
+                      <StatBox label="ديون"  value={`${stats.debts} ج`}  color="text-orange-500" />
+                      <div className="bg-black/30 p-2 rounded-lg border border-[#ca8a04]/30 min-w-[80px]">
+                        <p className="text-[8px] text-gray-500">حالة الدفع</p>
+                        <p className={`font-bold text-xs ${h.paymentStatus==='مدفوع'?'text-green-500':h.paymentStatus==='جزئي'?'text-yellow-400':'text-red-400'}`}>{h.paymentStatus||'غير مدفوع'}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-row flex-wrap gap-2 w-full md:w-auto text-center items-center">
+                      <StatBox label="الربح"        value={`${stats.profit} ج`}        color={stats.profit>=0?'text-green-500':'text-red-500'} />
+                      <StatBox label="ديون"         value={`${stats.debts} ج`}         color="text-orange-500" />
+                      <StatBox label="جيجا متبقية"  value={`${stats.remainingGB} GB`}  color="text-blue-400" />
+                      <StatBox label="دقائق متبقية" value={`${stats.remainingMins} د`} color="text-green-400" />
+                      <ToggleBtn label="الفاتورة" active={line.billPaid}    onText="مدفوعة ✓"  offText="غير مدفوعة" onBorder="border-green-700 bg-green-900/30 text-green-400"  offBorder="border-red-900 bg-red-900/20 text-red-400"       onClick={(e)=>toggleField(e,line.id,'billPaid',line.billPaid)} />
+                      <ToggleBtn label="فواتشر"   active={line.voucherSent} onText="اتباعت ✓" offText="لسه"        onBorder="border-cyan-700 bg-cyan-900/30 text-cyan-400"    offBorder="border-gray-700 bg-gray-900/20 text-gray-500"    onClick={(e)=>toggleField(e,line.id,'voucherSent',line.voucherSent)} />
+                      <ToggleBtn label="TOD"      active={line.todSent}     onText="اتباعت ✓" offText="لسه"        onBorder="border-yellow-600 bg-yellow-900/30 text-yellow-400" offBorder="border-gray-700 bg-gray-900/20 text-gray-500"  onClick={(e)=>toggleField(e,line.id,'todSent',line.todSent)} />
+                    </div>
+                  )}
+
+                  <button onClick={(e)=>deleteLine(e,line.id)} className="text-gray-600 hover:text-red-500 transition-colors flex-shrink-0">🗑️</button>
+                </div>
+
+                {/* Expanded: Home4G */}
+                {isOpen && isH4G && (
+                  <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
+                    <p className="text-xs text-[#ca8a04] font-bold mb-4 flex items-center gap-2"><span>🏠</span> بيانات خط Home 4G</p>
+                    <div className="overflow-x-auto">
+                      <div className="grid grid-cols-9 gap-2 items-end bg-[#111] p-4 rounded-2xl border border-[#ca8a04]/30 min-w-[1100px]">
+                        {[
+                          { label:'صاحب البرينت', field:'ownerName',     cls:'text-white' },
+                          { label:'رقم خط الهوم', field:'linePhone',      cls:'text-white' },
+                          { label:'رقم الخصم',    field:'discountPhone',  cls:'text-white' },
+                          { label:'اسم المشترك',  field:'subscriberName', cls:'text-white' },
+                          { label:'رقم تواصل',    field:'contactPhone',   cls:'text-white' },
+                          { label:'الباقة',        field:'package',        cls:'text-[#ca8a04]' },
+                        ].map(({ label, field, cls }) => (
+                          <div key={field} className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">{label}</label>
+                            <input defaultValue={h[field]||''} onChange={(e)=>updateHome4G(line.id,field,e.target.value,h)}
+                              className={`bg-black border border-gray-800 rounded-lg p-2 text-[12px] ${cls} outline-none focus:border-[#ca8a04] text-center`} />
+                          </div>
+                        ))}
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[9px] text-gray-500 text-center">حالة الدفع</label>
+                          <select value={h.paymentStatus} onChange={(e)=>updateHome4G(line.id,'paymentStatus',e.target.value,h)}
+                            className={`bg-black border border-gray-800 rounded-lg p-2 text-[12px] outline-none focus:border-[#ca8a04] text-center font-bold ${h.paymentStatus==='مدفوع'?'text-green-500':h.paymentStatus==='جزئي'?'text-yellow-400':'text-red-400'}`}>
+                            <option value="غير مدفوع">غير مدفوع</option>
+                            <option value="مدفوع">مدفوع</option>
+                            <option value="جزئي">جزئي</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[9px] text-gray-500 text-center">المبلغ المدفوع</label>
+                          <input type="number" defaultValue={h.paidAmount} onChange={(e)=>updateHome4G(line.id,'paidAmount',e.target.value,h)}
+                            className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-green-400 outline-none focus:border-[#ca8a04] text-center" />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[9px] text-gray-500 text-center">التكلفة</label>
+                          <input type="number" defaultValue={h.baseCost} onChange={(e)=>updateHome4G(line.id,'baseCost',e.target.value,h)}
+                            className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-orange-400 outline-none focus:border-[#ca8a04] text-center" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Expanded: Normal Line */}
+                {isOpen && !isH4G && (
+                  <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
+                    <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8 bg-[#161616] p-4 rounded-2xl border border-gray-800">
+                      {[
+                        { l:'الاسم',           k:'ownerName',      t:'text' },
+                        { l:'الرقم',           k:'masterPhone',    t:'text' },
+                        { l:'تاريخ التفعيل',  k:'activationDate', t:'text' },
+                        { l:'إجمالي الجيجا',  k:'totalGB',        t:'number' },
+                        { l:'إجمالي الدقائق', k:'totalMins',      t:'number' },
+                        { l:'التكلفة',         k:'baseCost',       t:'number' },
+                      ].map(({ l, k, t }) => (
+                        <div key={k} className="flex flex-col gap-2">
+                          <label className="text-[11px] font-bold text-gray-500 px-1">{l}</label>
+                          <input type={t} placeholder={k==='activationDate'?'مثال: 1/4':''} defaultValue={line[k]||''}
+                            onChange={(e)=>updateMasterLine(line.id,k,e.target.value)}
+                            className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none focus:border-[#ca8a04] transition-colors" />
+                        </div>
+                      ))}
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[11px] font-bold text-gray-500 px-1">الفاتورة</label>
+                        <button onClick={(e)=>toggleField(e,line.id,'billPaid',line.billPaid)}
+                          className={`rounded-lg p-3 text-sm font-bold border-2 transition-all h-full ${line.billPaid?'border-green-600 bg-green-900/40 text-green-400':'border-red-900 bg-red-900/20 text-red-400'}`}>
+                          {line.billPaid?'مدفوعة ✓':'غير مدفوعة ✗'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 overflow-x-auto">
+                      {Array.from({length:7}).map((_,index) => {
+                        const sub      = (line.subscribers||[])[index] || makeSub();
+                        const totalMB  = Number(sub.gb||0)*1024;
+                        const remainMB = totalMB - Number(sub.sentMB||0);
+                        const debt     = Number(sub.price||0) - Number(sub.paidAmount||0);
+                        const isPaid   = debt <= 0;
+                        return (
+                          <div key={index} className="grid grid-cols-2 md:grid-cols-10 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 text-center hover:border-gray-700 transition-all min-w-[900px]">
+                            <SubField label="الاسم"><input defaultValue={sub.name} onChange={(e)=>updateSub(line.id,index,'name',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
+                            <SubField label="الرقم"><input defaultValue={sub.phone} onChange={(e)=>updateSub(line.id,index,'phone',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
+                            <SubField label="باقة GB">
+                              <select defaultValue={sub.gb} onChange={(e)=>updateSub(line.id,index,'gb',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none w-full">
+                                <option value="0">0</option>
+                                {Object.keys(PRICE_TABLE[line.network]||{}).map(g=><option key={g} value={g}>{g}</option>)}
+                              </select>
+                            </SubField>
+                            <SubField label="الدقائق"><input type="number" defaultValue={sub.mins} onChange={(e)=>updateSub(line.id,index,'mins',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
+                            <SubField label="إجمالي MB" hidden><span className="text-[12px] font-bold p-2 text-gray-500">{totalMB}</span></SubField>
+                            <SubField label="مُرسل MB"><input type="number" defaultValue={sub.sentMB} onChange={(e)=>updateSub(line.id,index,'sentMB',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
+                            <SubField label="متبقي MB" hidden><span className={`text-[12px] font-bold p-2 ${remainMB<0?'text-red-500':'text-green-500'}`}>{remainMB}</span></SubField>
+                            <SubField label="السعر"><input type="number" defaultValue={sub.price} onChange={(e)=>updateSub(line.id,index,'price',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
+                            <SubField label="المدفوع"><input type="number" defaultValue={sub.paidAmount} onChange={(e)=>updateSub(line.id,index,'paidAmount',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
+                            <button onClick={()=>handleClearDebt(line.id,index,line.subscribers,sub.price)}
+                              className={`text-[10px] font-bold mt-4 h-8 rounded-lg transition-all px-1 ${isPaid?'text-green-500 bg-green-500/10 border border-green-900':'text-red-500 bg-red-500/10 border border-red-900 hover:bg-red-500/20'}`}>
+                              {isPaid?'خالص ✓':`باقي ${debt}`}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════
+          قسم "العملاء اللي عليهم فلوس" — يظهر فقط في وضع الخطوط
+          ══════════════════════════════════════════════════════════════ */}
+      {!isHome4G && !abroadMode && (
         <div className="max-w-7xl mx-auto mt-10">
 
           <button
@@ -923,7 +1152,6 @@ export default function TelecomSystem() {
 
           {showSubsList && (
             <div className="mt-2">
-              {/* زرارين الفلتر */}
               <div className="flex gap-2 px-4 pt-4 pb-3 bg-[#111] rounded-t-2xl border border-b-0 border-gray-800 flex-wrap">
                 {[
                   { key:'all',     label:'كل الديون', icon:'💸', count:countAll,    active:'border-[#ca8a04] bg-[#ca8a04]/15 text-[#ca8a04]',         badge:'bg-[#ca8a04] text-black' },
@@ -939,7 +1167,6 @@ export default function TelecomSystem() {
                 ))}
               </div>
 
-              {/* الجدول */}
               <div className="bg-[#111] border border-gray-800 rounded-b-2xl overflow-hidden">
                 {filteredSubs.length === 0 ? (
                   <div className="text-center text-gray-600 py-16">
@@ -1012,7 +1239,13 @@ export default function TelecomSystem() {
         <button onClick={exportToExcel} title="تصدير Excel منسّق" className="bg-green-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">📥</button>
         <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
         <label htmlFor="importFile" title="استيراد Excel" className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
-        <button onClick={addNewLine} title="إضافة خط جديد" className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center">+</button>
+        {/* زر + يضيف خط أو عميل خارج حسب الوضع الحالي */}
+        <button
+          onClick={abroadMode ? addNewAbroadClient : addNewLine}
+          title={abroadMode ? 'إضافة عميل خارج جديد' : 'إضافة خط جديد'}
+          className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center">
+          +
+        </button>
       </div>
     </div>
   );
