@@ -9,7 +9,7 @@ export default function TelecomSystem() {
   const [searchTerm, setSearchTerm] = useState('');
   const [masterLines, setMasterLines] = useState([]);
 
-  // جلب البيانات من Firebase فور فتح الصفحة
+  // ربط Firebase بالـ state الخاص بك
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "lines"), (snapshot) => {
       setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -50,24 +50,16 @@ export default function TelecomSystem() {
   const updateSub = async (lineId, subIndex, field, value) => {
     const line = masterLines.find(l => l.id === lineId);
     if (!line) return;
-    
-    const newSubs = [...line.subscribers];
+    const newSubs = line.subscribers ? [...line.subscribers] : [];
     if (!newSubs[subIndex]) newSubs[subIndex] = { name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
-    
-    if (field === 'gb') {
-      newSubs[subIndex].price = priceTable[line.network][value] || 0;
-    }
-    
+    if (field === 'gb') newSubs[subIndex].price = priceTable[line.network][value] || 0;
     newSubs[subIndex] = { ...newSubs[subIndex], [field]: value };
     await updateDoc(doc(db, "lines", lineId), { subscribers: newSubs });
   };
 
   const getStats = (line) => {
-    let actualCollected = 0;
-    let totalPrices = 0;
-    let usedGB = 0;
-    let usedMins = 0;
-    line.subscribers.forEach(sub => {
+    let actualCollected = 0, totalPrices = 0, usedGB = 0, usedMins = 0;
+    (line.subscribers || []).forEach(sub => {
       actualCollected += Number(sub.paidAmount || 0);
       totalPrices += Number(sub.price || 0);
       usedGB += Number(sub.gb || 0);
@@ -83,19 +75,17 @@ export default function TelecomSystem() {
 
   const filteredLines = masterLines.filter(line => {
     const searchLower = searchTerm.toLowerCase();
-    const matchesMaster = line.ownerName.toLowerCase().includes(searchLower) || line.masterPhone.includes(searchTerm);
-    const matchesSub = line.subscribers.some(sub => sub.name.toLowerCase().includes(searchLower) || sub.phone.includes(searchTerm));
+    const matchesMaster = (line.ownerName || '').toLowerCase().includes(searchLower) || (line.masterPhone || '').includes(searchTerm);
+    const matchesSub = (line.subscribers || []).some(sub => (sub.name || '').toLowerCase().includes(searchLower) || (sub.phone || '').includes(searchTerm));
     return (line.network === activeTab) && (matchesMaster || matchesSub || searchTerm === '');
   });
 
   return (
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-gray-200" dir="rtl">
       <header className="mb-6 text-center"><h1 className="text-4xl font-black text-[#ca8a04]">MO CONTROL</h1></header>
-
       <div className="max-w-xl mx-auto mb-8">
         <input type="text" placeholder="البحث باسم العميل أو الرقم..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-[#111] border border-gray-800 rounded-2xl py-4 px-6 text-sm outline-none focus:border-[#ca8a04]"/>
       </div>
-
       <div className="flex justify-center gap-3 mb-10">
         {['Etisalat', 'Vodafone', 'WE'].map(net => (
           <button key={net} onClick={() => {setActiveTab(net); setExpandedLine(null);}} className={`px-8 py-3 rounded-2xl font-bold border-2 ${activeTab === net ? 'border-[#ca8a04] bg-[#ca8a04] text-black' : 'border-gray-800 text-gray-500'}`}>
@@ -103,7 +93,6 @@ export default function TelecomSystem() {
           </button>
         ))}
       </div>
-
       <div className="max-w-6xl mx-auto space-y-4">
         {filteredLines.map(line => {
           const stats = getStats(line);
@@ -123,7 +112,6 @@ export default function TelecomSystem() {
                 </div>
                 <button onClick={(e) => deleteLine(e, line.id)} className="text-gray-600 hover:text-red-500">🗑️</button>
               </div>
-
               {isMainOpen && (
                 <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-[#161616] p-4 rounded-2xl border border-gray-800">
@@ -134,18 +122,16 @@ export default function TelecomSystem() {
                        </div>
                      ))}
                    </div>
-                   
                    {[...Array(7)].map((_, index) => {
-                      const sub = line.subscribers[index] || { name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
+                      const sub = (line.subscribers || [])[index] || { name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
                       const totalMB = sub.gb * 1024;
                       const remainingMB = totalMB - Number(sub.sentMB || 0);
                       const debt = Number(sub.price || 0) - Number(sub.paidAmount || 0);
-
                       return (
                         <div key={index} className="grid grid-cols-2 md:grid-cols-10 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 mb-2 text-center">
                           <div className="flex flex-col gap-1"><label className="text-[10px] font-bold text-gray-400">الاسم</label><input value={sub.name} onChange={(e) => updateSub(line.id, index, 'name', e.target.value)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white"/></div>
                           <div className="flex flex-col gap-1"><label className="text-[10px] font-bold text-gray-400">الرقم</label><input value={sub.phone} onChange={(e) => updateSub(line.id, index, 'phone', e.target.value)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white"/></div>
-                          <div className="flex flex-col gap-1"><label className="text-[10px] font-bold text-gray-400">الباقة (GB)</label><select value={sub.gb} onChange={(e) => updateSub(line.id, index, 'gb', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400"><option value="0">0</option>{Object.keys(priceTable[line.network]).map(g => <option key={g} value={g}>{g}</option>)}</select></div>
+                          <div className="flex flex-col gap-1"><label className="text-[10px] font-bold text-gray-400">الباقة (GB)</label><select value={sub.gb} onChange={(e) => updateSub(line.id, index, 'gb', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400"><option value="0">0</option>{Object.keys(priceTable[line.network] || {}).map(g => <option key={g} value={g}>{g}</option>)}</select></div>
                           <div className="flex flex-col gap-1"><label className="text-[10px] font-bold text-gray-400">الدقائق</label><input type="number" value={sub.mins} onChange={(e) => updateSub(line.id, index, 'mins', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white"/></div>
                           <div className="flex flex-col gap-1"><label className="text-[10px] font-bold text-gray-400">إجمالي MB</label><span className="text-[12px] font-bold p-2 text-gray-300">{totalMB}</span></div>
                           <div className="flex flex-col gap-1"><label className="text-[10px] font-bold text-gray-400">المُرسل (MB)</label><input type="number" value={sub.sentMB} onChange={(e) => updateSub(line.id, index, 'sentMB', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white"/></div>
@@ -162,7 +148,6 @@ export default function TelecomSystem() {
           );
         })}
       </div>
-
       <button onClick={addNewLine} className="fixed bottom-8 left-8 bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 active:scale-95 transition-all z-[9999]">+</button>
     </div>
   );
