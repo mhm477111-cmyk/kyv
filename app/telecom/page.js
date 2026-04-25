@@ -1,12 +1,21 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebaseConfigV2';
+import { db } from '@/lib/firebaseConfig';
 import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 
 export default function TelecomSystem() {
   const [activeTab, setActiveTab] = useState('Etisalat');
   const [expandedLine, setExpandedLine] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [masterLines, setMasterLines] = useState([]);
+
+  // جلب البيانات من Firebase فور فتح الصفحة
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "lines"), (snapshot) => {
+      setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return unsub;
+  }, []);
 
   const priceTable = {
     'Etisalat': { 20: 260, 25: 300, 30: 340, 40: 420, 50: 500, 60: 640 },
@@ -14,22 +23,8 @@ export default function TelecomSystem() {
     'WE': { 20: 250, 25: 280, 30: 310, 40: 360, 50: 410, 60: 520 }
   };
 
-  const [masterLines, setMasterLines] = useState([
-    {
-      id: Date.now(),
-      network: 'Etisalat',
-      masterPhone: '01101902909',
-      ownerName: 'محمد حسين',
-      baseCost: 1860,
-      totalGB: 195,
-      totalMins: 10500,
-      subscribers: []
-    }
-  ]);
-
-  const addNewLine = () => {
+  const addNewLine = async () => {
     const newLine = {
-      id: Date.now(),
       network: activeTab,
       masterPhone: '',
       ownerName: 'خط جديد',
@@ -38,34 +33,33 @@ export default function TelecomSystem() {
       totalMins: 0,
       subscribers: []
     };
-    setMasterLines(prev => [...prev, newLine]);
-    setExpandedLine(newLine.id);
+    await addDoc(collection(db, "lines"), newLine);
   };
 
-  const deleteLine = (e, id) => {
+  const deleteLine = async (e, id) => {
     e.stopPropagation();
     if(window.confirm("هل تريد حذف هذا الخط نهائياً؟")) {
-      setMasterLines(prev => prev.filter(line => line.id !== id));
+      await deleteDoc(doc(db, "lines", id));
     }
   };
 
-  const updateMasterLine = (lineId, field, value) => {
-    setMasterLines(prev => prev.map(line => line.id === lineId ? { ...line, [field]: value } : line));
+  const updateMasterLine = async (lineId, field, value) => {
+    await updateDoc(doc(db, "lines", lineId), { [field]: value });
   };
 
-  const updateSub = (lineId, subIndex, field, value) => {
-    setMasterLines(prev => prev.map(line => {
-      if (line.id === lineId) {
-        const newSubs = [...line.subscribers];
-        if (!newSubs[subIndex]) newSubs[subIndex] = { id: Date.now() + subIndex, name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
-        if (field === 'gb') {
-          newSubs[subIndex].price = priceTable[line.network][value] || 0;
-        }
-        newSubs[subIndex] = { ...newSubs[subIndex], [field]: value };
-        return { ...line, subscribers: newSubs };
-      }
-      return line;
-    }));
+  const updateSub = async (lineId, subIndex, field, value) => {
+    const line = masterLines.find(l => l.id === lineId);
+    if (!line) return;
+    
+    const newSubs = [...line.subscribers];
+    if (!newSubs[subIndex]) newSubs[subIndex] = { name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
+    
+    if (field === 'gb') {
+      newSubs[subIndex].price = priceTable[line.network][value] || 0;
+    }
+    
+    newSubs[subIndex] = { ...newSubs[subIndex], [field]: value };
+    await updateDoc(doc(db, "lines", lineId), { subscribers: newSubs });
   };
 
   const getStats = (line) => {
@@ -80,10 +74,10 @@ export default function TelecomSystem() {
       usedMins += Number(sub.mins || 0);
     });
     return {
-      profit: actualCollected - line.baseCost,
+      profit: actualCollected - (line.baseCost || 0),
       debts: totalPrices - actualCollected,
-      remainingGB: line.totalGB - usedGB,
-      remainingMins: line.totalMins - usedMins
+      remainingGB: (line.totalGB || 0) - usedGB,
+      remainingMins: (line.totalMins || 0) - usedMins
     };
   };
 
@@ -136,7 +130,7 @@ export default function TelecomSystem() {
                      {[ {l: "الاسم", k: "ownerName", t: "text"}, {l: "الرقم", k: "masterPhone", t: "text"}, {l: "إجمالي الجيجا", k: "totalGB", t: "number"}, {l: "إجمالي الدقائق", k: "totalMins", t: "number"}, {l: "التكلفة", k: "baseCost", t: "number"} ].map((item, i) => (
                        <div key={i} className="flex flex-col gap-2">
                          <label className="text-[12px] font-bold text-gray-400">{item.l}</label>
-                         <input type={item.t} value={line[item.k]} onChange={(e) => updateMasterLine(line.id, item.k, item.t === 'number' ? Number(e.target.value) : e.target.value)} className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none"/>
+                         <input type={item.t} value={line[item.k] || ""} onChange={(e) => updateMasterLine(line.id, item.k, item.t === 'number' ? Number(e.target.value) : e.target.value)} className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none"/>
                        </div>
                      ))}
                    </div>
