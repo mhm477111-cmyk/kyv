@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebaseConfigV2';
-import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
 
 export default function TelecomSystem() {
@@ -17,14 +17,18 @@ export default function TelecomSystem() {
     'WE': { 20: 250, 25: 280, 30: 310, 40: 360, 50: 410, 60: 520 }
   };
 
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "lines"), (snapshot) => {
-      setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-    return () => unsub();
-  }, []);
+  // دالة لجلب البيانات مرة واحدة فقط لتوفير القراءات
+  const fetchLines = async () => {
+    const snapshot = await getDocs(collection(db, "lines"));
+    setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
 
-  // ---------- بداية دوال الاستيراد والتصدير ----------
+  useEffect(() => { fetchLines(); }, []);
+
+  // دالة لتحديث الشاشة فوراً دون إعادة جلب البيانات من Firebase
+  const updateLocalState = (lineId, newData) => {
+    setMasterLines(prev => prev.map(l => l.id === lineId ? { ...l, ...newData } : l));
+  };
 
   const exportToExcel = () => {
     const dataToExport = masterLines.map(line => ({
@@ -48,13 +52,11 @@ export default function TelecomSystem() {
   const importFromExcel = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
     const reader = new FileReader();
     reader.onload = async (evt) => {
       const data = new Uint8Array(evt.target.result);
       const workbook = XLSX.read(data, { type: 'array' });
       const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-      
       for (const item of jsonData) {
         await setDoc(doc(db, "lines", item["ID"]), {
           ownerName: item["صاحب الخط"] || '',
@@ -69,45 +71,37 @@ export default function TelecomSystem() {
         });
       }
       alert("تم استعادة البيانات بنجاح!");
+      fetchLines();
     };
     reader.readAsArrayBuffer(file);
   };
 
-  // ---------- نهاية دوال الاستيراد والتصدير ----------
-
   const addNewLine = async () => {
-    try {
-      await addDoc(collection(db, "lines"), {
-        network: activeTab,
-        cycle: activeCycle,
-        masterPhone: '',
-        ownerName: 'خط جديد',
-        activationDate: '',
-        baseCost: 0,
-        totalGB: 0,
-        totalMins: 0,
-        subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
-      });
-    } catch (err) {
-      alert("خطأ في الاتصال بقاعدة البيانات");
-    }
+    await addDoc(collection(db, "lines"), {
+      network: activeTab, cycle: activeCycle, masterPhone: '', ownerName: 'خط جديد',
+      activationDate: '', baseCost: 0, totalGB: 0, totalMins: 0,
+      subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
+    });
+    fetchLines();
   };
 
   const deleteLine = async (e, id) => {
     e.stopPropagation();
     if(window.confirm("هل تريد حذف هذا الخط نهائياً؟")) {
       await deleteDoc(doc(db, "lines", id));
+      fetchLines();
     }
   };
 
   const updateMasterLine = async (lineId, field, value) => {
-    const val = (field === 'totalGB' || field === 'totalMins' || field === 'baseCost') ? Number(value) : value;
+    const val = (['totalGB', 'totalMins', 'baseCost'].includes(field)) ? Number(value) : value;
     await updateDoc(doc(db, "lines", lineId), { [field]: val });
+    updateLocalState(lineId, { [field]: val });
   };
 
   const updateSub = async (lineId, subIndex, field, value, currentSubscribers) => {
     let newSubs = currentSubscribers ? [...currentSubscribers] : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 });
-    const updatedValue = (field === 'gb' || field === 'sentMB' || field === 'mins' || field === 'price' || field === 'paidAmount') ? Number(value) : value;
+    const updatedValue = (['gb', 'sentMB', 'mins', 'price', 'paidAmount'].includes(field)) ? Number(value) : value;
     newSubs[subIndex] = { ...newSubs[subIndex], [field]: updatedValue };
     
     if (field === 'gb') {
@@ -115,6 +109,7 @@ export default function TelecomSystem() {
       newSubs[subIndex].price = priceTable[line?.network]?.[updatedValue] || 0;
     }
     await updateDoc(doc(db, "lines", lineId), { subscribers: newSubs });
+    updateLocalState(lineId, { subscribers: newSubs });
   };
 
   const getStats = (line) => {
@@ -226,16 +221,12 @@ export default function TelecomSystem() {
         })}
       </div>
 
-      {/* منطقة الأزرار في الأسفل يساراً */}
-<div className="fixed bottom-8 left-8 flex gap-3 z-[999]">
-  <button onClick={exportToExcel} title="تصدير" className="bg-green-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">📥</button>
-  
-  <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
-  <label htmlFor="importFile" title="استعادة" className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
-
-  <button onClick={addNewLine} title="إضافة" className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center">+</button>
-</div>
-
+      <div className="fixed bottom-8 left-8 flex gap-3 z-[999]">
+        <button onClick={exportToExcel} title="تصدير" className="bg-green-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">📥</button>
+        <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
+        <label htmlFor="importFile" title="استعادة" className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
+        <button onClick={addNewLine} title="إضافة" className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center">+</button>
+      </div>
     </div>
   );
 }
