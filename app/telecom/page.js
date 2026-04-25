@@ -378,14 +378,12 @@ export default function TelecomSystem() {
                       {/* 6. الباقة */}
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">الباقة</label>
-                        <select
+                        <input
                           value={h.package}
                           onChange={(e) => updateHome4G(line.id, 'package', e.target.value, h)}
+                          placeholder="مثال: 100GB"
                           className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-purple-400 outline-none focus:border-purple-500 text-center"
-                        >
-                          <option value="">اختر</option>
-                          {home4GPackages.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
+                        />
                       </div>
 
                       {/* 7. حالة الدفع */}
@@ -518,8 +516,8 @@ export default function TelecomSystem() {
         })}
       </div>
 
-      {/* Bottom Buttons */}
-      <div className="fixed bottom-8 left-8 flex gap-3 z-[999]">
+      {/* Bottom Buttons - inline at bottom of page */}
+      <div className="max-w-7xl mx-auto mt-10 pb-8 flex justify-end gap-3">
         <button onClick={exportToExcel} title="تصدير" className="bg-green-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">📥</button>
         <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
         <label htmlFor="importFile" title="استعادة" className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
