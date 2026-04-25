@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react';
 import { auth, db } from '@/lib/firebaseConfig';
 import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 
-'use client';
-import { useState } from 'react';
+
 
 export default function TelecomSystem() {
   const [activeTab, setActiveTab] = useState('Etisalat');
