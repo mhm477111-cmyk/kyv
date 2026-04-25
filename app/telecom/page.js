@@ -111,7 +111,6 @@ export default function TelecomSystem() {
                 
                 {/* الرأس المحدث: يظهر فيه التاريخ */}
                 <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right">
-                  <p className="text-[9px] text-gray-500 uppercase mb-1">صاحب الخط / الرقم / التفعيل</p>
                   <p className="font-bold text-white text-sm truncate">{line.ownerName || 'بدون اسم'} - {line.masterPhone || '0000'}</p>
                   <p className="text-[10px] text-[#ca8a04] font-bold mt-1">تفعيل: {line.activationDate || 'غير محدد'}</p>
                 </div>
