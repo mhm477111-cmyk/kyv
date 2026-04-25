@@ -157,21 +157,17 @@ export default function TelecomSystem() {
                       const debt = Number(sub.price || 0) - Number(sub.paidAmount || 0);
 
                       return (
-                        <div key={index} className="grid grid-cols-2 md:grid-cols-9 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 mb-2 text-center">
-                          <input placeholder="الاسم" value={sub.name} onChange={(e) => updateSub(line.id, index, 'name', e.target.value)} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] outline-none"/>
-                          <input placeholder="الرقم" value={sub.phone} onChange={(e) => updateSub(line.id, index, 'phone', e.target.value)} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] outline-none"/>
-                          <select value={sub.gb} onChange={(e) => updateSub(line.id, index, 'gb', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] text-blue-400">
-                             <option value="0">الباقة</option>
-                             {[20, 25, 30, 35, 40].map(g => <option key={g} value={g}>{g} GB</option>)}
-                          </select>
-                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">إجمالي MB</label><span className="text-[10px] text-blue-400 font-bold">{totalMB}</span></div>
-                          <input type="number" placeholder="تم إرسال" value={sub.sentMB} onChange={(e) => updateSub(line.id, index, 'sentMB', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] text-green-500"/>
-                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">المتبقي MB</label><span className={`text-[10px] font-bold ${remainingMB < 0 ? 'text-red-500' : 'text-green-500'}`}>{remainingMB}</span></div>
-                          <input type="number" value={sub.price} onChange={(e) => updateSub(line.id, index, 'price', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] text-yellow-500"/>
-                          <input type="number" value={sub.paidAmount} onChange={(e) => updateSub(line.id, index, 'paidAmount', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] text-green-500"/>
-                          <button onClick={() => updateSub(line.id, index, 'paidAmount', sub.price)} className={`text-[9px] font-bold ${debt > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                            {debt > 0 ? `باقي ${debt}` : 'خالص ✓'}
-                          </button>
+                        <div key={index} className="grid grid-cols-2 md:grid-cols-10 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 mb-2 text-center">
+                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">الاسم</label><input placeholder="الاسم" value={sub.name} onChange={(e) => updateSub(line.id, index, 'name', e.target.value)} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] outline-none"/></div>
+                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">الرقم</label><input placeholder="الرقم" value={sub.phone} onChange={(e) => updateSub(line.id, index, 'phone', e.target.value)} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] outline-none"/></div>
+                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">الباقة</label><select value={sub.gb} onChange={(e) => updateSub(line.id, index, 'gb', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] text-blue-400"><option value="0">0</option>{[20, 25, 30, 35, 40].map(g => <option key={g} value={g}>{g}</option>)}</select></div>
+                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">الدقائق</label><input type="number" value={sub.mins} onChange={(e) => updateSub(line.id, index, 'mins', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] text-green-500"/></div>
+                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">إجمالي MB</label><span className="text-[10px] text-blue-400 font-bold p-2">{totalMB}</span></div>
+                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">تم إرسال</label><input type="number" value={sub.sentMB} onChange={(e) => updateSub(line.id, index, 'sentMB', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] text-green-500"/></div>
+                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">المتبقي MB</label><span className={`text-[10px] font-bold p-2 ${remainingMB < 0 ? 'text-red-500' : 'text-green-500'}`}>{remainingMB}</span></div>
+                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">السعر</label><input type="number" value={sub.price} onChange={(e) => updateSub(line.id, index, 'price', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] text-yellow-500"/></div>
+                          <div className="flex flex-col"><label className="text-[7px] text-gray-500">المدفوع</label><input type="number" value={sub.paidAmount} onChange={(e) => updateSub(line.id, index, 'paidAmount', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[10px] text-green-500"/></div>
+                          <button onClick={() => updateSub(line.id, index, 'paidAmount', sub.price)} className={`text-[9px] font-bold ${debt > 0 ? 'text-red-500' : 'text-green-500'}`}>{debt > 0 ? `باقي ${debt}` : 'خالص ✓'}</button>
                         </div>
                       );
                     })}
