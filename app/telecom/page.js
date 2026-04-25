@@ -28,7 +28,7 @@ export default function TelecomSystem() {
         network: activeTab,
         masterPhone: '',
         ownerName: 'خط جديد',
-        activationDate: '', // تاريخ التفعيل للخط الأساسي
+        activationDate: '',
         baseCost: 0,
         totalGB: 0,
         totalMins: 0,
@@ -108,9 +108,12 @@ export default function TelecomSystem() {
           return (
             <div key={line.id} className="bg-[#111] border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
               <div onClick={() => setExpandedLine(isMainOpen ? null : line.id)} className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row items-center justify-between gap-4 transition-colors">
-                <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-52 text-center md:text-right">
-                  <p className="text-[9px] text-gray-500 uppercase mb-1">صاحب الخط / الرقم</p>
+                
+                {/* الرأس المحدث: يظهر فيه التاريخ */}
+                <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right">
+                  <p className="text-[9px] text-gray-500 uppercase mb-1">صاحب الخط / الرقم / التفعيل</p>
                   <p className="font-bold text-white text-sm truncate">{line.ownerName || 'بدون اسم'} - {line.masterPhone || '0000'}</p>
+                  <p className="text-[10px] text-[#ca8a04] font-bold mt-1">تفعيل: {line.activationDate || 'غير محدد'}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto text-center">
