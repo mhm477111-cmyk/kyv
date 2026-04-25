@@ -46,6 +46,371 @@ const makeSub       = () => ({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1
 const makeSubsArray = () => Array(7).fill(null).map(makeSub);
 
 // ─────────────────────────────────────────────────────────────────
+// Excel Export Helper — مرتب ومنسّق
+// ─────────────────────────────────────────────────────────────────
+function buildFormattedExcel(allLines) {
+  const wb = XLSX.utils.book_new();
+
+  // تجميع الخطوط حسب شبكة + سايكل
+  const groups = {};
+  allLines.forEach(line => {
+    const key = `${line.network || 'Unknown'} سايكل ${line.cycle || '?'}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(line);
+  });
+
+  // ─── ألوان بـ ARGB ───────────────────────────────────────────
+  const COLORS = {
+    headerBg:    'FF1565C0',  // أزرق داكن
+    headerFg:    'FFFFFFFF',
+    colHdrBg:    'FF1976D2',  // أزرق متوسط
+    colHdrFg:    'FFFFFFFF',
+    paidBg:      'FFE8F5E9',  // أخضر فاتح
+    paidFg:      'FF1B5E20',
+    unpaidBg:    'FFFFEBEE',  // أحمر فاتح
+    unpaidFg:    'FFB71C1C',
+    partialBg:   'FFFFF8E1',  // أصفر فاتح
+    partialFg:   'FFE65100',
+    totalBg:     'FF0D47A1',  // أزرق غامق
+    totalFg:     'FFFFFFFF',
+    lineBg:      'FFE3F2FD',  // أزرق فاتح جداً
+    emptyBg:     'FFF5F5F5',  // رمادي
+    altBg:       'FFFAFAFA',
+    white:       'FFFFFFFF',
+    doneBg:      'FFE8F5E9',
+    doneFg:      'FF1B5E20',
+    notDoneBg:   'FFFFEBEE',
+    notDoneFg:   'FFB71C1C',
+  };
+
+  // ─── دوال مساعدة ────────────────────────────────────────────
+  const cellStyle = (bgColor, fgColor = 'FF000000', bold = false, sz = 11, hAlign = 'center') => ({
+    fill:   { patternType: 'solid', fgColor: { rgb: bgColor } },
+    font:   { bold, color: { rgb: fgColor }, sz, name: 'Cairo' },
+    alignment: { horizontal: hAlign, vertical: 'center', readingOrder: 2, wrapText: false },
+    border: {
+      top:    { style: 'thin', color: { rgb: 'FFBDBDBD' } },
+      bottom: { style: 'thin', color: { rgb: 'FFBDBDBD' } },
+      left:   { style: 'thin', color: { rgb: 'FFBDBDBD' } },
+      right:  { style: 'thin', color: { rgb: 'FFBDBDBD' } },
+    },
+  });
+
+  const thickCellStyle = (bgColor, fgColor = 'FFFFFFFF', bold = true, sz = 11) => ({
+    fill:   { patternType: 'solid', fgColor: { rgb: bgColor } },
+    font:   { bold, color: { rgb: fgColor }, sz, name: 'Cairo' },
+    alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 },
+    border: {
+      top:    { style: 'medium', color: { rgb: 'FF9E9E9E' } },
+      bottom: { style: 'medium', color: { rgb: 'FF9E9E9E' } },
+      left:   { style: 'medium', color: { rgb: 'FF9E9E9E' } },
+      right:  { style: 'medium', color: { rgb: 'FF9E9E9E' } },
+    },
+  });
+
+  // عرض الأعمدة
+  const COL_WIDTHS = [8, 8, 9, 12, 20, 12, 12, 14, 14, 18, 20, 20, 14, 10];
+  // الأعمدة: الباقة | الدقا | السعر | الدفع | العميل | Total Giga | Total Min | Total Price | P&L | رقم البيرنت | تفاصيل صاحب الخط | تفاصيل2 | تاريخ التفعيل | 4G
+
+  Object.entries(groups).forEach(([sheetName, lines]) => {
+    const aoa   = [];   // array of arrays للبيانات
+    const rowStyles = []; // array of arrays للستايلات
+    const merges  = [];   // دمج الخلايا
+    const rowHeights = [];
+
+    const pushRow = (cells, styles, height = 20) => {
+      aoa.push(cells);
+      rowStyles.push(styles);
+      rowHeights.push(height);
+    };
+
+    lines.forEach(line => {
+      const subs        = line.subscribers || [];
+      const isH4G       = line.network === 'Home4G';
+      const h           = line.home4gData || makeHome4G();
+
+      // حسابات الخط
+      const baseCost    = Number(line.baseCost || 0);
+      const totalPrice  = isH4G ? Number(h.paidAmount || 0) : subs.reduce((a, s) => a + Number(s.price || 0), 0);
+      const totalPaid   = isH4G ? Number(h.paidAmount || 0) : subs.reduce((a, s) => a + Number(s.paidAmount || 0), 0);
+      const totalGB     = Number(line.totalGB || 0);
+      const totalMins   = Number(line.totalMins || 0);
+      const usedGB      = isH4G ? 0 : subs.reduce((a, s) => a + Number(s.gb || 0), 0);
+      const usedMins    = isH4G ? 0 : subs.reduce((a, s) => a + Number(s.mins || 0), 0);
+      const profitLoss  = totalPaid - baseCost;
+      const plSign      = profitLoss >= 0 ? '+' : '';
+
+      const startRow    = aoa.length; // نحتاجه للـ merge
+
+      // ════════════════════════════════════════════════════════
+      // صف 1: هيدر الخط الرئيسي
+      // ════════════════════════════════════════════════════════
+      const ownerDisplay = isH4G
+        ? `🏠 ${h.ownerName || 'بدون اسم'} — ${h.linePhone || ''}`
+        : line.ownerName || 'بدون اسم';
+
+      const billTxt    = line.billPaid    ? '✓ مدفوعة'  : '✗ غير مدفوعة';
+      const voucherTxt = line.voucherSent ? '✓ فواتشر'  : '✗ فواتشر';
+      const todTxt     = line.todSent     ? '✓ TOD'     : '✗ TOD';
+
+      pushRow(
+        [
+          ownerDisplay, '', '', '', '',
+          `جيجا: ${totalGB} GB`,
+          `دقائق: ${totalMins}`,
+          `ج.م. ${baseCost.toLocaleString('ar-EG')}`,
+          `ج.م. ${plSign}${profitLoss.toLocaleString('ar-EG')}`,
+          isH4G ? (h.linePhone || '') : (line.masterPhone || ''),
+          billTxt, voucherTxt, todTxt,
+          line.activationDate || (isH4G ? (h.package || '') : ''),
+        ],
+        [
+          cellStyle(COLORS.headerBg, COLORS.headerFg, true, 14, 'right'), // col1 — اسم
+          cellStyle(COLORS.headerBg, COLORS.headerFg, false, 10),
+          cellStyle(COLORS.headerBg, COLORS.headerFg, false, 10),
+          cellStyle(COLORS.headerBg, COLORS.headerFg, false, 10),
+          cellStyle(COLORS.headerBg, COLORS.headerFg, false, 10),
+          cellStyle(COLORS.headerBg, COLORS.headerFg, true, 10),
+          cellStyle(COLORS.headerBg, COLORS.headerFg, true, 10),
+          cellStyle(COLORS.headerBg, COLORS.headerFg, true, 11),
+          cellStyle(
+            COLORS.headerBg,
+            profitLoss >= 0 ? 'FF81C784' : 'FFEF9A9A',
+            true, 12
+          ),
+          cellStyle(COLORS.headerBg, COLORS.headerFg, true, 10),
+          cellStyle(line.billPaid    ? COLORS.doneBg : COLORS.notDoneBg, line.billPaid    ? COLORS.doneFg : COLORS.notDoneFg, true, 10),
+          cellStyle(line.voucherSent ? COLORS.doneBg : COLORS.notDoneBg, line.voucherSent ? COLORS.doneFg : COLORS.notDoneFg, true, 10),
+          cellStyle(line.todSent     ? COLORS.doneBg : COLORS.notDoneBg, line.todSent     ? COLORS.doneFg : COLORS.notDoneFg, true, 10),
+          cellStyle(COLORS.headerBg, 'FFFFD54F', true, 11),
+        ],
+        28
+      );
+
+      // merge الاسم من col1 إلى col5
+      merges.push({ s: { r: startRow, c: 0 }, e: { r: startRow, c: 4 } });
+
+      // ════════════════════════════════════════════════════════
+      // صف 2: هيدر الأعمدة
+      // ════════════════════════════════════════════════════════
+      pushRow(
+        ['الباقة','الدقا','السعر','الدفع','العميل','Total Giga','Total Min','Total Price','P & L','رقم البيرنت','تفاصيل صاحب الخط','','تاريخ التفعيل','4G'],
+        Array(14).fill(cellStyle(COLORS.colHdrBg, COLORS.colHdrFg, true, 9)),
+        22
+      );
+
+      if (!isH4G) {
+        // ════════════════════════════════════════════════════════
+        // صفوف المشتركين
+        // ════════════════════════════════════════════════════════
+        subs.forEach((sub, si) => {
+          const isEmpty   = !sub.name && !sub.phone && !sub.gb;
+          const paid      = Number(sub.paidAmount || 0);
+          const price     = Number(sub.price || 0);
+          const debt      = price - paid;
+          const isPaid    = debt <= 0 && price > 0;
+          const isPartial = debt > 0 && paid > 0;
+          const isFullDebt = debt > 0 && paid === 0 && price > 0;
+          const totalMB  = Number(sub.gb || 0) * 1024;
+          const sentMB   = Number(sub.sentMB || 0);
+          const remainMB = totalMB - sentMB;
+
+          const rowBg = isEmpty ? COLORS.emptyBg : si % 2 === 0 ? COLORS.white : COLORS.altBg;
+          const baseStyle = (bold = false, sz = 10, hAlign = 'center') =>
+            cellStyle(rowBg, 'FF212121', bold, sz, hAlign);
+
+          // تحديد ستايل خلية الدفع
+          let payStyle, payVal;
+          if (isEmpty) {
+            payStyle = cellStyle(COLORS.emptyBg, 'FFBDBDBD', false, 9);
+            payVal   = '';
+          } else if (isPaid) {
+            payStyle = cellStyle(COLORS.paidBg, COLORS.paidFg, true, 10);
+            payVal   = 'دفع ✓';
+          } else if (isPartial) {
+            payStyle = cellStyle(COLORS.partialBg, COLORS.partialFg, true, 10);
+            payVal   = `جزئي ${paid}`;
+          } else if (isFullDebt) {
+            payStyle = cellStyle(COLORS.unpaidBg, COLORS.unpaidFg, true, 10);
+            payVal   = 'لا ✗';
+          } else {
+            payStyle = baseStyle();
+            payVal   = '';
+          }
+
+          pushRow(
+            [
+              sub.gb || '',
+              sub.mins || '',
+              price || '',
+              payVal,
+              sub.name || '',
+              totalMB || '',
+              sub.mins || '',
+              price || '',
+              remainMB || '',
+              '',  // رقم البيرنت — بيانات الخط مش المشترك
+              sub.phone || '',
+              '',
+              '',
+              '',
+            ],
+            [
+              baseStyle(),
+              baseStyle(),
+              baseStyle(),
+              payStyle,
+              baseStyle(true, 11, 'right'),
+              baseStyle(false, 9),
+              baseStyle(false, 9),
+              baseStyle(false, 9),
+              cellStyle(
+                rowBg,
+                remainMB < 0 ? 'FFEF5350' : 'FF43A047',
+                false, 9
+              ),
+              baseStyle(false, 9),
+              baseStyle(false, 10, 'center'),
+              baseStyle(false, 9),
+              baseStyle(false, 9),
+              baseStyle(false, 9),
+            ],
+            20
+          );
+        });
+      } else {
+        // ════════════════════════════════════════════════════════
+        // صف Home4G — مشترك واحد
+        // ════════════════════════════════════════════════════════
+        const hPaid   = Number(h.paidAmount || 0);
+        const hCost   = Number(h.baseCost || 0);
+        const hDebt   = hCost - hPaid;
+        const hStatus = h.paymentStatus || 'غير مدفوع';
+        const statusBg = hStatus === 'مدفوع' ? COLORS.paidBg : hStatus === 'جزئي' ? COLORS.partialBg : COLORS.unpaidBg;
+        const statusFg = hStatus === 'مدفوع' ? COLORS.paidFg : hStatus === 'جزئي' ? COLORS.partialFg : COLORS.unpaidFg;
+
+        pushRow(
+          [
+            h.package || '', '', hCost || '', hStatus,
+            h.subscriberName || '',
+            '', '', hPaid || '', hDebt > 0 ? `-${hDebt}` : '✓',
+            h.linePhone || '',
+            h.ownerName || '',
+            h.discountPhone || '',
+            h.contactPhone || '',
+            '🏠',
+          ],
+          [
+            cellStyle(COLORS.lineBg, 'FF212121', false, 10),
+            cellStyle(COLORS.lineBg, 'FF212121', false, 10),
+            cellStyle(COLORS.lineBg, 'FF212121', false, 10),
+            cellStyle(statusBg, statusFg, true, 10),
+            cellStyle(COLORS.lineBg, 'FF212121', true, 11, 'right'),
+            cellStyle(COLORS.lineBg, 'FF212121', false, 10),
+            cellStyle(COLORS.lineBg, 'FF212121', false, 10),
+            cellStyle(COLORS.paidBg, COLORS.paidFg, true, 10),
+            cellStyle(hDebt > 0 ? COLORS.unpaidBg : COLORS.paidBg, hDebt > 0 ? COLORS.unpaidFg : COLORS.paidFg, true, 10),
+            cellStyle(COLORS.lineBg, 'FF212121', false, 10),
+            cellStyle(COLORS.lineBg, 'FF212121', false, 10),
+            cellStyle(COLORS.lineBg, 'FF212121', false, 10),
+            cellStyle(COLORS.lineBg, 'FF212121', false, 10),
+            cellStyle(COLORS.lineBg, 'FFCA8A04', true, 14),
+          ],
+          22
+        );
+      }
+
+      // ════════════════════════════════════════════════════════
+      // صف التوتال
+      // ════════════════════════════════════════════════════════
+      pushRow(
+        [
+          'الإجمالي', '', '', '',
+          `${isH4G ? 1 : subs.filter(s => s.name || s.phone).length} مشترك`,
+          `${isH4G ? 0 : usedGB} GB`,
+          isH4G ? '' : `${usedMins}`,
+          `ج.م. ${totalPrice.toLocaleString('ar-EG')}`,
+          `ج.م. ${plSign}${profitLoss.toLocaleString('ar-EG')}`,
+          '', '', '', '', '',
+        ],
+        [
+          thickCellStyle(COLORS.totalBg),
+          thickCellStyle(COLORS.totalBg),
+          thickCellStyle(COLORS.totalBg),
+          thickCellStyle(COLORS.totalBg),
+          thickCellStyle(COLORS.totalBg, COLORS.totalFg, true, 10),
+          thickCellStyle(COLORS.totalBg, COLORS.totalFg, true, 10),
+          thickCellStyle(COLORS.totalBg, COLORS.totalFg, false, 10),
+          thickCellStyle(COLORS.totalBg, COLORS.totalFg, true, 11),
+          thickCellStyle(
+            COLORS.totalBg,
+            profitLoss >= 0 ? 'FF81C784' : 'FFEF9A9A',
+            true, 12
+          ),
+          ...Array(5).fill(thickCellStyle(COLORS.totalBg)),
+        ],
+        24
+      );
+
+      // merge الإجمالي من col1 إلى col4
+      merges.push({ s: { r: aoa.length - 1, c: 0 }, e: { r: aoa.length - 1, c: 3 } });
+
+      // صف فارغ فاصل
+      pushRow(Array(14).fill(''), Array(14).fill(cellStyle('FFFFFFFF', 'FFFFFFFF')), 8);
+    });
+
+    // ── إنشاء الشيت ──────────────────────────────────────────
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    // تطبيق الستايلات
+    aoa.forEach((rowArr, ri) => {
+      rowArr.forEach((_, ci) => {
+        const cellRef = XLSX.utils.encode_cell({ r: ri, c: ci });
+        if (!ws[cellRef]) ws[cellRef] = { v: '', t: 's' };
+        ws[cellRef].s = rowStyles[ri][ci];
+      });
+    });
+
+    // عرض الأعمدة
+    ws['!cols'] = COL_WIDTHS.map(w => ({ wch: w }));
+
+    // ارتفاع الصفوف
+    ws['!rows'] = rowHeights.map(h => ({ hpt: h }));
+
+    // الدمج
+    ws['!merges'] = merges;
+
+    // RTL
+    if (!ws['!sheetView']) ws['!sheetView'] = {};
+    ws['!sheetViews'] = [{ rightToLeft: true }];
+
+    XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0, 31));
+  });
+
+  // شيت backup خام للاستيراد
+  const backupRows = allLines.map(line => ({
+    ID: line.id,
+    'صاحب الخط': line.ownerName || '',
+    'الرقم': line.masterPhone || '',
+    'الشبكة': line.network || '',
+    'السايكل': line.cycle || '',
+    'تاريخ التفعيل': line.activationDate || '',
+    'التكلفة': line.baseCost || 0,
+    'الجيجا': line.totalGB || 0,
+    'الدقائق': line.totalMins || 0,
+    'دفعت الفاتورة': line.billPaid ? 'نعم' : 'لا',
+    'فواتشر': line.voucherSent ? 'نعم' : 'لا',
+    'TOD': line.todSent ? 'نعم' : 'لا',
+    'بيانات المشتركين (JSON)': JSON.stringify(line.subscribers || []),
+    'بيانات Home4G (JSON)': JSON.stringify(line.home4gData || null),
+  }));
+  const wsBackup = XLSX.utils.json_to_sheet(backupRows);
+  XLSX.utils.book_append_sheet(wb, wsBackup, 'Backup');
+
+  return wb;
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────────────────────────
 export default function TelecomSystem() {
@@ -54,17 +419,18 @@ export default function TelecomSystem() {
   const [expandedLine, setExpandedLine] = useState(null);
   const [searchTerm,   setSearchTerm]   = useState('');
   const [masterLines,  setMasterLines]  = useState([]);
+  const [allLines,     setAllLines]     = useState([]);  // كل الخطوط للـ export
   const [showStats,    setShowStats]    = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSubsList, setShowSubsList] = useState(false);
-  // 'all' = كل الديون | 'full' = دين كامل | 'partial' = دفع جزء
   const [subsFilter,   setSubsFilter]   = useState('all');
 
-  const unsubRef = useRef(null);
-  const isHome4G = activeTab === 'Home4G';
-  const netMeta  = NETWORKS.find(n => n.key === activeTab);
+  const unsubRef    = useRef(null);
+  const unsubAllRef = useRef(null);
+  const isHome4G    = activeTab === 'Home4G';
+  const netMeta     = NETWORKS.find(n => n.key === activeTab);
 
-  // ── Reads ──────────────────────────────────────────────────────
+  // ── Reads — الخطوط الحالية (شبكة+سايكل) ─────────────────────
   const subscribeToLines = useCallback(() => {
     if (unsubRef.current) unsubRef.current();
     const q = query(
@@ -79,6 +445,15 @@ export default function TelecomSystem() {
     unsubRef.current = unsub;
     return unsub;
   }, [activeTab, activeCycle]);
+
+  // ── Reads — كل الخطوط للـ export ─────────────────────────────
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'lines'), (snap) => {
+      setAllLines(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    unsubAllRef.current = unsub;
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     const unsub = subscribeToLines();
@@ -139,27 +514,21 @@ export default function TelecomSystem() {
       await deleteDoc(doc(db, 'lines', id));
   }, []);
 
-  // ── Import / Export ────────────────────────────────────────────
+  // ── Export — منسّق ────────────────────────────────────────────
   const exportToExcel = useCallback(() => {
-    const rows = masterLines.map(line => ({
-      ID: line.id, 'صاحب الخط': line.ownerName||'', 'الرقم': line.masterPhone||'',
-      'الشبكة': line.network||'', 'السايكل': line.cycle||'', 'تاريخ التفعيل': line.activationDate||'',
-      'التكلفة': line.baseCost||0, 'الجيجا': line.totalGB||0, 'الدقائق': line.totalMins||0,
-      'دفعت الفاتورة': line.billPaid?'نعم':'لا', 'فواتشر': line.voucherSent?'نعم':'لا', 'TOD': line.todSent?'نعم':'لا',
-      'بيانات المشتركين (JSON)': JSON.stringify(line.subscribers||[]),
-      'بيانات Home4G (JSON)': JSON.stringify(line.home4gData||null),
-    }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'FullBackup');
-    XLSX.writeFile(wb, 'MO_CONTROL_Full_Backup.xlsx');
-  }, [masterLines]);
+    const wb = buildFormattedExcel(allLines);
+    XLSX.writeFile(wb, 'MO_CONTROL_Export.xlsx');
+  }, [allLines]);
 
+  // ── Import ────────────────────────────────────────────────────
   const importFromExcel = useCallback((e) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = async (evt) => {
       const wb   = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+      // نقرأ من شيت Backup
+      const sheetName = wb.SheetNames.includes('Backup') ? 'Backup' : wb.SheetNames[wb.SheetNames.length - 1];
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
       for (const item of rows) {
         await setDoc(doc(db, 'lines', item.ID), {
           ownerName: item['صاحب الخط']||'', masterPhone: item['الرقم']||'', network: item['الشبكة']||'',
@@ -194,7 +563,6 @@ export default function TelecomSystem() {
       if (nets[line.network]!==undefined) nets[line.network]++;
       const s = getLineStats(line);
       totalProfit += s.profit;
-      // Home4G: ديون الخط نفسه | باقي الشبكات: الفاتورة غير المدفوعة فقط
       if (line.network === 'Home4G') {
         totalDebt += s.debts;
       } else if (!line.billPaid) {
@@ -229,14 +597,11 @@ export default function TelecomSystem() {
     return result;
   })();
 
-  // ── حساب أعداد كل فئة للزرارين ────────────────────────────────
   const countAll     = allSubscribers.filter(s => s.debt > 0).length;
   const countFull    = allSubscribers.filter(s => s.paidAmount === 0 && s.debt > 0).length;
   const countPartial = allSubscribers.filter(s => s.paidAmount > 0 && s.debt > 0).length;
 
   const subsStats = {
-    total:     allSubscribers.length,
-    withDebt:  allSubscribers.filter(s => s.debt > 0).length,
     totalDebt: allSubscribers.filter(s => s.debt > 0).reduce((a,s) => a + Math.max(0, s.debt), 0),
     totalPaid: allSubscribers.filter(s => s.debt > 0).reduce((a,s) => a + s.paidAmount, 0),
     totalPrice:allSubscribers.filter(s => s.debt > 0).reduce((a,s) => a + s.price, 0),
@@ -252,28 +617,21 @@ export default function TelecomSystem() {
     return false;
   });
 
-  // ── filteredSubs: يعرض فقط اللي عليهم دين، مع فلتر الزرارين ───
   const filteredSubs = allSubscribers.filter(sub => {
-    // فلتر البحث
     const matchSearch = !searchTerm || (() => {
       const s = searchTerm.toLowerCase();
       return sub.name?.toLowerCase().includes(s) || sub.phone?.includes(searchTerm) || sub.lineOwner?.toLowerCase().includes(s);
     })();
-
-    // فلتر نوع الدين
     const isFullDebt = sub.paidAmount === 0 && sub.debt > 0;
     const isPartial  = sub.paidAmount > 0  && sub.debt > 0;
     const hasDebt    = sub.debt > 0;
-
     let matchFilter = false;
     if (subsFilter === 'all')     matchFilter = hasDebt;
     if (subsFilter === 'full')    matchFilter = isFullDebt;
     if (subsFilter === 'partial') matchFilter = isPartial;
-
     return matchSearch && matchFilter;
   });
 
-  // حساب totals للـ filteredSubs المعروضة حالياً
   const filteredSubsStats = {
     totalPrice: filteredSubs.reduce((a,s) => a + s.price, 0),
     totalPaid:  filteredSubs.reduce((a,s) => a + s.paidAmount, 0),
@@ -304,7 +662,7 @@ export default function TelecomSystem() {
         </button>
       </div>
 
-      {/* لوحة الإحصائيات — المديونية = فواتير الخطوط غير المدفوعة فقط */}
+      {/* لوحة الإحصائيات */}
       {showStats && (
         <div className="max-w-4xl mx-auto mb-8 bg-[#111] border border-gray-800 rounded-3xl p-6">
           <h2 className="text-center text-sm font-bold text-[#ca8a04] mb-5 tracking-widest">ملخص عام</h2>
@@ -529,12 +887,11 @@ export default function TelecomSystem() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════
-          قسم "العملاء اللي عليهم فلوس" — للشبكات الثلاث فقط
+          قسم "العملاء اللي عليهم فلوس"
           ══════════════════════════════════════════════════════════════ */}
       {!isHome4G && (
         <div className="max-w-7xl mx-auto mt-10">
 
-          {/* زر فتح/إغلاق القسم */}
           <button
             onClick={() => setShowSubsList(v => !v)}
             className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all ${netMeta?.border} ${netMeta?.bg} hover:opacity-90`}
@@ -564,68 +921,32 @@ export default function TelecomSystem() {
             </div>
           </button>
 
-          {/* جدول العملاء */}
           {showSubsList && (
             <div className="mt-2">
-
-              {/* ── زرارين الفلتر ── */}
+              {/* زرارين الفلتر */}
               <div className="flex gap-2 px-4 pt-4 pb-3 bg-[#111] rounded-t-2xl border border-b-0 border-gray-800 flex-wrap">
                 {[
-                  {
-                    key:     'all',
-                    label:   'كل الديون',
-                    icon:    '💸',
-                    count:   countAll,
-                    active:  'border-[#ca8a04] bg-[#ca8a04]/15 text-[#ca8a04]',
-                    badge:   'bg-[#ca8a04] text-black',
-                  },
-                  {
-                    key:     'full',
-                    label:   'دين كامل',
-                    icon:    '🔴',
-                    count:   countFull,
-                    active:  'border-red-600 bg-red-900/20 text-red-400',
-                    badge:   'bg-red-600 text-white',
-                  },
-                  {
-                    key:     'partial',
-                    label:   'دفع جزء',
-                    icon:    '🟡',
-                    count:   countPartial,
-                    active:  'border-yellow-600 bg-yellow-900/20 text-yellow-400',
-                    badge:   'bg-yellow-500 text-black',
-                  },
+                  { key:'all',     label:'كل الديون', icon:'💸', count:countAll,    active:'border-[#ca8a04] bg-[#ca8a04]/15 text-[#ca8a04]',         badge:'bg-[#ca8a04] text-black' },
+                  { key:'full',    label:'دين كامل',  icon:'🔴', count:countFull,   active:'border-red-600 bg-red-900/20 text-red-400',                 badge:'bg-red-600 text-white' },
+                  { key:'partial', label:'دفع جزء',   icon:'🟡', count:countPartial,active:'border-yellow-600 bg-yellow-900/20 text-yellow-400',        badge:'bg-yellow-500 text-black' },
                 ].map(f => (
-                  <button
-                    key={f.key}
-                    onClick={() => setSubsFilter(f.key)}
-                    className={`flex items-center gap-2 px-5 py-2 rounded-xl text-[12px] font-bold border-2 transition-all ${
-                      subsFilter === f.key
-                        ? f.active
-                        : 'border-gray-800 text-gray-500 hover:border-gray-600 hover:text-gray-400'
-                    }`}
-                  >
+                  <button key={f.key} onClick={() => setSubsFilter(f.key)}
+                    className={`flex items-center gap-2 px-5 py-2 rounded-xl text-[12px] font-bold border-2 transition-all ${subsFilter===f.key?f.active:'border-gray-800 text-gray-500 hover:border-gray-600 hover:text-gray-400'}`}>
                     <span>{f.icon}</span>
                     <span>{f.label}</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${subsFilter===f.key ? f.badge : 'bg-gray-800 text-gray-400'}`}>
-                      {f.count}
-                    </span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${subsFilter===f.key?f.badge:'bg-gray-800 text-gray-400'}`}>{f.count}</span>
                   </button>
                 ))}
               </div>
 
-              {/* ── الجدول ── */}
+              {/* الجدول */}
               <div className="bg-[#111] border border-gray-800 rounded-b-2xl overflow-hidden">
                 {filteredSubs.length === 0 ? (
                   <div className="text-center text-gray-600 py-16">
-                    {searchTerm
-                      ? 'لا توجد نتائج للبحث'
-                      : subsFilter === 'full'
-                        ? 'لا يوجد عملاء عليهم دين كامل 🎉'
-                        : subsFilter === 'partial'
-                          ? 'لا يوجد عملاء دفعوا جزء من الدين'
-                          : 'لا يوجد عملاء عليهم ديون 🎉'
-                    }
+                    {searchTerm ? 'لا توجد نتائج للبحث'
+                      : subsFilter==='full' ? 'لا يوجد عملاء عليهم دين كامل 🎉'
+                      : subsFilter==='partial' ? 'لا يوجد عملاء دفعوا جزء من الدين'
+                      : 'لا يوجد عملاء عليهم ديون 🎉'}
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -642,50 +963,25 @@ export default function TelecomSystem() {
                           const isPartialPay = sub.paidAmount > 0 && sub.debt > 0;
                           return (
                             <tr key={`${sub.lineId}-${sub.subIndex}`}
-                              className={`border-b border-gray-900 transition-colors ${isPartialPay ? 'hover:bg-yellow-900/5' : 'hover:bg-red-900/5'}`}>
-
+                              className={`border-b border-gray-900 transition-colors ${isPartialPay?'hover:bg-yellow-900/5':'hover:bg-red-900/5'}`}>
                               <td className="px-3 py-2.5 text-center text-gray-600 text-[11px]">{i+1}</td>
-
-                              <td className="px-3 py-2.5 text-center font-bold text-white text-[12px]">
-                                {sub.name || <span className="text-gray-700">—</span>}
-                              </td>
-
-                              <td className="px-3 py-2.5 text-center text-gray-400 text-[12px]">{sub.phone || '—'}</td>
-
+                              <td className="px-3 py-2.5 text-center font-bold text-white text-[12px]">{sub.name||<span className="text-gray-700">—</span>}</td>
+                              <td className="px-3 py-2.5 text-center text-gray-400 text-[12px]">{sub.phone||'—'}</td>
                               <td className="px-3 py-2.5 text-center">
-                                <span className={`text-[11px] font-bold px-2 py-1 rounded-lg ${netMeta?.bg} ${netMeta?.color} border ${netMeta?.border}`}>
-                                  {sub.lineOwner}
-                                </span>
+                                <span className={`text-[11px] font-bold px-2 py-1 rounded-lg ${netMeta?.bg} ${netMeta?.color} border ${netMeta?.border}`}>{sub.lineOwner}</span>
                               </td>
-
                               <td className="px-3 py-2.5 text-center text-gray-600 text-[11px]">{sub.masterPhone||'—'}</td>
-
-                              <td className="px-3 py-2.5 text-center text-blue-400 font-bold text-[12px]">
-                                {sub.gb > 0 ? `${sub.gb} GB` : '—'}
-                              </td>
-
-                              <td className="px-3 py-2.5 text-center text-gray-300 text-[12px]">
-                                {sub.price > 0 ? `${sub.price} ج` : '—'}
-                              </td>
-
+                              <td className="px-3 py-2.5 text-center text-blue-400 font-bold text-[12px]">{sub.gb>0?`${sub.gb} GB`:'—'}</td>
+                              <td className="px-3 py-2.5 text-center text-gray-300 text-[12px]">{sub.price>0?`${sub.price} ج`:'—'}</td>
                               <td className="px-3 py-2.5 text-center text-[12px]">
-                                {sub.paidAmount > 0
-                                  ? <span className="text-yellow-400 font-bold">{sub.paidAmount} ج</span>
-                                  : <span className="text-gray-700">—</span>
-                                }
+                                {sub.paidAmount>0?<span className="text-yellow-400 font-bold">{sub.paidAmount} ج</span>:<span className="text-gray-700">—</span>}
                               </td>
-
                               <td className="px-3 py-2.5 text-center">
-                                <span className={`font-black text-[13px] ${isPartialPay ? 'text-yellow-400' : 'text-red-400'}`}>
-                                  {sub.debt} ج
-                                </span>
+                                <span className={`font-black text-[13px] ${isPartialPay?'text-yellow-400':'text-red-400'}`}>{sub.debt} ج</span>
                               </td>
-
                               <td className="px-3 py-2.5 text-center">
-                                <button
-                                  onClick={() => handleClearDebt(sub.lineId, sub.subIndex, sub.subscribers, sub.price)}
-                                  className="text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all border text-red-400 bg-red-500/10 border-red-900 hover:bg-red-500/20 hover:text-red-300"
-                                >
+                                <button onClick={()=>handleClearDebt(sub.lineId,sub.subIndex,sub.subscribers,sub.price)}
+                                  className="text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all border text-red-400 bg-red-500/10 border-red-900 hover:bg-red-500/20 hover:text-red-300">
                                   خلّص ✓
                                 </button>
                               </td>
@@ -693,13 +989,9 @@ export default function TelecomSystem() {
                           );
                         })}
                       </tbody>
-
-                      {/* Footer */}
                       <tfoot>
                         <tr className="border-t-2 border-gray-700 bg-black/30">
-                          <td colSpan={6} className="px-4 py-3 text-right text-[11px] text-gray-500 font-bold">
-                            الإجمالي ({filteredSubs.length} عميل)
-                          </td>
+                          <td colSpan={6} className="px-4 py-3 text-right text-[11px] text-gray-500 font-bold">الإجمالي ({filteredSubs.length} عميل)</td>
                           <td className="px-3 py-3 text-center text-gray-200 font-black text-[12px]">{filteredSubsStats.totalPrice} ج</td>
                           <td className="px-3 py-3 text-center text-yellow-400 font-black text-[12px]">{filteredSubsStats.totalPaid} ج</td>
                           <td className="px-3 py-3 text-center text-red-400 font-black text-[12px]">{filteredSubsStats.totalDebt} ج</td>
@@ -717,7 +1009,7 @@ export default function TelecomSystem() {
 
       {/* Bottom Buttons */}
       <div className="max-w-7xl mx-auto mt-10 pb-8 flex justify-end gap-3">
-        <button onClick={exportToExcel} title="تصدير Excel" className="bg-green-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">📥</button>
+        <button onClick={exportToExcel} title="تصدير Excel منسّق" className="bg-green-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">📥</button>
         <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
         <label htmlFor="importFile" title="استيراد Excel" className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
         <button onClick={addNewLine} title="إضافة خط جديد" className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center">+</button>
