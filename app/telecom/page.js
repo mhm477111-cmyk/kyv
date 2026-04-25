@@ -115,22 +115,22 @@ export default function TelecomSystem() {
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-gray-200" dir="rtl">
       <header className="mb-6 text-center"><h1 className="text-4xl font-black text-[#ca8a04]">MO CONTROL</h1></header>
       
-      <div className="max-w-xl mx-auto mb-6">
+      <div className="max-w-3xl mx-auto mb-6">
         <button onClick={() => setShowStats(!showStats)} className="w-full bg-[#111] border border-[#ca8a04] text-[#ca8a04] py-3 rounded-2xl font-bold hover:bg-[#ca8a04] hover:text-black transition-all">
-          {showStats ? 'إخفاء التفاصيل' : 'عرض التفاصيل (الربح وعدد الخطوط)'}
+          {showStats ? 'إخفاء التفاصيل' : 'عرض تفاصيل الأرباح وعدد الخطوط'}
         </button>
       </div>
 
       {showStats && (
-        <div className="max-w-xl mx-auto grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-[#111] p-4 rounded-2xl border border-gray-800 text-center col-span-2">
-            <p className="text-gray-500 text-xs">صافي الربح الإجمالي</p>
-            <p className="text-2xl font-black text-green-500">{totalProfit} ج</p>
+        <div className="max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          <div className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center">
+            <p className="text-[9px] text-gray-500 uppercase">صافي الربح</p>
+            <p className="text-sm font-black text-green-500">{totalProfit} ج</p>
           </div>
           {Object.entries(networkCounts).map(([net, count]) => (
-            <div key={net} className="bg-[#111] p-4 rounded-2xl border border-gray-800 text-center">
-              <p className="text-gray-500 text-xs">{net === 'Etisalat' ? 'اتصالات' : net === 'Vodafone' ? 'فودافون' : 'وي'}</p>
-              <p className="text-xl font-black">{count}</p>
+            <div key={net} className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center">
+              <p className="text-[9px] text-gray-500 uppercase">{net === 'Etisalat' ? 'اتصالات' : net === 'Vodafone' ? 'فودافون' : 'وي'}</p>
+              <p className="text-sm font-black">{count}</p>
             </div>
           ))}
         </div>
