@@ -231,22 +231,18 @@ export default function TelecomSystem() {
         ))}
       </div>
 
-      {/* Cycle Tabs - hidden for Home4G */}
-      {!isHome4G && (
-        <div className="flex justify-center gap-3 mb-10">
-          {['1', '15'].map(cyc => (
-            <button
-              key={cyc}
-              onClick={() => { setActiveCycle(cyc); setExpandedLine(null); }}
-              className={`px-8 py-2 rounded-xl font-bold ${activeCycle === cyc ? 'bg-blue-600 text-white' : 'bg-[#111] text-gray-500 border border-gray-800'}`}
-            >
-              سايكل {cyc}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {isHome4G && <div className="mb-10" />}
+      {/* Cycle Tabs - shown for all tabs including Home4G */}
+      <div className="flex justify-center gap-3 mb-10">
+        {['1', '15'].map(cyc => (
+          <button
+            key={cyc}
+            onClick={() => { setActiveCycle(cyc); setExpandedLine(null); }}
+            className={`px-8 py-2 rounded-xl font-bold ${activeCycle === cyc ? (isHome4G ? 'bg-purple-600 text-white' : 'bg-blue-600 text-white') : 'bg-[#111] text-gray-500 border border-gray-800'}`}
+          >
+            سايكل {cyc}
+          </button>
+        ))}
+      </div>
 
       {/* Lines */}
       <div className="max-w-7xl mx-auto space-y-4">
@@ -275,34 +271,41 @@ export default function TelecomSystem() {
                   }
                 </div>
 
-                <div className={`grid gap-2 w-full md:w-auto text-center ${isHome4G ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'}`}>
-                  <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
-                    <p className="text-[8px] text-gray-500">الربح</p>
-                    <p className={`font-bold text-xs ${stats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{stats.profit} ج</p>
-                  </div>
-                  <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
-                    <p className="text-[8px] text-gray-500">ديون</p>
-                    <p className="font-bold text-xs text-orange-500">{stats.debts} ج</p>
-                  </div>
-                  {!isHome4G && (
-                    <>
-                      <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
-                        <p className="text-[8px] text-gray-500">جيجا متبقية</p>
-                        <p className="font-bold text-xs text-blue-400">{stats.remainingGB} GB</p>
-                      </div>
-                      <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
-                        <p className="text-[8px] text-gray-500">دقائق متبقية</p>
-                        <p className="font-bold text-xs text-green-400">{stats.remainingMins} د</p>
-                      </div>
-                    </>
-                  )}
-                  {isHome4G && (
+                {line.network === 'Home4G' ? (
+                  <div className="flex flex-row gap-2 w-full md:w-auto text-center">
                     <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
-                      <p className="text-[8px] text-gray-500">حالة الدفع</p>
-                      <p className={`font-bold text-xs ${h.paymentStatus === 'مدفوع' ? 'text-green-500' : 'text-red-400'}`}>{h.paymentStatus || 'غير مدفوع'}</p>
+                      <p className="text-[8px] text-gray-500">الربح</p>
+                      <p className={`font-bold text-xs ${stats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{stats.profit} ج</p>
                     </div>
-                  )}
-                </div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
+                      <p className="text-[8px] text-gray-500">ديون</p>
+                      <p className="font-bold text-xs text-orange-500">{stats.debts} ج</p>
+                    </div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-purple-900 min-w-[80px]">
+                      <p className="text-[8px] text-gray-500">حالة الدفع</p>
+                      <p className={`font-bold text-xs ${h.paymentStatus === 'مدفوع' ? 'text-green-500' : h.paymentStatus === 'جزئي' ? 'text-yellow-400' : 'text-red-400'}`}>{h.paymentStatus || 'غير مدفوع'}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto text-center">
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
+                      <p className="text-[8px] text-gray-500">الربح</p>
+                      <p className={`font-bold text-xs ${stats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{stats.profit} ج</p>
+                    </div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
+                      <p className="text-[8px] text-gray-500">ديون</p>
+                      <p className="font-bold text-xs text-orange-500">{stats.debts} ج</p>
+                    </div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
+                      <p className="text-[8px] text-gray-500">جيجا متبقية</p>
+                      <p className="font-bold text-xs text-blue-400">{stats.remainingGB} GB</p>
+                    </div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
+                      <p className="text-[8px] text-gray-500">دقائق متبقية</p>
+                      <p className="font-bold text-xs text-green-400">{stats.remainingMins} د</p>
+                    </div>
+                  </div>
+                )}
 
                 <button onClick={(e) => deleteLine(e, line.id)} className="text-gray-600 hover:text-red-500 transition-colors">🗑️</button>
               </div>
