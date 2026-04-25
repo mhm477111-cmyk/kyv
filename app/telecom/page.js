@@ -120,12 +120,12 @@ export default function TelecomSystem() {
       profit: actualCollected - (line.baseCost || 0),
       debts: totalPrices - actualCollected,
       actualCollected: actualCollected,
+      totalPrices: totalPrices,
       remainingGB: (line.totalGB || 0) - usedGB,
       remainingMins: (line.totalMins || 0) - usedMins
     };
   };
 
-  // الحسابات الجديدة
   const totalProfit = masterLines.reduce((acc, line) => acc + getStats(line).profit, 0);
   const etisalatCount = masterLines.filter(l => l.network === 'Etisalat').length;
   const vodafoneCount = masterLines.filter(l => l.network === 'Vodafone').length;
@@ -136,7 +136,8 @@ export default function TelecomSystem() {
     const stats = getStats(line);
     const matchesSearch = (line.ownerName?.toLowerCase().includes(searchLower) || line.masterPhone?.includes(searchTerm));
     
-    if (filterMode === 'debts') return stats.debts > 0 && matchesSearch;
+    // فلترة دقيقة
+    if (filterMode === 'debts') return stats.debts > 0 && stats.actualCollected > 0 && matchesSearch;
     if (filterMode === 'notPaid') return stats.actualCollected === 0 && matchesSearch;
     return (line.network === activeTab) && (line.cycle === activeCycle) && matchesSearch;
   });
@@ -145,22 +146,22 @@ export default function TelecomSystem() {
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-gray-200" dir="rtl">
       <header className="mb-6 text-center"><h1 className="text-4xl font-black text-[#ca8a04]">MO CONTROL</h1></header>
       
-      {/* خانات الإحصائيات والأزرار الجديدة */}
-      <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        <div className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center"><p className="text-[10px] text-gray-500">صافي الربح</p><p className="font-bold text-green-500">{totalProfit} ج</p></div>
-        <div className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center"><p className="text-[10px] text-gray-500">اتصالات</p><p className="font-bold">{etisalatCount}</p></div>
-        <div className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center"><p className="text-[10px] text-gray-500">فودافون</p><p className="font-bold">{vodafoneCount}</p></div>
-        <div className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center"><p className="text-[10px] text-gray-500">وي</p><p className="font-bold">{weCount}</p></div>
-        <button onClick={() => setFilterMode('all')} className="bg-[#ca8a04] text-black font-bold rounded-xl text-xs">الكل</button>
+      {/* خانات إحصائية احترافية */}
+      <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+        <button className="bg-[#111] border border-[#ca8a04] p-3 rounded-2xl hover:bg-[#1a1a1a] transition-all"><p className="text-[10px] text-gray-500">صافي الربح</p><p className="font-bold text-green-500">{totalProfit} ج</p></button>
+        <button className="bg-[#111] border border-gray-800 p-3 rounded-2xl"><p className="text-[10px] text-gray-500">اتصالات</p><p className="font-bold">{etisalatCount}</p></button>
+        <button className="bg-[#111] border border-gray-800 p-3 rounded-2xl"><p className="text-[10px] text-gray-500">فودافون</p><p className="font-bold">{vodafoneCount}</p></button>
+        <button className="bg-[#111] border border-gray-800 p-3 rounded-2xl"><p className="text-[10px] text-gray-500">وي</p><p className="font-bold">{weCount}</p></button>
+        <button onClick={() => setFilterMode('all')} className="bg-[#ca8a04] text-black font-bold rounded-2xl hover:scale-105 transition-all">الكل</button>
       </div>
 
       <div className="flex justify-center gap-3 mb-6">
-        <button onClick={() => setFilterMode('debts')} className="bg-red-900/20 text-red-500 px-4 py-2 rounded-lg border border-red-900 text-sm">عليهم فلوس</button>
-        <button onClick={() => setFilterMode('notPaid')} className="bg-orange-900/20 text-orange-500 px-4 py-2 rounded-lg border border-orange-900 text-sm">مدفعوش خالص</button>
+        <button onClick={() => setFilterMode('debts')} className="bg-red-500/10 text-red-500 border border-red-500/50 px-6 py-2 rounded-xl text-sm font-bold hover:bg-red-500/20">عليهم فلوس</button>
+        <button onClick={() => setFilterMode('notPaid')} className="bg-orange-500/10 text-orange-500 border border-orange-500/50 px-6 py-2 rounded-xl text-sm font-bold hover:bg-orange-500/20">مدفعوش خالص</button>
       </div>
       
       <div className="max-w-xl mx-auto mb-8">
-        <input type="text" placeholder="البحث باسم العميل أو الرقم..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-[#111] border border-gray-800 rounded-2xl py-4 px-6 text-sm outline-none focus:border-[#ca8a04]"/>
+        <input type="text" placeholder="البحث..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-[#111] border border-gray-800 rounded-2xl py-4 px-6 text-sm outline-none focus:border-[#ca8a04]"/>
       </div>
 
       <div className="flex justify-center gap-3 mb-4">
@@ -187,14 +188,14 @@ export default function TelecomSystem() {
             <div key={line.id} className="bg-[#111] border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
               <div onClick={() => setExpandedLine(isMainOpen ? null : line.id)} className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row items-center justify-between gap-4 transition-colors">
                 <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right">
-                  <p className="text-[9px] text-gray-500 uppercase mb-1">صاحب الخط / الرقم / التفعيل</p>
+                  <p className="text-[9px] text-gray-500 uppercase mb-1">العميل / الرقم / التفعيل</p>
                   <p className="font-bold text-white text-sm truncate">{line.ownerName || 'بدون اسم'} - {line.masterPhone || '0000'}</p>
                   <p className="text-[10px] text-[#ca8a04] font-bold mt-1">تفعيل: {line.activationDate || 'غير محدد'}</p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto text-center">
                     <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">الربح</p><p className={`font-bold text-xs ${stats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{stats.profit} ج</p></div>
                     <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">ديون</p><p className="font-bold text-xs text-orange-500">{stats.debts} ج</p></div>
-                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">جيجا متبقية</p><p className="font-bold text-xs text-blue-400">{stats.remainingGB} GB</p></div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">GB متبقية</p><p className="font-bold text-xs text-blue-400">{stats.remainingGB} GB</p></div>
                     <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">دقائق متبقية</p><p className="font-bold text-xs text-green-400">{stats.remainingMins} د</p></div>
                 </div>
                 <button onClick={(e) => deleteLine(e, line.id)} className="text-gray-600 hover:text-red-500 transition-colors">🗑️</button>
