@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react';
 
-export default function TelecomDashboard() {
-  // 1. التحكم في الأقسام (الشبكات)
+export default function TelecomSystem() {
   const [activeTab, setActiveTab] = useState('Etisalat');
+  const [expandedLine, setExpandedLine] = useState(null); // للتحكم في فتح وقفل الخطوط
 
-  // 2. إعدادات الباقات (عشان السيستم يسعر أوتوماتيك)
+  // إعدادات الباقات الافتراضية للتسعير التلقائي
   const planConfigs = {
     20: { price: 260, mins: 1500 },
     25: { price: 300, mins: 1500 },
@@ -14,147 +14,182 @@ export default function TelecomDashboard() {
     40: { price: 420, mins: 1500 },
   };
 
-  // 3. حالة مبدئية لخط رئيسي (كمثال للتجربة)
+  // البيانات (يفضل مستقبلاً ربطها بـ Firebase)
   const [masterLines, setMasterLines] = useState([
     {
-      id: 1,
+      id: 'L1',
       network: 'Etisalat',
       masterPhone: '1101902909',
       baseCost: 1860,
-      totalGB: 195, // إجمالي باقة الإنترنت للخط
-      totalMins: 10500, // إجمالي الدقائق
+      totalGB: 195,
+      totalMins: 10500,
       subscribers: [
-        { id: 's1', name: 'اسلام لبان', phone: '01140379721', gb: 25, isPaid: true },
-        { id: 's2', name: 'علي سميح', phone: '01150606087', gb: 30, isPaid: true },
-        { id: 's3', name: 'الحضري', phone: '01156177494', gb: 20, isPaid: false }, // لم يدفع
+        { id: 1, name: 'إسلام لبان', phone: '01140379721', gb: 25, isPaid: true },
+        { id: 2, name: 'علي سميح', phone: '01150606087', gb: 30, isPaid: true },
       ]
     }
   ]);
 
-  // دالة لحساب تفاصيل الخط الرئيسي
-  const calculateLineStats = (line) => {
-    let collectedMoney = 0;
-    let usedGB = 0;
-    let usedMins = 0;
+  // دالة حساب الإحصائيات لكل خط
+  const getStats = (line) => {
+    const collected = line.subscribers.reduce((acc, sub) => acc + (planConfigs[sub.gb]?.price || 0), 0);
+    const usedGB = line.subscribers.reduce((acc, sub) => acc + Number(sub.gb), 0);
+    return {
+      collected,
+      profit: collected - line.baseCost,
+      remainingGB: line.totalGB - usedGB
+    };
+  };
 
-    line.subscribers.forEach(sub => {
-      const config = planConfigs[sub.gb] || { price: 0, mins: 0 };
-      collectedMoney += config.price;
-      usedGB += Number(sub.gb);
-      usedMins += config.mins;
-    });
+  // دالة تعديل بيانات الخط الأساسي
+  const updateMasterLine = (lineId, field, value) => {
+    setMasterLines(prev => prev.map(line => 
+      line.id === lineId ? { ...line, [field]: Number(value) || value } : line
+    ));
+  };
 
-    const profit = collectedMoney - line.baseCost;
-    const remainingGB = line.totalGB - usedGB;
-    
-    return { collectedMoney, profit, remainingGB, usedGB };
+  // دالة تعديل أو إضافة مشترك
+  const updateSub = (lineId, subIndex, field, value) => {
+    setMasterLines(prev => prev.map(line => {
+      if (line.id === lineId) {
+        const newSubs = [...line.subscribers];
+        if (!newSubs[subIndex]) {
+           newSubs[subIndex] = { id: Date.now(), name: '', phone: '', gb: 20, isPaid: false };
+        }
+        newSubs[subIndex] = { ...newSubs[subIndex], [field]: value };
+        return { ...line, subscribers: newSubs };
+      }
+      return line;
+    }));
   };
 
   return (
-    <div className="p-8 bg-black min-h-screen text-white" dir="rtl">
-      <h1 className="text-3xl font-bold text-yellow-500 mb-8">إدارة باقات العائلات</h1>
+    <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-gray-200" dir="rtl">
+      <header className="mb-10 text-center">
+        <h1 className="text-4xl font-black text-[#ca8a04] mb-2">MO CONTROL</h1>
+        <p className="text-gray-500">نظام إدارة باقات العائلات والشبكات</p>
+      </header>
 
-      {/* أزرار التنقل بين الشبكات */}
-      <div className="flex gap-4 mb-8">
-        <button 
-          onClick={() => setActiveTab('Etisalat')}
-          className={`px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'Etisalat' ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400'}`}>
-          اتصالات (Emerald)
-        </button>
-        <button 
-          onClick={() => setActiveTab('Vodafone')}
-          className={`px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'Vodafone' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-400'}`}>
-          فودافون (Red)
-        </button>
-        <button 
-          onClick={() => setActiveTab('WE')}
-          className={`px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'WE' ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400'}`}>
-          وي (Gold)
-        </button>
+      {/* التبديل بين الشبكات */}
+      <div className="flex justify-center gap-2 mb-10 overflow-x-auto pb-2">
+        {['Etisalat', 'Vodafone', 'WE'].map(net => (
+          <button 
+            key={net}
+            onClick={() => {setActiveTab(net); setExpandedLine(null);}}
+            className={`px-8 py-3 rounded-2xl font-bold transition-all duration-300 border-2 ${
+              activeTab === net ? 'border-[#ca8a04] bg-[#ca8a04] text-black shadow-[0_0_20px_rgba(202,138,4,0.3)]' : 'border-gray-800 bg-transparent text-gray-500'
+            }`}>
+            {net === 'Etisalat' ? 'اتصالات Emerald' : net === 'Vodafone' ? 'فودافون Red' : 'وي Gold'}
+          </button>
+        ))}
       </div>
 
-      {/* عرض الخطوط الخاصة بالشبكة المحددة */}
-      <div className="grid gap-8">
-        {masterLines.filter(line => line.network === activeTab).map(line => {
-          const stats = calculateLineStats(line);
-          
+      {/* قائمة الخطوط الأساسية */}
+      <div className="max-w-5xl mx-auto space-y-4">
+        {masterLines.filter(l => l.network === activeTab).map(line => {
+          const stats = getStats(line);
+          const isMainOpen = expandedLine === line.id;
+
           return (
-            <div key={line.id} className="bg-gray-900 border border-gray-700 rounded-3xl p-6">
-              {/* هيدر الكارت (إحصائيات الخط الرئيسي) */}
-              <div className="flex justify-between items-center border-b border-gray-700 pb-4 mb-4">
-                <div>
-                  <h2 className="text-xl font-bold text-yellow-500">رقم الخط: {line.masterPhone}</h2>
-                  <p className="text-sm text-gray-400 mt-1">تكلفة الخط: {line.baseCost} ج.م</p>
+            <div key={line.id} className="bg-[#111] border border-gray-800 rounded-3xl overflow-hidden transition-all duration-500">
+              {/* واجهة الخط (Header) */}
+              <div 
+                onClick={() => setExpandedLine(isMainOpen ? null : line.id)}
+                className="p-6 cursor-pointer hover:bg-[#161616] flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`w-3 h-3 rounded-full animate-pulse ${stats.remainingGB > 10 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <h3 className="text-xl font-bold">الرقم الأساسي: <span className="text-[#ca8a04]">{line.masterPhone}</span></h3>
                 </div>
-                <div className="flex gap-6 text-center">
-                  <div className="bg-black p-3 rounded-xl border border-gray-800">
-                    <p className="text-[10px] text-gray-500">إجمالي الملموم</p>
-                    <p className="font-bold text-lg">{stats.collectedMoney} ج.م</p>
+                <div className="flex gap-4 items-center">
+                  <div className="text-center px-4 border-l border-gray-800">
+                    <p className="text-[10px] text-gray-500 uppercase">المتبقي</p>
+                    <p className="font-bold text-blue-400">{stats.remainingGB}GB</p>
                   </div>
-                  <div className={`p-3 rounded-xl border ${stats.profit >= 0 ? 'bg-green-900/20 border-green-700 text-green-500' : 'bg-red-900/20 border-red-700 text-red-500'}`}>
-                    <p className="text-[10px]">الربح / الخسارة</p>
-                    <p className="font-bold text-lg" dir="ltr">{stats.profit} ج.م</p>
+                  <div className="text-center px-4 border-l border-gray-800">
+                    <p className="text-[10px] text-gray-500 uppercase">الربح الصافي</p>
+                    <p className={`font-bold ${stats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{stats.profit} ج.م</p>
                   </div>
-                  <div className="bg-black p-3 rounded-xl border border-gray-800">
-                    <p className="text-[10px] text-gray-500">المتبقي من الجيجات</p>
-                    <p className="font-bold text-lg text-blue-400">{stats.remainingGB} GB</p>
-                  </div>
+                  <span className={`transform transition-transform text-gray-600 ${isMainOpen ? 'rotate-180' : ''}`}>▼</span>
                 </div>
               </div>
 
-              {/* جدول المشتركين الـ 7 */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-right text-sm">
-                  <thead className="bg-gray-800 text-gray-400">
-                    <tr>
-                      <th className="p-3 rounded-tr-xl">العميل</th>
-                      <th className="p-3">رقم الموبايل</th>
-                      <th className="p-3">الباقة (GB)</th>
-                      <th className="p-3">السعر التلقائي</th>
-                      <th className="p-3">الميجابايت (للتحويل)</th>
-                      <th className="p-3 rounded-tl-xl">حالة الدفع</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* عرض المشتركين الحاليين */}
-                    {line.subscribers.map((sub, index) => (
-                      <tr key={sub.id} className="border-b border-gray-800 hover:bg-gray-800/50 transition-all">
-                        <td className="p-3 font-bold">{sub.name}</td>
-                        <td className="p-3 font-mono text-yellow-500">{sub.phone}</td>
-                        <td className="p-3">{sub.gb} GB</td>
-                        <td className="p-3 font-bold">{planConfigs[sub.gb]?.price || 0} ج.م</td>
-                        {/* هنا المعادلة اللي بتضرب في 1024 */}
-                        <td className="p-3 font-mono text-blue-400">{sub.gb * 1024} MB</td>
-                        <td className="p-3">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${sub.isPaid ? 'bg-green-600/20 text-green-500' : 'bg-red-600/20 text-red-500'}`}>
-                            {sub.isPaid ? 'تم الدفع' : 'عليه فلوس'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    
-                    {/* إضافة خانات فارغة لتكملة الـ 7 أماكن */}
-                    {[...Array(7 - line.subscribers.length)].map((_, i) => (
-                      <tr key={`empty-${i}`} className="border-b border-gray-800 opacity-50">
-                        <td className="p-3 text-gray-600">مكان فارغ...</td>
-                        <td className="p-3">-</td>
-                        <td className="p-3">-</td>
-                        <td className="p-3">-</td>
-                        <td className="p-3">-</td>
-                        <td className="p-3">-</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              
-              <button className="mt-4 w-full bg-gray-800 hover:bg-gray-700 text-yellow-500 py-3 rounded-xl font-bold transition-all border border-gray-700 border-dashed">
-                + إضافة عميل جديد
-              </button>
+              {/* التفاصيل الداخلية (تظهر عند الضغط) */}
+              {isMainOpen && (
+                <div className="p-6 border-t border-gray-800 bg-[#0d0d0d] space-y-8 animate-fadeIn">
+                  
+                  {/* قسم تعديل بيانات الخط الأساسي */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-[#161616] p-4 rounded-2xl border border-gray-800">
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-gray-500 mr-2">تكلفة الخط الأساسي</label>
+                      <input type="number" value={line.baseCost} onChange={(e) => updateMasterLine(line.id, 'baseCost', e.target.value)}
+                             className="w-full bg-black border border-gray-800 rounded-xl p-2 text-yellow-500 focus:border-yellow-600 outline-none"/>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-gray-500 mr-2">إجمالي جيجات الخط</label>
+                      <input type="number" value={line.totalGB} onChange={(e) => updateMasterLine(line.id, 'totalGB', e.target.value)}
+                             className="w-full bg-black border border-gray-800 rounded-xl p-2 text-blue-400 outline-none"/>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-gray-500 mr-2">إجمالي الدقائق</label>
+                      <input type="number" value={line.totalMins} onChange={(e) => updateMasterLine(line.id, 'totalMins', e.target.value)}
+                             className="w-full bg-black border border-gray-800 rounded-xl p-2 text-gray-300 outline-none"/>
+                    </div>
+                    <div className="flex items-end pb-1 px-2">
+                       <p className="text-[10px] text-gray-600 italic">⚠️ التعديلات تسمع فوراً في الحسابات</p>
+                    </div>
+                  </div>
+
+                  {/* جدول المشتركين (7 أماكن) */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-bold text-gray-500 px-2">المشتركين (7 أماكن متاحة):</h4>
+                    <div className="grid gap-3">
+                      {[...Array(7)].map((_, index) => {
+                        const sub = line.subscribers[index] || { name: '', phone: '', gb: 0, isPaid: false };
+                        return (
+                          <div key={index} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all">
+                            <input placeholder="اسم العميل" value={sub.name} onChange={(e) => updateSub(line.id, index, 'name', e.target.value)}
+                                   className="bg-black border border-gray-800 rounded-lg p-2 text-sm outline-none focus:border-[#ca8a04]"/>
+                            
+                            <input placeholder="رقم الموبايل" value={sub.phone} onChange={(e) => updateSub(line.id, index, 'phone', e.target.value)}
+                                   className="bg-black border border-gray-800 rounded-lg p-2 text-sm font-mono text-gray-400 outline-none"/>
+                            
+                            <select value={sub.gb} onChange={(e) => updateSub(line.id, index, 'gb', e.target.value)}
+                                    className="bg-black border border-gray-800 rounded-lg p-2 text-sm outline-none text-yellow-500">
+                              <option value="0">اختر الباقة</option>
+                              {[20, 25, 30, 35, 40].map(g => <option key={g} value={g}>{g} GB</option>)}
+                            </select>
+
+                            <div className="text-center">
+                               <p className="text-[10px] text-gray-600">الميجابايت</p>
+                               <p className="text-blue-400 font-mono text-xs">{sub.gb * 1024} MB</p>
+                            </div>
+
+                            <div className="text-center">
+                               <p className="text-[10px] text-gray-600">السعر</p>
+                               <p className="text-white font-bold">{planConfigs[sub.gb]?.price || 0} ج</p>
+                            </div>
+
+                            <button 
+                              onClick={() => updateSub(line.id, index, 'isPaid', !sub.isPaid)}
+                              className={`py-2 rounded-xl text-[10px] font-bold transition-all ${sub.isPaid ? 'bg-green-600/10 text-green-500 border border-green-600/20' : 'bg-red-600/10 text-red-500 border border-red-600/20'}`}>
+                              {sub.isPaid ? 'تم الدفع' : 'لم يدفع'}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+      
+      {/* زر إضافة خط أساسي جديد */}
+      <button className="fixed bottom-8 left-8 bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-2xl font-bold hover:scale-110 transition-transform">
+        +
+      </button>
     </div>
   );
 }
