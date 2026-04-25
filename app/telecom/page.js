@@ -498,6 +498,7 @@ export default function TelecomSystem() {
         price: 0,
         paidAmount: 0,
         traderName: '',
+        activationDate: '',
       });
     } catch { alert('خطأ في الاتصال بقاعدة البيانات'); }
   }, [activeTab, abroadCycle]);
@@ -811,6 +812,7 @@ export default function TelecomSystem() {
                       </p>
                       <p className="text-[10px] text-gray-400 mt-1 truncate">
                         التاجر: <span className="text-[#ca8a04] font-bold">{client.traderName || 'غير محدد'}</span>
+                        {client.activationDate ? <span className="mr-2 text-gray-500">· تفعيل: <span className="text-white">{client.activationDate}</span></span> : null}
                       </p>
                     </div>
 
@@ -882,6 +884,17 @@ export default function TelecomSystem() {
                               network={activeTab}
                               listId={`abroad-gb-list-${client.id}`}
                               onChange={(e) => updateAbroadClient(client.id, 'gb', e.target.value, client)}
+                            />
+                          </div>
+
+                          {/* تاريخ التفعيل */}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] text-gray-500 text-center">تاريخ التفعيل</label>
+                            <input
+                              defaultValue={client.activationDate || ''}
+                              onChange={(e) => updateAbroadClient(client.id, 'activationDate', e.target.value, client)}
+                              placeholder="مثال: 1/4"
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-[#ca8a04] outline-none focus:border-[#ca8a04] text-center"
                             />
                           </div>
 
