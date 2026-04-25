@@ -6,7 +6,6 @@ export default function TelecomSystem() {
   const [expandedLine, setExpandedLine] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // قاعدة بيانات الأسعار المحدثة حسب الصور المرسلة
   const priceTable = {
     'Etisalat': { 20: 260, 25: 300, 30: 340, 40: 420, 50: 500, 60: 640 },
     'Vodafone': { 20: 300, 25: 340, 30: 380, 40: 460, 50: 520, 60: 580 },
@@ -48,6 +47,7 @@ export default function TelecomSystem() {
     }
   };
 
+  // دالة لتعديل بيانات الخط الرئيسي
   const updateMasterLine = (lineId, field, value) => {
     setMasterLines(prev => prev.map(line => line.id === lineId ? { ...line, [field]: value } : line));
   };
@@ -57,12 +57,9 @@ export default function TelecomSystem() {
       if (line.id === lineId) {
         const newSubs = [...line.subscribers];
         if (!newSubs[subIndex]) newSubs[subIndex] = { id: Date.now() + subIndex, name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
-        
-        // تحديث السعر أوتوماتيك بناءً على الشبكة والباقة
         if (field === 'gb') {
           newSubs[subIndex].price = priceTable[line.network][value] || 0;
         }
-        
         newSubs[subIndex] = { ...newSubs[subIndex], [field]: value };
         return { ...line, subscribers: newSubs };
       }
@@ -136,11 +133,17 @@ export default function TelecomSystem() {
 
               {isMainOpen && (
                 <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
-                   <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6 bg-[#161616] p-4 rounded-2xl border border-gray-800">
-                     {["الاسم", "الرقم", "إجمالي الجيجا", "إجمالي الدقائق", "التكلفة الأساسية"].map((l, i) => (
-                       <div key={i} className="flex flex-col gap-1">
-                         <label className="text-[10px] text-gray-500">{l}</label>
-                         <input type={i > 1 ? "number" : "text"} className="bg-black border border-gray-800 rounded-lg p-2 text-sm text-white"/>
+                   <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-[#161616] p-4 rounded-2xl border border-gray-800">
+                     {[
+                       {l: "الاسم", k: "ownerName", t: "text"},
+                       {l: "الرقم", k: "masterPhone", t: "text"},
+                       {l: "إجمالي الجيجا", k: "totalGB", t: "number"},
+                       {l: "إجمالي الدقائق", k: "totalMins", t: "number"},
+                       {l: "التكلفة", k: "baseCost", t: "number"}
+                     ].map((item, i) => (
+                       <div key={i} className="flex flex-col gap-2">
+                         <label className="text-[12px] font-bold text-gray-400">{item.l}</label>
+                         <input type={item.t} value={line[item.k]} onChange={(e) => updateMasterLine(line.id, item.k, item.t === 'number' ? Number(e.target.value) : e.target.value)} className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-[#ca8a04] outline-none"/>
                        </div>
                      ))}
                    </div>
@@ -165,7 +168,7 @@ export default function TelecomSystem() {
                             {label: "المدفوع", key: "paidAmount", type: "number"}
                           ].map((f, i) => (
                             <div key={i} className="flex flex-col gap-1">
-                              <label className="text-[8px] text-gray-500 uppercase">{f.label}</label>
+                              <label className="text-[10px] font-bold text-gray-400">{f.label}</label>
                               {f.type === 'select' ? (
                                 <select value={sub.gb} onChange={(e) => updateSub(line.id, index, 'gb', Number(e.target.value))} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400">
                                   <option value="0">0</option>{Object.keys(priceTable[line.network]).map(g => <option key={g} value={g}>{g}</option>)}
@@ -177,7 +180,7 @@ export default function TelecomSystem() {
                               )}
                             </div>
                           ))}
-                          <button onClick={() => updateSub(line.id, index, 'paidAmount', sub.price)} className={`text-[10px] font-bold ${debt > 0 ? 'text-red-500' : 'text-green-500'}`}>{debt > 0 ? `باقي ${debt}` : 'خالص ✓'}</button>
+                          <button onClick={() => updateSub(line.id, index, 'paidAmount', sub.price)} className={`text-[10px] font-bold mt-4 ${debt > 0 ? 'text-red-500' : 'text-green-500'}`}>{debt > 0 ? `باقي ${debt}` : 'خالص ✓'}</button>
                         </div>
                       );
                     })}
