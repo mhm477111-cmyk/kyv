@@ -17,7 +17,8 @@ export default function TelecomSystem() {
   const priceTable = {
     'Etisalat': { 20: 260, 25: 300, 30: 340, 40: 420, 50: 500, 60: 640 },
     'Vodafone': { 20: 300, 25: 340, 30: 380, 40: 460, 50: 520, 60: 580 },
-    'WE': { 20: 250, 25: 280, 30: 310, 40: 360, 50: 410, 60: 520 }
+    'WE': { 20: 250, 25: 280, 30: 310, 40: 360, 50: 410, 60: 520 },
+    'Home4G': { 225: 225 }
   };
 
   useEffect(() => {
@@ -43,7 +44,8 @@ export default function TelecomSystem() {
   const networkCounts = {
     Etisalat: masterLines.filter(l => l.network === 'Etisalat').length,
     Vodafone: masterLines.filter(l => l.network === 'Vodafone').length,
-    WE: masterLines.filter(l => l.network === 'WE').length
+    WE: masterLines.filter(l => l.network === 'WE').length,
+    Home4G: masterLines.filter(l => l.network === 'Home4G').length
   };
 
   const exportToExcel = () => {
@@ -126,7 +128,7 @@ export default function TelecomSystem() {
           </div>
           {Object.entries(networkCounts).map(([net, count]) => (
             <div key={net} className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center">
-              <p className="text-[9px] text-gray-500 uppercase">{net === 'Etisalat' ? 'اتصالات' : net === 'Vodafone' ? 'فودافون' : 'وي'}</p>
+              <p className="text-[9px] text-gray-500 uppercase">{net === 'Home4G' ? 'Home 4G' : net}</p>
               <p className="text-sm font-black">{count}</p>
             </div>
           ))}
@@ -137,10 +139,10 @@ export default function TelecomSystem() {
         <input type="text" placeholder="البحث باسم العميل أو الرقم..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-[#111] border border-gray-800 rounded-2xl py-4 px-6 text-sm outline-none focus:border-[#ca8a04]"/>
       </div>
 
-      <div className="flex justify-center gap-3 mb-4">
-        {['Etisalat', 'Vodafone', 'WE'].map(net => (
-          <button key={net} onClick={() => {setActiveTab(net); setExpandedLine(null);}} className={`px-8 py-3 rounded-2xl font-bold border-2 ${activeTab === net ? 'border-[#ca8a04] bg-[#ca8a04] text-black' : 'border-gray-800 text-gray-500'}`}>
-            {net === 'Etisalat' ? 'اتصالات' : net === 'Vodafone' ? 'فودافون' : 'وي'}
+      <div className="flex justify-center gap-3 mb-4 flex-wrap">
+        {['Etisalat', 'Vodafone', 'WE', 'Home4G'].map(net => (
+          <button key={net} onClick={() => {setActiveTab(net); setExpandedLine(null);}} className={`px-6 py-3 rounded-2xl font-bold border-2 ${activeTab === net ? 'border-[#ca8a04] bg-[#ca8a04] text-black' : 'border-gray-800 text-gray-500'}`}>
+            {net === 'Home4G' ? 'Home 4G' : net === 'Etisalat' ? 'اتصالات' : net === 'Vodafone' ? 'فودافون' : 'وي'}
           </button>
         ))}
       </div>
