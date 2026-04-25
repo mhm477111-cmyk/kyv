@@ -17,17 +17,31 @@ export default function TelecomSystem() {
     'WE': { 20: 250, 25: 280, 30: 310, 40: 360, 50: 410, 60: 520 }
   };
 
-  // دالة لجلب البيانات مرة واحدة فقط لتوفير القراءات
-  const fetchLines = async () => {
-    const snapshot = await getDocs(collection(db, "lines"));
-    setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  // دالة لجلب البيانات مع دعم التخزين المؤقت
+  const fetchLines = async (forceRefresh = false) => {
+    // محاولة جلب البيانات من ذاكرة المتصفح أولاً
+    const cachedData = localStorage.getItem('mo_control_data');
+    if (cachedData && !forceRefresh) {
+      setMasterLines(JSON.parse(cachedData));
+    }
+    
+    try {
+      const snapshot = await getDocs(collection(db, "lines"));
+      const newData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setMasterLines(newData);
+      localStorage.setItem('mo_control_data', JSON.stringify(newData));
+    } catch (e) {
+      console.error("خطأ في الاتصال بـ Firebase");
+    }
   };
 
   useEffect(() => { fetchLines(); }, []);
 
-  // دالة لتحديث الشاشة فوراً دون إعادة جلب البيانات من Firebase
+  // تحديث الحالة محلياً وفي المتصفح
   const updateLocalState = (lineId, newData) => {
-    setMasterLines(prev => prev.map(l => l.id === lineId ? { ...l, ...newData } : l));
+    const updated = masterLines.map(l => l.id === lineId ? { ...l, ...newData } : l);
+    setMasterLines(updated);
+    localStorage.setItem('mo_control_data', JSON.stringify(updated));
   };
 
   const exportToExcel = () => {
@@ -71,7 +85,7 @@ export default function TelecomSystem() {
         });
       }
       alert("تم استعادة البيانات بنجاح!");
-      fetchLines();
+      fetchLines(true);
     };
     reader.readAsArrayBuffer(file);
   };
@@ -82,14 +96,14 @@ export default function TelecomSystem() {
       activationDate: '', baseCost: 0, totalGB: 0, totalMins: 0,
       subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
     });
-    fetchLines();
+    fetchLines(true);
   };
 
   const deleteLine = async (e, id) => {
     e.stopPropagation();
     if(window.confirm("هل تريد حذف هذا الخط نهائياً؟")) {
       await deleteDoc(doc(db, "lines", id));
-      fetchLines();
+      fetchLines(true);
     }
   };
 
@@ -226,6 +240,7 @@ export default function TelecomSystem() {
         <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
         <label htmlFor="importFile" title="استعادة" className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
         <button onClick={addNewLine} title="إضافة" className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center">+</button>
+        <button onClick={() => fetchLines(true)} title="تحديث البيانات" className="bg-gray-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">🔄</button>
       </div>
     </div>
   );
