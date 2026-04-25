@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebaseConfigV2';
-import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
+import * as XLSX from 'xlsx';
 
 export default function TelecomSystem() {
   const [activeTab, setActiveTab] = useState('Etisalat');
@@ -16,12 +17,29 @@ export default function TelecomSystem() {
     'WE': { 20: 250, 25: 280, 30: 310, 40: 360, 50: 410, 60: 520 }
   };
 
+  const fetchLines = async () => {
+    const snapshot = await getDocs(collection(db, "lines"));
+    setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
+
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "lines"), (snapshot) => {
-      setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-    return () => unsub();
+    fetchLines();
   }, []);
+
+  const exportToExcel = () => {
+    const dataToExport = masterLines.map(line => ({
+      "صاحب الخط": line.ownerName,
+      "الرقم": line.masterPhone,
+      "الشبكة": line.network,
+      "السايكل": line.cycle,
+      "تاريخ التفعيل": line.activationDate,
+      "التكلفة": line.baseCost
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "LinesData");
+    XLSX.writeFile(workbook, "MO_CONTROL_Data.xlsx");
+  };
 
   const addNewLine = async () => {
     try {
@@ -36,6 +54,7 @@ export default function TelecomSystem() {
         totalMins: 0,
         subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
       });
+      fetchLines();
     } catch (err) {
       alert("خطأ في الاتصال بقاعدة البيانات");
     }
@@ -45,12 +64,14 @@ export default function TelecomSystem() {
     e.stopPropagation();
     if(window.confirm("هل تريد حذف هذا الخط نهائياً؟")) {
       await deleteDoc(doc(db, "lines", id));
+      fetchLines();
     }
   };
 
   const updateMasterLine = async (lineId, field, value) => {
     const val = (field === 'totalGB' || field === 'totalMins' || field === 'baseCost') ? Number(value) : value;
     await updateDoc(doc(db, "lines", lineId), { [field]: val });
+    setMasterLines(prev => prev.map(l => l.id === lineId ? { ...l, [field]: val } : l));
   };
 
   const updateSub = async (lineId, subIndex, field, value, currentSubscribers) => {
@@ -63,6 +84,7 @@ export default function TelecomSystem() {
       newSubs[subIndex].price = priceTable[line?.network]?.[updatedValue] || 0;
     }
     await updateDoc(doc(db, "lines", lineId), { subscribers: newSubs });
+    setMasterLines(prev => prev.map(l => l.id === lineId ? { ...l, subscribers: newSubs } : l));
   };
 
   const getStats = (line) => {
@@ -173,6 +195,8 @@ export default function TelecomSystem() {
           );
         })}
       </div>
+      
+      <button onClick={exportToExcel} className="fixed bottom-28 left-8 bg-green-600 text-white w-14 h-14 rounded-full shadow-2xl text-2xl font-bold hover:scale-110 active:scale-95 transition-all z-[999]">📥</button>
       <button onClick={addNewLine} className="fixed bottom-8 left-8 bg-[#ca8a04] text-black w-16 h-16 rounded-full shadow-2xl text-4xl font-bold hover:scale-110 active:scale-95 transition-all z-[999]">+</button>
     </div>
   );
