@@ -44,8 +44,10 @@ export default function TelecomSystem() {
         let collected = 0, prices = 0;
         subs.forEach(s => { collected += Number(s.paidAmount || 0); prices += Number(s.price || 0); });
         totalProfit += collected - Number(line.baseCost || 0);
-        const debt = prices - collected;
-        if (debt > 0) totalDebt += debt;
+        const subDebt = prices - collected;
+        if (subDebt > 0) totalDebt += subDebt;
+        // ✅ لو الفاتورة مش مدفوعة، ضيف التكلفة للمديونية الكلية
+        if (!line.billPaid) totalDebt += Number(line.baseCost || 0);
       }
     });
     return { nets, totalProfit, totalDebt };
