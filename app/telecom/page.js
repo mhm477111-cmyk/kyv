@@ -30,7 +30,7 @@ export default function TelecomSystem() {
         cycle: activeCycle,
         masterPhone: '',
         ownerName: 'خط جديد',
-        activationDate: '1 في الشهر',
+        activationDate: '1',
         baseCost: 0,
         totalGB: 0,
         totalMins: 0,
@@ -123,7 +123,7 @@ export default function TelecomSystem() {
                 <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right">
                   <p className="text-[9px] text-gray-500 uppercase mb-1">صاحب الخط / الرقم / التفعيل</p>
                   <p className="font-bold text-white text-sm truncate">{line.ownerName || 'بدون اسم'} - {line.masterPhone || '0000'}</p>
-                  <p className="text-[10px] text-[#ca8a04] font-bold mt-1">تفعيل: {line.activationDate || 'غير محدد'}</p>
+                  <p className="text-[10px] text-[#ca8a04] font-bold mt-1">تفعيل: {line.activationDate || '1'}</p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto text-center">
                     <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">الربح</p><p className={`font-bold text-xs ${stats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{stats.profit} ج</p></div>
@@ -141,9 +141,9 @@ export default function TelecomSystem() {
                           <div key={i} className="flex flex-col gap-2">
                             <label className="text-[11px] font-bold text-gray-500 px-1">{item.l}</label>
                             {item.t === 'select' ? (
-                              <select value={line[item.k] || ""} onChange={(e) => updateMasterLine(line.id, item.k, e.target.value)} className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none focus:border-[#ca8a04]">
-                                <option value="1 في الشهر">1 في الشهر</option>
-                                <option value="15 في الشهر">15 في الشهر</option>
+                              <select value={line[item.k] || "1"} onChange={(e) => updateMasterLine(line.id, item.k, e.target.value)} className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none focus:border-[#ca8a04]">
+                                <option value="1">1</option>
+                                <option value="15">15</option>
                               </select>
                             ) : (
                               <input type={item.t} value={line[item.k] || ""} onChange={(e) => updateMasterLine(line.id, item.k, e.target.value)} className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none focus:border-[#ca8a04]"/>
