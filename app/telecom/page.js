@@ -227,14 +227,14 @@ export default function TelecomSystem() {
       </div>
 
       {/* منطقة الأزرار في الأسفل يساراً */}
-      <div className="fixed bottom-8 left-8 flex flex-col gap-3 z-[999]">
-        <button onClick={exportToExcel} title="تصدير نسخة احتياطية" className="bg-green-600 text-white w-14 h-14 rounded-full shadow-2xl text-2xl flex items-center justify-center hover:scale-110 transition-all">📥</button>
-        
-        <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
-        <label htmlFor="importFile" title="استعادة نسخة احتياطية" className="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl text-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
+<div className="fixed bottom-8 left-8 flex gap-3 z-[999]">
+  <button onClick={exportToExcel} title="تصدير" className="bg-green-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">📥</button>
+  
+  <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
+  <label htmlFor="importFile" title="استعادة" className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
 
-        <button onClick={addNewLine} title="إضافة خط جديد" className="bg-[#ca8a04] text-black w-16 h-16 rounded-full shadow-2xl text-4xl font-bold hover:scale-110 active:scale-95 transition-all flex items-center justify-center pb-2">+</button>
-      </div>
+  <button onClick={addNewLine} title="إضافة" className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center">+</button>
+</div>
 
     </div>
   );
