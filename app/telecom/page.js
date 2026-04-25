@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebaseConfigV2';
-import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 
 export default function TelecomSystem() {
   const [activeTab, setActiveTab] = useState('Etisalat');
@@ -16,13 +16,11 @@ export default function TelecomSystem() {
     'WE': { 20: 250, 25: 280, 30: 310, 40: 360, 50: 410, 60: 520 }
   };
 
-  const fetchLines = async () => {
-    const querySnapshot = await getDocs(collection(db, "lines"));
-    setMasterLines(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-  };
-
   useEffect(() => {
-    fetchLines();
+    const unsub = onSnapshot(collection(db, "lines"), (snapshot) => {
+      setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsub();
   }, []);
 
   const addNewLine = async () => {
@@ -38,7 +36,6 @@ export default function TelecomSystem() {
         totalMins: 0,
         subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
       });
-      fetchLines(); // تحديث القائمة بعد الإضافة
     } catch (err) {
       alert("خطأ في الاتصال بقاعدة البيانات");
     }
@@ -48,14 +45,12 @@ export default function TelecomSystem() {
     e.stopPropagation();
     if(window.confirm("هل تريد حذف هذا الخط نهائياً؟")) {
       await deleteDoc(doc(db, "lines", id));
-      fetchLines(); // تحديث القائمة بعد الحذف
     }
   };
 
   const updateMasterLine = async (lineId, field, value) => {
     const val = (field === 'totalGB' || field === 'totalMins' || field === 'baseCost') ? Number(value) : value;
     await updateDoc(doc(db, "lines", lineId), { [field]: val });
-    // لا نحتاج fetchLines هنا لأن التعديل محلي أو يمكننا تحديث الحالة يدوياً
   };
 
   const updateSub = async (lineId, subIndex, field, value, currentSubscribers) => {
@@ -68,7 +63,6 @@ export default function TelecomSystem() {
       newSubs[subIndex].price = priceTable[line?.network]?.[updatedValue] || 0;
     }
     await updateDoc(doc(db, "lines", lineId), { subscribers: newSubs });
-    setMasterLines(prev => prev.map(l => l.id === lineId ? {...l, subscribers: newSubs} : l));
   };
 
   const getStats = (line) => {
