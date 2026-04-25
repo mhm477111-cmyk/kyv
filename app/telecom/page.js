@@ -8,6 +8,7 @@ export default function TelecomSystem() {
   const [expandedLine, setExpandedLine] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [masterLines, setMasterLines] = useState([]);
+  const [filterMode, setFilterMode] = useState('all');
 
   const priceTable = {
     'Etisalat': { 20: 260, 25: 300, 30: 340, 40: 420, 50: 500, 60: 640 },
@@ -118,21 +119,45 @@ export default function TelecomSystem() {
     return {
       profit: actualCollected - (line.baseCost || 0),
       debts: totalPrices - actualCollected,
+      actualCollected: actualCollected,
       remainingGB: (line.totalGB || 0) - usedGB,
       remainingMins: (line.totalMins || 0) - usedMins
     };
   };
 
+  // الحسابات الجديدة
+  const totalProfit = masterLines.reduce((acc, line) => acc + getStats(line).profit, 0);
+  const etisalatCount = masterLines.filter(l => l.network === 'Etisalat').length;
+  const vodafoneCount = masterLines.filter(l => l.network === 'Vodafone').length;
+  const weCount = masterLines.filter(l => l.network === 'WE').length;
+
   const filteredLines = masterLines.filter(line => {
     const searchLower = searchTerm.toLowerCase();
-    const matchesMaster = (line.ownerName?.toLowerCase().includes(searchLower) || line.masterPhone?.includes(searchTerm));
-    const matchesSub = line.subscribers?.some(sub => sub.name?.toLowerCase().includes(searchLower) || sub.phone?.includes(searchTerm));
-    return (line.network === activeTab) && (line.cycle === activeCycle) && (matchesMaster || matchesSub || searchTerm === '');
+    const stats = getStats(line);
+    const matchesSearch = (line.ownerName?.toLowerCase().includes(searchLower) || line.masterPhone?.includes(searchTerm));
+    
+    if (filterMode === 'debts') return stats.debts > 0 && matchesSearch;
+    if (filterMode === 'notPaid') return stats.actualCollected === 0 && matchesSearch;
+    return (line.network === activeTab) && (line.cycle === activeCycle) && matchesSearch;
   });
 
   return (
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-gray-200" dir="rtl">
       <header className="mb-6 text-center"><h1 className="text-4xl font-black text-[#ca8a04]">MO CONTROL</h1></header>
+      
+      {/* خانات الإحصائيات والأزرار الجديدة */}
+      <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center"><p className="text-[10px] text-gray-500">صافي الربح</p><p className="font-bold text-green-500">{totalProfit} ج</p></div>
+        <div className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center"><p className="text-[10px] text-gray-500">اتصالات</p><p className="font-bold">{etisalatCount}</p></div>
+        <div className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center"><p className="text-[10px] text-gray-500">فودافون</p><p className="font-bold">{vodafoneCount}</p></div>
+        <div className="bg-[#111] p-3 rounded-xl border border-gray-800 text-center"><p className="text-[10px] text-gray-500">وي</p><p className="font-bold">{weCount}</p></div>
+        <button onClick={() => setFilterMode('all')} className="bg-[#ca8a04] text-black font-bold rounded-xl text-xs">الكل</button>
+      </div>
+
+      <div className="flex justify-center gap-3 mb-6">
+        <button onClick={() => setFilterMode('debts')} className="bg-red-900/20 text-red-500 px-4 py-2 rounded-lg border border-red-900 text-sm">عليهم فلوس</button>
+        <button onClick={() => setFilterMode('notPaid')} className="bg-orange-900/20 text-orange-500 px-4 py-2 rounded-lg border border-orange-900 text-sm">مدفعوش خالص</button>
+      </div>
       
       <div className="max-w-xl mx-auto mb-8">
         <input type="text" placeholder="البحث باسم العميل أو الرقم..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-[#111] border border-gray-800 rounded-2xl py-4 px-6 text-sm outline-none focus:border-[#ca8a04]"/>
@@ -140,7 +165,7 @@ export default function TelecomSystem() {
 
       <div className="flex justify-center gap-3 mb-4">
         {['Etisalat', 'Vodafone', 'WE'].map(net => (
-          <button key={net} onClick={() => {setActiveTab(net); setExpandedLine(null);}} className={`px-8 py-3 rounded-2xl font-bold border-2 ${activeTab === net ? 'border-[#ca8a04] bg-[#ca8a04] text-black' : 'border-gray-800 text-gray-500'}`}>
+          <button key={net} onClick={() => {setFilterMode('all'); setActiveTab(net); setExpandedLine(null);}} className={`px-8 py-3 rounded-2xl font-bold border-2 ${activeTab === net && filterMode === 'all' ? 'border-[#ca8a04] bg-[#ca8a04] text-black' : 'border-gray-800 text-gray-500'}`}>
             {net === 'Etisalat' ? 'اتصالات' : net === 'Vodafone' ? 'فودافون' : 'وي'}
           </button>
         ))}
@@ -148,7 +173,7 @@ export default function TelecomSystem() {
 
       <div className="flex justify-center gap-3 mb-10">
         {['1', '15'].map(cyc => (
-          <button key={cyc} onClick={() => {setActiveCycle(cyc); setExpandedLine(null);}} className={`px-8 py-2 rounded-xl font-bold ${activeCycle === cyc ? 'bg-blue-600 text-white' : 'bg-[#111] text-gray-500 border border-gray-800'}`}>
+          <button key={cyc} onClick={() => {setFilterMode('all'); setActiveCycle(cyc); setExpandedLine(null);}} className={`px-8 py-2 rounded-xl font-bold ${activeCycle === cyc && filterMode === 'all' ? 'bg-blue-600 text-white' : 'bg-[#111] text-gray-500 border border-gray-800'}`}>
             سايكل {cyc}
           </button>
         ))}
