@@ -34,7 +34,7 @@ export default function TelecomSystem() {
         baseCost: 0,
         totalGB: 0,
         totalMins: 0,
-        subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 })
+        subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
       });
     } catch (err) {
       alert("خطأ في الاتصال بقاعدة البيانات");
@@ -54,7 +54,7 @@ export default function TelecomSystem() {
   };
 
   const updateSub = async (lineId, subIndex, field, value, currentSubscribers) => {
-    let newSubs = currentSubscribers ? [...currentSubscribers] : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 });
+    let newSubs = currentSubscribers ? [...currentSubscribers] : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 });
     const updatedValue = (field === 'gb' || field === 'sentMB' || field === 'mins' || field === 'price' || field === 'paidAmount') ? Number(value) : value;
     newSubs[subIndex] = { ...newSubs[subIndex], [field]: updatedValue };
     
@@ -147,7 +147,7 @@ export default function TelecomSystem() {
 
                     <div className="space-y-3 overflow-x-auto">
                         {[...Array(7)].map((_, index) => {
-                            const sub = (line.subscribers || [])[index] || { name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
+                            const sub = (line.subscribers || [])[index] || { name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 };
                             const totalMB = (sub.gb || 0) * 1024;
                             const remainingMB = totalMB - (sub.sentMB || 0);
                             const debt = (sub.price || 0) - (sub.paidAmount || 0);
