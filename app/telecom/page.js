@@ -1,6 +1,28 @@
 'use client';
-
+import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebaseConfigV2';
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
+
+
+
+const IS_FIREBASE_ENABLED = false; // <-- غير هذا إلى false لتعطيل الاتصال فوراً
+
+const updateMasterLine = async (lineId, field, value) => {
+    const val = (['totalGB', 'totalMins', 'baseCost'].includes(field)) ? Number(value) : value;
+    
+    // التحديث المحلي دائماً يعمل
+    updateLocalState(lineId, { [field]: val });
+
+    // لن يتصل بـ Firebase إلا إذا كان المفتاح true
+    if (IS_FIREBASE_ENABLED) {
+        await updateDoc(doc(db, "lines", lineId), { [field]: val });
+    } else {
+        console.log("تم تعطيل الاتصال بـ Firebase - تم التحديث محلياً فقط");
+    }
+};
+
+
 
 export default function TelecomSystem() {
   const [activeTab, setActiveTab] = useState('Etisalat');
