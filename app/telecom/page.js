@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebaseConfig';
+import { db } from '@/lib/firebaseConfig'; // تأكد أن هذا الملف موجود وبه export const db
 import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 
 export default function TelecomSystem() {
@@ -9,12 +9,16 @@ export default function TelecomSystem() {
   const [searchTerm, setSearchTerm] = useState('');
   const [masterLines, setMasterLines] = useState([]);
 
-  // ربط Firebase بالـ state الخاص بك
+  // جلب البيانات لحظياً من Firebase
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "lines"), (snapshot) => {
-      setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-    return unsub;
+    try {
+      const unsub = onSnapshot(collection(db, "lines"), (snapshot) => {
+        setMasterLines(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      });
+      return unsub;
+    } catch (err) {
+      console.error("Firebase Connection Error:", err);
+    }
   }, []);
 
   const priceTable = {
@@ -24,16 +28,23 @@ export default function TelecomSystem() {
   };
 
   const addNewLine = async () => {
-    const newLine = {
-      network: activeTab,
-      masterPhone: '',
-      ownerName: 'خط جديد',
-      baseCost: 0,
-      totalGB: 0,
-      totalMins: 0,
-      subscribers: []
-    };
-    await addDoc(collection(db, "lines"), newLine);
+    console.log("تم الضغط على زر إضافة خط..."); // للتأكد أن الزر يستجيب
+    try {
+      const newLine = {
+        network: activeTab,
+        masterPhone: '',
+        ownerName: 'خط جديد',
+        baseCost: 0,
+        totalGB: 0,
+        totalMins: 0,
+        subscribers: []
+      };
+      const docRef = await addDoc(collection(db, "lines"), newLine);
+      console.log("تمت الإضافة بنجاح، ID المستند:", docRef.id);
+    } catch (err) {
+      console.error("خطأ أثناء الإضافة:", err);
+      alert("فشلت الإضافة: " + err.message);
+    }
   };
 
   const deleteLine = async (e, id) => {
@@ -83,9 +94,11 @@ export default function TelecomSystem() {
   return (
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-gray-200" dir="rtl">
       <header className="mb-6 text-center"><h1 className="text-4xl font-black text-[#ca8a04]">MO CONTROL</h1></header>
+
       <div className="max-w-xl mx-auto mb-8">
         <input type="text" placeholder="البحث باسم العميل أو الرقم..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-[#111] border border-gray-800 rounded-2xl py-4 px-6 text-sm outline-none focus:border-[#ca8a04]"/>
       </div>
+
       <div className="flex justify-center gap-3 mb-10">
         {['Etisalat', 'Vodafone', 'WE'].map(net => (
           <button key={net} onClick={() => {setActiveTab(net); setExpandedLine(null);}} className={`px-8 py-3 rounded-2xl font-bold border-2 ${activeTab === net ? 'border-[#ca8a04] bg-[#ca8a04] text-black' : 'border-gray-800 text-gray-500'}`}>
@@ -93,6 +106,7 @@ export default function TelecomSystem() {
           </button>
         ))}
       </div>
+
       <div className="max-w-6xl mx-auto space-y-4">
         {filteredLines.map(line => {
           const stats = getStats(line);
@@ -112,6 +126,7 @@ export default function TelecomSystem() {
                 </div>
                 <button onClick={(e) => deleteLine(e, line.id)} className="text-gray-600 hover:text-red-500">🗑️</button>
               </div>
+
               {isMainOpen && (
                 <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-[#161616] p-4 rounded-2xl border border-gray-800">
@@ -122,11 +137,13 @@ export default function TelecomSystem() {
                        </div>
                      ))}
                    </div>
+                   
                    {[...Array(7)].map((_, index) => {
                       const sub = (line.subscribers || [])[index] || { name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
                       const totalMB = sub.gb * 1024;
                       const remainingMB = totalMB - Number(sub.sentMB || 0);
                       const debt = Number(sub.price || 0) - Number(sub.paidAmount || 0);
+
                       return (
                         <div key={index} className="grid grid-cols-2 md:grid-cols-10 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 mb-2 text-center">
                           <div className="flex flex-col gap-1"><label className="text-[10px] font-bold text-gray-400">الاسم</label><input value={sub.name} onChange={(e) => updateSub(line.id, index, 'name', e.target.value)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white"/></div>
@@ -148,6 +165,7 @@ export default function TelecomSystem() {
           );
         })}
       </div>
+
       <button onClick={addNewLine} className="fixed bottom-8 left-8 bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 active:scale-95 transition-all z-[9999]">+</button>
     </div>
   );
