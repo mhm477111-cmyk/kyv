@@ -46,7 +46,6 @@ export default function TelecomSystem() {
         totalProfit += collected - Number(line.baseCost || 0);
         const subDebt = prices - collected;
         if (subDebt > 0) totalDebt += subDebt;
-        // ✅ لو الفاتورة مش مدفوعة، ضيف التكلفة للمديونية الكلية
         if (!line.billPaid) totalDebt += Number(line.baseCost || 0);
       }
     });
@@ -66,6 +65,8 @@ export default function TelecomSystem() {
       "الجيجا": line.totalGB || 0,
       "الدقائق": line.totalMins || 0,
       "دفعت الفاتورة": line.billPaid ? 'نعم' : 'لا',
+      "فواتشر": line.voucherSent ? 'نعم' : 'لا',
+      "TOD": line.todSent ? 'نعم' : 'لا',
       "بيانات المشتركين (JSON)": JSON.stringify(line.subscribers || []),
       "بيانات Home4G (JSON)": JSON.stringify(line.home4gData || null)
     }));
@@ -94,6 +95,8 @@ export default function TelecomSystem() {
           totalGB: Number(item["الجيجا"]) || 0,
           totalMins: Number(item["الدقائق"]) || 0,
           billPaid: item["دفعت الفاتورة"] === 'نعم',
+          voucherSent: item["فواتشر"] === 'نعم',
+          todSent: item["TOD"] === 'نعم',
           subscribers: item["بيانات المشتركين (JSON)"] ? JSON.parse(item["بيانات المشتركين (JSON)"]) : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 }),
           home4gData: item["بيانات Home4G (JSON)"] ? JSON.parse(item["بيانات Home4G (JSON)"]) : null
         });
@@ -129,6 +132,8 @@ export default function TelecomSystem() {
           totalGB: 0,
           totalMins: 0,
           billPaid: false,
+          voucherSent: false,
+          todSent: false,
           subscribers: [],
           home4gData: defaultHome4G()
         });
@@ -143,6 +148,8 @@ export default function TelecomSystem() {
           totalGB: 0,
           totalMins: 0,
           billPaid: false,
+          voucherSent: false,
+          todSent: false,
           subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 }),
           home4gData: null
         });
@@ -167,6 +174,16 @@ export default function TelecomSystem() {
   const toggleBillPaid = async (e, lineId, current) => {
     e.stopPropagation();
     await updateDoc(doc(db, "lines", lineId), { billPaid: !current });
+  };
+
+  const toggleVoucher = async (e, lineId, current) => {
+    e.stopPropagation();
+    await updateDoc(doc(db, "lines", lineId), { voucherSent: !current });
+  };
+
+  const toggleTOD = async (e, lineId, current) => {
+    e.stopPropagation();
+    await updateDoc(doc(db, "lines", lineId), { todSent: !current });
   };
 
   const updateHome4G = async (lineId, field, value, currentData) => {
@@ -380,13 +397,32 @@ export default function TelecomSystem() {
                       <p className="text-[8px] text-gray-500">دقائق متبقية</p>
                       <p className="font-bold text-xs text-green-400">{stats.remainingMins} د</p>
                     </div>
-                    {/* زرار الفاتورة في الصف */}
+
+                    {/* زرار الفاتورة */}
                     <button
                       onClick={(e) => toggleBillPaid(e, line.id, line.billPaid)}
                       className={`p-2 rounded-lg border min-w-[75px] transition-all ${line.billPaid ? 'border-green-700 bg-green-900/30 text-green-400' : 'border-red-900 bg-red-900/20 text-red-400'}`}
                     >
                       <p className="text-[8px] text-gray-500">الفاتورة</p>
                       <p className="font-bold text-xs">{line.billPaid ? 'مدفوعة ✓' : 'غير مدفوعة'}</p>
+                    </button>
+
+                    {/* زرار فواتشر */}
+                    <button
+                      onClick={(e) => toggleVoucher(e, line.id, line.voucherSent)}
+                      className={`p-2 rounded-lg border min-w-[75px] transition-all ${line.voucherSent ? 'border-cyan-700 bg-cyan-900/30 text-cyan-400' : 'border-gray-700 bg-gray-900/20 text-gray-500'}`}
+                    >
+                      <p className="text-[8px] text-gray-500">فواتشر</p>
+                      <p className="font-bold text-xs">{line.voucherSent ? 'اتباعت ✓' : 'لسه'}</p>
+                    </button>
+
+                    {/* زرار TOD */}
+                    <button
+                      onClick={(e) => toggleTOD(e, line.id, line.todSent)}
+                      className={`p-2 rounded-lg border min-w-[75px] transition-all ${line.todSent ? 'border-yellow-600 bg-yellow-900/30 text-yellow-400' : 'border-gray-700 bg-gray-900/20 text-gray-500'}`}
+                    >
+                      <p className="text-[8px] text-gray-500">TOD</p>
+                      <p className="font-bold text-xs">{line.todSent ? 'اتباعت ✓' : 'لسه'}</p>
                     </button>
                   </div>
                 )}
@@ -402,37 +438,30 @@ export default function TelecomSystem() {
                   </p>
                   <div className="overflow-x-auto">
                     <div className="grid grid-cols-9 gap-2 items-end bg-[#111] p-4 rounded-2xl border border-purple-900 min-w-[1100px]">
-
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">صاحب البرينت</label>
                         <input value={h.ownerName} onChange={(e) => updateHome4G(line.id, 'ownerName', e.target.value, h)} placeholder="الاسم" className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none focus:border-purple-500 text-center" />
                       </div>
-
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">رقم خط الهوم</label>
                         <input value={h.linePhone} onChange={(e) => updateHome4G(line.id, 'linePhone', e.target.value, h)} placeholder="01xxxxxxxxx" className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none focus:border-purple-500 text-center" />
                       </div>
-
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">رقم الخصم</label>
                         <input value={h.discountPhone} onChange={(e) => updateHome4G(line.id, 'discountPhone', e.target.value, h)} placeholder="01xxxxxxxxx" className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none focus:border-purple-500 text-center" />
                       </div>
-
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">اسم المشترك</label>
                         <input value={h.subscriberName} onChange={(e) => updateHome4G(line.id, 'subscriberName', e.target.value, h)} placeholder="الاسم" className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none focus:border-purple-500 text-center" />
                       </div>
-
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">رقم تواصل</label>
                         <input value={h.contactPhone} onChange={(e) => updateHome4G(line.id, 'contactPhone', e.target.value, h)} placeholder="01xxxxxxxxx" className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none focus:border-purple-500 text-center" />
                       </div>
-
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">الباقة</label>
                         <input value={h.package} onChange={(e) => updateHome4G(line.id, 'package', e.target.value, h)} placeholder="مثال: 100GB" className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-purple-400 outline-none focus:border-purple-500 text-center" />
                       </div>
-
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">حالة الدفع</label>
                         <select value={h.paymentStatus} onChange={(e) => updateHome4G(line.id, 'paymentStatus', e.target.value, h)} className={`bg-black border border-gray-800 rounded-lg p-2 text-[12px] outline-none focus:border-purple-500 text-center font-bold ${h.paymentStatus === 'مدفوع' ? 'text-green-500' : h.paymentStatus === 'جزئي' ? 'text-yellow-400' : 'text-red-400'}`}>
@@ -441,17 +470,14 @@ export default function TelecomSystem() {
                           <option value="جزئي">جزئي</option>
                         </select>
                       </div>
-
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">المبلغ المدفوع</label>
                         <input type="number" value={h.paidAmount} onChange={(e) => updateHome4G(line.id, 'paidAmount', e.target.value, h)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-green-400 outline-none focus:border-purple-500 text-center" />
                       </div>
-
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">التكلفة</label>
                         <input type="number" value={h.baseCost} onChange={(e) => updateHome4G(line.id, 'baseCost', e.target.value, h)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-orange-400 outline-none focus:border-purple-500 text-center" />
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -480,7 +506,6 @@ export default function TelecomSystem() {
                         />
                       </div>
                     ))}
-                    {/* زرار الفاتورة داخل التفاصيل */}
                     <div className="flex flex-col gap-2">
                       <label className="text-[11px] font-bold text-gray-500 px-1">الفاتورة</label>
                       <button
