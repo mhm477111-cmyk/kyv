@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { db } from '../lib/firebaseConfig';
+import { auth, db } from '@/lib/firebaseConfig';
 import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 
 export default function TelecomSystem() {
