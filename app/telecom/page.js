@@ -5,6 +5,7 @@ import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from 'fireb
 
 export default function TelecomSystem() {
   const [activeTab, setActiveTab] = useState('Etisalat');
+  const [activeCycle, setActiveCycle] = useState('1');
   const [expandedLine, setExpandedLine] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [masterLines, setMasterLines] = useState([]);
@@ -26,22 +27,25 @@ export default function TelecomSystem() {
     try {
       await addDoc(collection(db, "lines"), {
         network: activeTab,
+        cycle: activeCycle,
         masterPhone: '',
         ownerName: 'خط جديد',
-        activationDate: '',
+        activationDate: '1 في الشهر',
         baseCost: 0,
         totalGB: 0,
         totalMins: 0,
         subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 })
       });
     } catch (err) {
-      alert("خطأ في الاتصال");
+      alert("خطأ في الاتصال بقاعدة البيانات");
     }
   };
 
   const deleteLine = async (e, id) => {
     e.stopPropagation();
-    if(window.confirm("حذف نهائي؟")) await deleteDoc(doc(db, "lines", id));
+    if(window.confirm("هل تريد حذف هذا الخط نهائياً؟")) {
+      await deleteDoc(doc(db, "lines", id));
+    }
   };
 
   const updateMasterLine = async (lineId, field, value) => {
@@ -49,11 +53,11 @@ export default function TelecomSystem() {
     await updateDoc(doc(db, "lines", lineId), { [field]: val });
   };
 
-  const updateSub = async (lineId, subIndex, field, value, currentSubs) => {
-    let newSubs = currentSubs ? [...currentSubs] : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 });
+  const updateSub = async (lineId, subIndex, field, value, currentSubscribers) => {
+    let newSubs = currentSubscribers ? [...currentSubscribers] : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 });
     const updatedValue = (field === 'gb' || field === 'sentMB' || field === 'mins' || field === 'price' || field === 'paidAmount') ? Number(value) : value;
     newSubs[subIndex] = { ...newSubs[subIndex], [field]: updatedValue };
-
+    
     if (field === 'gb') {
       const line = masterLines.find(l => l.id === lineId);
       newSubs[subIndex].price = priceTable[line?.network]?.[updatedValue] || 0;
@@ -82,7 +86,7 @@ export default function TelecomSystem() {
     const searchLower = searchTerm.toLowerCase();
     const matchesMaster = (line.ownerName?.toLowerCase().includes(searchLower) || line.masterPhone?.includes(searchTerm));
     const matchesSub = line.subscribers?.some(sub => sub.name?.toLowerCase().includes(searchLower) || sub.phone?.includes(searchTerm));
-    return (line.network === activeTab) && (matchesMaster || matchesSub || searchTerm === '');
+    return (line.network === activeTab) && (line.cycle === activeCycle) && (matchesMaster || matchesSub || searchTerm === '');
   });
 
   return (
@@ -93,10 +97,18 @@ export default function TelecomSystem() {
         <input type="text" placeholder="البحث باسم العميل أو الرقم..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-[#111] border border-gray-800 rounded-2xl py-4 px-6 text-sm outline-none focus:border-[#ca8a04]"/>
       </div>
 
-      <div className="flex justify-center gap-3 mb-10">
+      <div className="flex justify-center gap-3 mb-4">
         {['Etisalat', 'Vodafone', 'WE'].map(net => (
-          <button key={net} onClick={() => {setActiveTab(net); setExpandedLine(null);}} className={`px-8 py-3 rounded-2xl font-bold border-2 transition-all ${activeTab === net ? 'border-[#ca8a04] bg-[#ca8a04] text-black' : 'border-gray-800 text-gray-500 hover:border-gray-600'}`}>
+          <button key={net} onClick={() => {setActiveTab(net); setExpandedLine(null);}} className={`px-8 py-3 rounded-2xl font-bold border-2 ${activeTab === net ? 'border-[#ca8a04] bg-[#ca8a04] text-black' : 'border-gray-800 text-gray-500'}`}>
             {net === 'Etisalat' ? 'اتصالات' : net === 'Vodafone' ? 'فودافون' : 'وي'}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex justify-center gap-3 mb-10">
+        {['1', '15'].map(cyc => (
+          <button key={cyc} onClick={() => {setActiveCycle(cyc); setExpandedLine(null);}} className={`px-8 py-2 rounded-xl font-bold ${activeCycle === cyc ? 'bg-blue-600 text-white' : 'bg-[#111] text-gray-500 border border-gray-800'}`}>
+            سايكل {cyc}
           </button>
         ))}
       </div>
@@ -108,56 +120,60 @@ export default function TelecomSystem() {
           return (
             <div key={line.id} className="bg-[#111] border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
               <div onClick={() => setExpandedLine(isMainOpen ? null : line.id)} className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row items-center justify-between gap-4 transition-colors">
-                
-                {/* الرأس المحدث: يظهر فيه التاريخ */}
                 <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right">
+                  <p className="text-[9px] text-gray-500 uppercase mb-1">صاحب الخط / الرقم / التفعيل</p>
                   <p className="font-bold text-white text-sm truncate">{line.ownerName || 'بدون اسم'} - {line.masterPhone || '0000'}</p>
                   <p className="text-[10px] text-[#ca8a04] font-bold mt-1">تفعيل: {line.activationDate || 'غير محدد'}</p>
                 </div>
-                
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto text-center">
-                   <div className="bg-black/30 p-2 rounded-lg border border-gray-800"><p className="text-[8px] text-gray-500">الربح</p><p className={`font-bold text-xs ${stats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{stats.profit} ج</p></div>
-                   <div className="bg-black/30 p-2 rounded-lg border border-gray-800"><p className="text-[8px] text-gray-500">ديون</p><p className="font-bold text-xs text-orange-500">{stats.debts} ج</p></div>
-                   <div className="bg-black/30 p-2 rounded-lg border border-gray-800"><p className="text-[8px] text-gray-500">جيجا متبقية</p><p className="font-bold text-xs text-blue-400">{stats.remainingGB} GB</p></div>
-                   <div className="bg-black/30 p-2 rounded-lg border border-gray-800"><p className="text-[8px] text-gray-500">دقائق متبقية</p><p className="font-bold text-xs text-green-400">{stats.remainingMins} د</p></div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">الربح</p><p className={`font-bold text-xs ${stats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>{stats.profit} ج</p></div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">ديون</p><p className="font-bold text-xs text-orange-500">{stats.debts} ج</p></div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">جيجا متبقية</p><p className="font-bold text-xs text-blue-400">{stats.remainingGB} GB</p></div>
+                    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]"><p className="text-[8px] text-gray-500">دقائق متبقية</p><p className="font-bold text-xs text-green-400">{stats.remainingMins} د</p></div>
                 </div>
-
-                <button onClick={(e) => deleteLine(e, line.id)} className="text-gray-600 hover:text-red-500">🗑️</button>
+                <button onClick={(e) => deleteLine(e, line.id)} className="text-gray-600 hover:text-red-500 transition-colors">🗑️</button>
               </div>
 
               {isMainOpen && (
                 <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
-                   <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8 bg-[#161616] p-4 rounded-2xl border border-gray-800">
-                     {[ {l: "الاسم", k: "ownerName", t: "text"}, {l: "الرقم", k: "masterPhone", t: "text"}, {l: "تاريخ التفعيل", k: "activationDate", t: "date"}, {l: "إجمالي الجيجا", k: "totalGB", t: "number"}, {l: "إجمالي الدقائق", k: "totalMins", t: "number"}, {l: "التكلفة", k: "baseCost", t: "number"} ].map((item, i) => (
-                       <div key={i} className="flex flex-col gap-2">
-                         <label className="text-[11px] font-bold text-gray-500 px-1">{item.l}</label>
-                         <input type={item.t} value={line[item.k] || ""} onChange={(e) => updateMasterLine(line.id, item.k, e.target.value)} className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none focus:border-[#ca8a04] [color-scheme:dark]"/>
-                       </div>
-                     ))}
-                   </div>
-
-                   <div className="space-y-3 overflow-x-auto">
-                     {[...Array(7)].map((_, index) => {
-                        const sub = (line.subscribers || [])[index] || { name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
-                        const totalMB = (sub.gb || 0) * 1024;
-                        const remainingMB = totalMB - (sub.sentMB || 0);
-                        const debt = (sub.price || 0) - (sub.paidAmount || 0);
-                        return (
-                          <div key={index} className="grid grid-cols-2 md:grid-cols-10 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 text-center hover:border-gray-700 transition-all min-w-[900px]">
-                            <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">الاسم</label><input value={sub.name} onChange={(e) => updateSub(line.id, index, 'name', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
-                            <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">الرقم</label><input value={sub.phone} onChange={(e) => updateSub(line.id, index, 'phone', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
-                            <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">باقة GB</label><select value={sub.gb} onChange={(e) => updateSub(line.id, index, 'gb', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none"><option value="0">0</option>{Object.keys(priceTable[line.network] || {}).map(g => <option key={g} value={g}>{g}</option>)}</select></div>
-                            <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">الدقائق</label><input type="number" value={sub.mins} onChange={(e) => updateSub(line.id, index, 'mins', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
-                            <div className="hidden md:flex flex-col gap-1"><label className="text-[9px] text-gray-500">إجمالي MB</label><span className="text-[12px] font-bold p-2 text-gray-500">{totalMB}</span></div>
-                            <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">مُرسل MB</label><input type="number" value={sub.sentMB} onChange={(e) => updateSub(line.id, index, 'sentMB', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
-                            <div className="hidden md:flex flex-col gap-1"><label className="text-[9px] text-gray-500">متبقي MB</label><span className={`text-[12px] font-bold p-2 ${remainingMB < 0 ? 'text-red-500' : 'text-green-500'}`}>{remainingMB}</span></div>
-                            <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">السعر</label><input type="number" value={sub.price} onChange={(e) => updateSub(line.id, index, 'price', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
-                            <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">المدفوع</label><input type="number" value={sub.paidAmount} onChange={(e) => updateSub(line.id, index, 'paidAmount', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
-                            <button onClick={() => updateSub(line.id, index, 'paidAmount', sub.price, line.subscribers)} className={`text-[10px] font-bold mt-4 h-8 rounded-lg transition-all ${debt > 0 ? 'text-red-500 bg-red-500/10' : 'text-green-500 bg-green-500/10'}`}>{debt > 0 ? `باقي ${debt}` : 'خالص ✓'}</button>
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8 bg-[#161616] p-4 rounded-2xl border border-gray-800">
+                        {[ {l: "الاسم", k: "ownerName", t: "text"}, {l: "الرقم", k: "masterPhone", t: "text"}, {l: "تاريخ التفعيل", k: "activationDate", t: "select"}, {l: "إجمالي الجيجا", k: "totalGB", t: "number"}, {l: "إجمالي الدقائق", k: "totalMins", t: "number"}, {l: "التكلفة", k: "baseCost", t: "number"} ].map((item, i) => (
+                          <div key={i} className="flex flex-col gap-2">
+                            <label className="text-[11px] font-bold text-gray-500 px-1">{item.l}</label>
+                            {item.t === 'select' ? (
+                              <select value={line[item.k] || ""} onChange={(e) => updateMasterLine(line.id, item.k, e.target.value)} className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none focus:border-[#ca8a04]">
+                                <option value="1 في الشهر">1 في الشهر</option>
+                                <option value="15 في الشهر">15 في الشهر</option>
+                              </select>
+                            ) : (
+                              <input type={item.t} value={line[item.k] || ""} onChange={(e) => updateMasterLine(line.id, item.k, e.target.value)} className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white outline-none focus:border-[#ca8a04]"/>
+                            )}
                           </div>
-                        );
-                      })}
-                   </div>
+                        ))}
+                    </div>
+
+                    <div className="space-y-3 overflow-x-auto">
+                        {[...Array(7)].map((_, index) => {
+                            const sub = (line.subscribers || [])[index] || { name: '', phone: '', gb: 0, sentMB: 0, mins: 1500, price: 0, paidAmount: 0 };
+                            const totalMB = (sub.gb || 0) * 1024;
+                            const remainingMB = totalMB - (sub.sentMB || 0);
+                            const debt = (sub.price || 0) - (sub.paidAmount || 0);
+                            return (
+                                <div key={index} className="grid grid-cols-2 md:grid-cols-10 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 text-center hover:border-gray-700 transition-all min-w-[900px]">
+                                    <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">الاسم</label><input value={sub.name} onChange={(e) => updateSub(line.id, index, 'name', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">الرقم</label><input value={sub.phone} onChange={(e) => updateSub(line.id, index, 'phone', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">باقة GB</label><select value={sub.gb} onChange={(e) => updateSub(line.id, index, 'gb', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none"><option value="0">0</option>{Object.keys(priceTable[line.network] || {}).map(g => <option key={g} value={g}>{g}</option>)}</select></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">الدقائق</label><input type="number" value={sub.mins} onChange={(e) => updateSub(line.id, index, 'mins', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
+                                    <div className="hidden md:flex flex-col gap-1"><label className="text-[9px] text-gray-500">إجمالي MB</label><span className="text-[12px] font-bold p-2 text-gray-500">{totalMB}</span></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">مُرسل MB</label><input type="number" value={sub.sentMB} onChange={(e) => updateSub(line.id, index, 'sentMB', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
+                                    <div className="hidden md:flex flex-col gap-1"><label className="text-[9px] text-gray-500">متبقي MB</label><span className={`text-[12px] font-bold p-2 ${remainingMB < 0 ? 'text-red-500' : 'text-green-500'}`}>{remainingMB}</span></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">السعر</label><input type="number" value={sub.price} onChange={(e) => updateSub(line.id, index, 'price', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">المدفوع</label><input type="number" value={sub.paidAmount} onChange={(e) => updateSub(line.id, index, 'paidAmount', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
+                                    <button onClick={() => updateSub(line.id, index, 'paidAmount', sub.price, line.subscribers)} className={`text-[10px] font-bold mt-4 h-8 rounded-lg transition-all ${debt > 0 ? 'text-red-500 bg-red-500/10' : 'text-green-500 bg-green-500/10'}`}>{debt > 0 ? `باقي ${debt}` : 'خالص ✓'}</button>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
               )}
             </div>
