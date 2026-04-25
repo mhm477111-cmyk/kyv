@@ -1723,7 +1723,10 @@ document.addEventListener('click', function(e) {
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-
+<button id="mainActionBtn" 
+        style="background: #ca8a04; color: black; padding: 12px 24px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(202, 138, 4, 0.3);">
+    جاري التحقق...
+</button>
 
 <div id="authModal" onclick="if(event.target==this) this.style.display='none'" 
      style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px; cursor: pointer;">
@@ -1768,11 +1771,6 @@ document.addEventListener('click', function(e) {
     button:hover { background: #eab308 !important; transform: translateY(-2px); }
 </style>
 
-
-  import { db } from '@/lib/firebaseConfig';
-import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyDpOVutqknIS9-lf8TM3suaD7aYn00utXQ",
@@ -1801,7 +1799,7 @@ import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
             try {
                 const userDoc = await db.collection("users").doc(user.uid).get();
                 const name = userDoc.exists ? userDoc.data().name : "عميلنا";
-                btn.innerText = "أهلاً " + name + " - اعرف تفاصيل حسابك";
+                btn.innerText = "أهلاً " + name + " - لوحة التحكم";
                 btn.onclick = () => window.location.href = '/dashboard';
             } catch (e) { console.error(e); }
         } else {
@@ -1849,193 +1847,31 @@ import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 
     async function registerUser() {
         const name = document.getElementById('name').value.trim();
-<script>
-    // الحصول على عناصر الـ Modal
-    const authModal = document.getElementById('authModal');
-
-    // الدالة الجديدة لفتح الـ Modal والتحكم في زر الرجوع
-    function openAuthModal() {
-        authModal.style.display = 'flex';
-        // إضافة حالة للتاريخ بحيث "الرجوع" يعتبر إغلاق للـ Modal
-        window.history.pushState({ modal: 'open' }, '');
-    }
-
-    // مراقبة زر الرجوع (لو المستخدم داس رجوع، نقفل الـ Modal بس)
-    window.addEventListener('popstate', function(event) {
-        if (authModal.style.display === 'flex') {
-            authModal.style.display = 'none';
-        }
-    });
-
-    function updateUI(user) {
-        const btn = document.getElementById('authBtn');
-        if (user) {
-            btn.innerText = "لوحة التحكم";
-            try {
-                btn.onclick = () => window.location.href = '/dashboard';
-            } catch (e) { console.error(e); }
-        } else {
-            btn.innerText = "تسجيل دخول / حساب جديد";
-            // استخدمنا الدالة الجديدة هنا
-            btn.onclick = () => openAuthModal();
-        }
-    }
-
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
-        auth.onAuthStateChanged((user) => updateUI(user));
-    });
-
-    // باقي الدوال الخاصة بك كما هي بدون تغيير
-    function showRegister() {
-        document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
-        document.getElementById('name').style.display = 'block';
-        document.getElementById('actionBtn').innerText = "إنشاء الحساب";
-        document.getElementById('actionBtn').onclick = registerUser;
-        document.getElementById('toggleText').innerHTML = 'لديك حساب بالفعل؟ <b style="color:white;">تسجيل الدخول</b>';
-        document.getElementById('toggleText').onclick = showLogin;
-    }
-
-    function showLogin() {
-        document.getElementById('modalTitle').innerText = "تسجيل الدخول";
-        document.getElementById('name').style.display = 'none';
-        document.getElementById('actionBtn').innerText = "دخول";
-        document.getElementById('actionBtn').onclick = loginUser;
-        document.getElementById('toggleText').innerHTML = 'ليس لديك حساب؟ <b style="color:white;">إنشاء حساب</b>';
-        document.getElementById('toggleText').onclick = showRegister;
-    }
-
-    async function loginUser() {
         const phone = document.getElementById('phone').value.trim();
         const pass = document.getElementById('pass').value;
         const btn = document.getElementById('actionBtn');
+        if (!name) { showSiteError("يرجى إدخال الاسم"); return; }
         if (phone.length !== 11) { showSiteError("رقم الموبايل يجب أن يكون 11 رقماً"); return; }
         if (!pass) { showSiteError("يرجى إدخال كلمة المرور"); return; }
         
-        btn.innerText = "جاري الدخول...";
+        btn.innerText = "جاري إنشاء الحساب...";
         btn.disabled = true;
         try {
-            await auth.signInWithEmailAndPassword(phone + "@mocontrol.com", pass);
+            const res = await auth.createUserWithEmailAndPassword(phone + "@mocontrol.com", pass);
+            await db.collection("users").doc(res.user.uid).set({ name, phone });
             window.location.href = '/dashboard';
-        } catch (e) { showSiteError("بيانات الدخول غير صحيحة"); btn.innerText = "دخول"; btn.disabled = false; }
+        } catch (e) { showSiteError("خطأ: " + e.message); btn.innerText = "إنشاء الحساب"; btn.disabled = false; }
     }
 
-<script type="module">
-    // 1. المكتبات الأساسية (تأكد من توافر الـ SDK في مشروعك)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-    // إعدادات Firebase (استبدلها ببيانات مشروعك الفعلية)
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_ID",
-        appId: "YOUR_APP_ID"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // --- منطق الـ Modal وزر الرجوع ---
-    const authModal = document.getElementById('authModal');
-    const actionBtn = document.getElementById('actionBtn');
-
-    function openAuthModal() {
-        authModal.style.display = 'flex';
-        window.history.pushState({ modal: 'open' }, '');
-    }
-
-    window.addEventListener('popstate', function(event) {
-        if (authModal.style.display === 'flex') {
-            authModal.style.display = 'none';
-            actionBtn.disabled = false;
-            const isLogin = document.getElementById('modalTitle').innerText === "تسجيل الدخول";
-            actionBtn.innerText = isLogin ? "دخول" : "إنشاء الحساب";
-        }
-    });
-
-    // --- تحديث الـ UI بناءً على حالة المستخدم ---
-    function updateUI(user) {
-        const btn = document.getElementById('authBtn');
-        if (btn) {
-            if (user) {
-                btn.innerText = "لوحة التحكم";
-                btn.onclick = () => window.location.href = '/dashboard';
-            } else {
-                btn.innerText = "تسجيل دخول / حساب جديد";
-                btn.onclick = () => openAuthModal();
-            }
-        }
-    }
-
-    // إعداد الاستمرارية ومراقبة الحالة
-    setPersistence(auth, browserLocalPersistence).then(() => {
-        onAuthStateChanged(auth, (user) => updateUI(user));
-    });
-
-    // --- دوال الـ Modal ---
-    function showRegister() {
-        document.getElementById('modalTitle').innerText = "إنشاء حساب جديد";
-        document.getElementById('name').style.display = 'block';
-        actionBtn.innerText = "إنشاء الحساب";
-        actionBtn.onclick = registerUser;
-        document.getElementById('toggleText').innerHTML = 'لديك حساب بالفعل؟ <b style="color:white;">تسجيل الدخول</b>';
-        document.getElementById('toggleText').onclick = showLogin;
-    }
-
-    function showLogin() {
-        document.getElementById('modalTitle').innerText = "تسجيل الدخول";
-        document.getElementById('name').style.display = 'none';
-        actionBtn.innerText = "دخول";
-        actionBtn.onclick = loginUser;
-        document.getElementById('toggleText').innerHTML = 'ليس لديك حساب؟ <b style="color:white;">إنشاء حساب</b>';
-        document.getElementById('toggleText').onclick = showRegister;
-    }
-
-    async function loginUser() {
+    function resetPassword() {
         const phone = document.getElementById('phone').value.trim();
-        const pass = document.getElementById('pass').value;
-        if (phone.length !== 11) { alert("رقم الموبايل يجب أن يكون 11 رقماً"); return; }
-        if (!pass) { alert("يرجى إدخال كلمة المرور"); return; }
-        
-        actionBtn.innerText = "جاري الدخول...";
-        actionBtn.disabled = true;
-        try {
-            await signInWithEmailAndPassword(auth, phone + "@mocontrol.com", pass);
-            window.location.href = '/dashboard';
-        } catch (e) { 
-            alert("بيانات الدخول غير صحيحة"); 
-        } finally {
-            actionBtn.innerText = "دخول";
-            actionBtn.disabled = false;
-        }
-    }
-
-    async function registerUser() {
-        const name = document.getElementById('name').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const pass = document.getElementById('pass').value;
-        if (!name) { alert("يرجى إدخال الاسم"); return; }
-        if (phone.length !== 11) { alert("رقم الموبايل يجب أن يكون 11 رقماً"); return; }
-        if (!pass) { alert("يرجى إدخال كلمة المرور"); return; }
-        
-        actionBtn.innerText = "جاري إنشاء الحساب...";
-        actionBtn.disabled = true;
-        try {
-            const res = await createUserWithEmailAndPassword(auth, phone + "@mocontrol.com", pass);
-            await setDoc(doc(db, "users", res.user.uid), { name, phone });
-            window.location.href = '/dashboard';
-        } catch (e) { 
-            alert("خطأ: " + e.message); 
-        } finally {
-            actionBtn.innerText = "إنشاء الحساب";
-            actionBtn.disabled = false;
-        }
+        const msg = phone ? `مرحباً، أنا العميل صاحب رقم ${phone} ونسيت كلمة المرور الخاصة بحسابي في MO CONTROL.` : "مرحباً، نسيت كلمة المرور الخاصة بحسابي في MO CONTROL.";
+        window.open(`https://wa.me/201112893086?text=${encodeURIComponent(msg)}`, '_blank');
     }
 </script>
+
+
+            
 
 
 <script>
