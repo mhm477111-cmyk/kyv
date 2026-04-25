@@ -439,7 +439,11 @@ export default function TelecomSystem() {
     const newSubs = currentSubscribers ? [...currentSubscribers] : makeSubsArray();
     const parsed  = ['gb','sentMB','mins','price','paidAmount'].includes(field) ? Number(value) : value;
     newSubs[subIndex] = { ...newSubs[subIndex], [field]: parsed };
-    if (field === 'gb') newSubs[subIndex].price = PRICE_TABLE[network]?.[parsed] || 0;
+    if (field === 'gb') {
+      const knownPrice = PRICE_TABLE[network]?.[parsed];
+      if (knownPrice !== undefined) newSubs[subIndex].price = knownPrice;
+      // لو الباقة مش معروفة → السعر يفضل زي ما هو بدون تغيير
+    }
     await updateDoc(doc(db, 'lines', lineId), { subscribers: newSubs });
   }, []);
   const updateSub = useDebounceCallback(_updateSub);
@@ -448,7 +452,11 @@ export default function TelecomSystem() {
   const _updateAbroadClient = useCallback(async (clientId, field, value, currentSubs) => {
     const parsed = ['gb','mins','price','paidAmount'].includes(field) ? Number(value) : value;
     const updatedSub = { ...currentSubs, [field]: parsed };
-    if (field === 'gb') updatedSub.price = PRICE_TABLE[activeTab]?.[parsed] || 0;
+    if (field === 'gb') {
+      const knownPrice = PRICE_TABLE[activeTab]?.[parsed];
+      if (knownPrice !== undefined) updatedSub.price = knownPrice;
+      // لو الباقة مش معروفة → السعر يفضل زي ما هو
+    }
     await updateDoc(doc(db, 'abroadClients', clientId), updatedSub);
   }, [activeTab]);
   const updateAbroadClient = useDebounceCallback(_updateAbroadClient);
@@ -869,16 +877,12 @@ export default function TelecomSystem() {
                           {/* باقة GB */}
                           <div className="flex flex-col gap-1">
                             <label className="text-[9px] text-gray-500 text-center">باقة GB</label>
-                            <select
-                              defaultValue={client.gb}
+                            <GbInput
+                              defaultValue={client.gb || ''}
+                              network={activeTab}
+                              listId={`abroad-gb-list-${client.id}`}
                               onChange={(e) => updateAbroadClient(client.id, 'gb', e.target.value, client)}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none focus:border-[#ca8a04] text-center"
-                            >
-                              <option value="0">0</option>
-                              {Object.keys(PRICE_TABLE[activeTab]||{}).map(g => (
-                                <option key={g} value={g}>{g}</option>
-                              ))}
-                            </select>
+                            />
                           </div>
 
                           {/* الدقائق */}
@@ -1088,10 +1092,12 @@ export default function TelecomSystem() {
                             <SubField label="الاسم"><input defaultValue={sub.name} onChange={(e)=>updateSub(line.id,index,'name',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
                             <SubField label="الرقم"><input defaultValue={sub.phone} onChange={(e)=>updateSub(line.id,index,'phone',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
                             <SubField label="باقة GB">
-                              <select defaultValue={sub.gb} onChange={(e)=>updateSub(line.id,index,'gb',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none w-full">
-                                <option value="0">0</option>
-                                {Object.keys(PRICE_TABLE[line.network]||{}).map(g=><option key={g} value={g}>{g}</option>)}
-                              </select>
+                              <GbInput
+                                defaultValue={sub.gb || ''}
+                                network={line.network}
+                                listId={`gb-list-${line.id}-${index}`}
+                                onChange={(e) => updateSub(line.id, index, 'gb', e.target.value, line.subscribers, line.network)}
+                              />
                             </SubField>
                             <SubField label="الدقائق"><input type="number" defaultValue={sub.mins} onChange={(e)=>updateSub(line.id,index,'mins',e.target.value,line.subscribers,line.network)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full" /></SubField>
                             <SubField label="إجمالي MB" hidden><span className="text-[12px] font-bold p-2 text-gray-500">{totalMB}</span></SubField>
@@ -1247,6 +1253,27 @@ export default function TelecomSystem() {
           +
         </button>
       </div>
+    </div>
+  );
+}
+
+// ── GbInput: input حر مع اقتراحات من القائمة المعروفة ─────────────
+function GbInput({ defaultValue, network, onChange, listId }) {
+  const knownGbs = Object.keys(PRICE_TABLE[network] || {});
+  return (
+    <div className="relative w-full">
+      <input
+        list={listId}
+        defaultValue={defaultValue || ''}
+        onChange={onChange}
+        placeholder="GB"
+        className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none focus:border-[#ca8a04] w-full text-center"
+      />
+      <datalist id={listId}>
+        {knownGbs.map(g => (
+          <option key={g} value={g}>{g} GB — {PRICE_TABLE[network][g]} ج</option>
+        ))}
+      </datalist>
     </div>
   );
 }
