@@ -3,9 +3,25 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { db } from '@/lib/firebaseConfigV2';
 import {
   collection, onSnapshot, doc, updateDoc, addDoc,
-  deleteDoc, query, where, writeBatch
+  deleteDoc, setDoc, query, where
 } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
+
+// ─────────────────────────────────────────────────────────────────
+// Hook: Debounce أي callback بفترة تأخير قابلة للضبط
+// يحل مشكلة الـ Writes المفرطة عند الكتابة في الـ Inputs
+// ─────────────────────────────────────────────────────────────────
+function useDebounceCallback(fn, delay = 1000) {
+  const timer = useRef(null);
+  // نحتاج ref للـ fn نفسه لتجنب re-creation عند تغيير الـ dependencies
+  const fnRef = useRef(fn);
+  useEffect(() => { fnRef.current = fn; }, [fn]);
+
+  return useCallback((...args) => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => fnRef.current(...args), delay);
+  }, [delay]); // delay فقط في الـ dependencies
+}
 
 // ─────────────────────────────────────────────────────────────────
 // Constants
@@ -53,13 +69,18 @@ export default function TelecomSystem() {
   const [showStats,    setShowStats]    = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // نحتفظ بـ ref للـ unsubscribe حتى نقدر نعمل manual refresh
   const unsubRef = useRef(null);
+
   const isHome4G = activeTab === 'Home4G';
 
   // ─────────────────────────────────────────────────────────────
-  // 1. READS Optimization
+  // 1. READS محسّنة: query بـ where بدل snapshot على المجموعة كاملة
+  //    - يشتغل فقط لما يتغير activeTab أو activeCycle
+  //    - يوفر قراءات كتيرة جداً لأنه بيجيب البيانات المفلترة من Firebase
   // ─────────────────────────────────────────────────────────────
   const subscribeToLines = useCallback(() => {
+    // إلغاء الـ listener القديم قبل إنشاء واحد جديد
     if (unsubRef.current) unsubRef.current();
 
     const q = query(
@@ -79,24 +100,33 @@ export default function TelecomSystem() {
 
   useEffect(() => {
     const unsub = subscribeToLines();
-    return () => unsub();
+    return () => unsub(); // Cleanup عند الـ unmount أو تغيير الـ dependencies
   }, [subscribeToLines]);
 
+  // ─────────────────────────────────────────────────────────────
+  // 3. Manual Refresh: يعيد الاشتراك في الـ snapshot لمزامنة فورية
+  // ─────────────────────────────────────────────────────────────
   const handleManualRefresh = useCallback(() => {
     setIsRefreshing(true);
     subscribeToLines();
   }, [subscribeToLines]);
 
   // ─────────────────────────────────────────────────────────────
-  // 2. WRITES Optimization (Direct Updates without Debounce)
+  // 2. WRITES محسّنة بـ Debouncing (1000ms)
+  //    - تمنع إرسال طلبات للسيرفر مع كل ضغطة كيبورد
+  //    - تنتظر لحد ما المستخدم يوقف الكتابة
   // ─────────────────────────────────────────────────────────────
-  const updateMasterLine = useCallback(async (lineId, field, value) => {
+
+  // تحديث بيانات الخط الرئيسي
+  const _updateMasterLine = useCallback(async (lineId, field, value) => {
     const numFields = ['totalGB', 'totalMins', 'baseCost'];
     const val = numFields.includes(field) ? Number(value) : value;
     await updateDoc(doc(db, 'lines', lineId), { [field]: val });
   }, []);
+  const updateMasterLine = useDebounceCallback(_updateMasterLine);
 
-  const updateHome4G = useCallback(async (lineId, field, value, currentData) => {
+  // تحديث بيانات Home 4G
+  const _updateHome4G = useCallback(async (lineId, field, value, currentData) => {
     const numFields = ['paidAmount', 'baseCost'];
     const updated = {
       ...currentData,
@@ -104,23 +134,30 @@ export default function TelecomSystem() {
     };
     await updateDoc(doc(db, 'lines', lineId), { home4gData: updated });
   }, []);
+  const updateHome4G = useDebounceCallback(_updateHome4G);
 
-  const updateSub = useCallback(async (lineId, subIndex, field, value, currentSubscribers, network) => {
-    const newSubs = currentSubscribers ? [...currentSubscribers] : makeSubsArray();
+  // تحديث بيانات المشترك
+  const _updateSub = useCallback(async (lineId, subIndex, field, value, currentSubscribers, network) => {
+    const newSubs = currentSubscribers
+      ? [...currentSubscribers]
+      : makeSubsArray();
+
     const numFields = ['gb', 'sentMB', 'mins', 'price', 'paidAmount'];
     const parsedValue = numFields.includes(field) ? Number(value) : value;
 
     newSubs[subIndex] = { ...newSubs[subIndex], [field]: parsedValue };
 
+    // تحديث السعر تلقائياً عند تغيير الجيجا
     if (field === 'gb') {
       newSubs[subIndex].price = PRICE_TABLE[network]?.[parsedValue] || 0;
     }
 
     await updateDoc(doc(db, 'lines', lineId), { subscribers: newSubs });
   }, []);
+  const updateSub = useDebounceCallback(_updateSub);
 
   // ─────────────────────────────────────────────────────────────
-  // Toggles & Immediate Actions
+  // Toggle handlers (فورية بدون debounce — أزرار لا inputs)
   // ─────────────────────────────────────────────────────────────
   const toggleField = useCallback(async (e, lineId, field, currentValue) => {
     e.stopPropagation();
@@ -128,7 +165,17 @@ export default function TelecomSystem() {
   }, []);
 
   // ─────────────────────────────────────────────────────────────
-  // CRUD & Excel (Optimized with Batch Writes)
+  // 4. زر "الخلاص" — فوري بدون debounce لأنه action مقصود
+  //    يسوّي paidAmount = price على طول
+  // ─────────────────────────────────────────────────────────────
+  const handleClearDebt = useCallback(async (lineId, subIndex, currentSubscribers, price) => {
+    const newSubs = currentSubscribers ? [...currentSubscribers] : makeSubsArray();
+    newSubs[subIndex] = { ...newSubs[subIndex], paidAmount: price };
+    await updateDoc(doc(db, 'lines', lineId), { subscribers: newSubs });
+  }, []);
+
+  // ─────────────────────────────────────────────────────────────
+  // CRUD
   // ─────────────────────────────────────────────────────────────
   const addNewLine = useCallback(async () => {
     try {
@@ -159,11 +206,14 @@ export default function TelecomSystem() {
       await deleteDoc(doc(db, 'lines', id));
   }, []);
 
+  // ─────────────────────────────────────────────────────────────
+  // Import / Export Excel
+  // ─────────────────────────────────────────────────────────────
   const exportToExcel = useCallback(() => {
     const rows = masterLines.map(line => ({
       ID: line.id,
       'صاحب الخط':             line.ownerName || '',
-      'الرقم':                 line.masterPhone || '',
+      'الرقم':                  line.masterPhone || '',
       'الشبكة':                 line.network || '',
       'السايكل':                line.cycle || '',
       'تاريخ التفعيل':          line.activationDate || '',
@@ -184,63 +234,40 @@ export default function TelecomSystem() {
   const importFromExcel = useCallback((e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setIsRefreshing(true);
     const reader = new FileReader();
     reader.onload = async (evt) => {
-      try {
-        const wb   = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-        
-        // استبدال setDoc العادي بـ writeBatch لتوفير الـ Writes
-        let batch = writeBatch(db);
-        let count = 0;
-
-        for (const item of rows) {
-          const docRef = doc(db, 'lines', String(item.ID));
-          batch.set(docRef, {
-            ownerName:      item['صاحب الخط'] || '',
-            masterPhone:    item['الرقم'] || '',
-            network:        item['الشبكة'] || '',
-            cycle:          String(item['السايكل'] || ''),
-            activationDate: item['تاريخ التفعيل'] || '',
-            baseCost:       Number(item['التكلفة']) || 0,
-            totalGB:        Number(item['الجيجا']) || 0,
-            totalMins:      Number(item['الدقائق']) || 0,
-            billPaid:       item['دفعت الفاتورة'] === 'نعم',
-            voucherSent:    item['فواتشر'] === 'نعم',
-            todSent:        item['TOD'] === 'نعم',
-            subscribers:    item['بيانات المشتركين (JSON)']
-              ? JSON.parse(item['بيانات المشتركين (JSON)'])
-              : makeSubsArray(),
-            home4gData:     item['بيانات Home4G (JSON)']
-              ? JSON.parse(item['بيانات Home4G (JSON)'])
-              : null,
-          });
-
-          count++;
-          if (count === 400) { // فايربيز بيقبل 500 كحد أقصى في الدفعة الواحدة
-            await batch.commit();
-            batch = writeBatch(db);
-            count = 0;
-          }
-        }
-        
-        if (count > 0) {
-          await batch.commit();
-        }
-        alert('تم استعادة البيانات بنجاح!');
-      } catch (err) {
-        alert('حدث خطأ أثناء الاستيراد');
-      } finally {
-        setIsRefreshing(false);
+      const wb   = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+      for (const item of rows) {
+        await setDoc(doc(db, 'lines', item.ID), {
+          ownerName:      item['صاحب الخط'] || '',
+          masterPhone:    item['الرقم'] || '',
+          network:        item['الشبكة'] || '',
+          cycle:          String(item['السايكل'] || ''),
+          activationDate: item['تاريخ التفعيل'] || '',
+          baseCost:       Number(item['التكلفة']) || 0,
+          totalGB:        Number(item['الجيجا']) || 0,
+          totalMins:      Number(item['الدقائق']) || 0,
+          billPaid:       item['دفعت الفاتورة'] === 'نعم',
+          voucherSent:    item['فواتشر'] === 'نعم',
+          todSent:        item['TOD'] === 'نعم',
+          subscribers:    item['بيانات المشتركين (JSON)']
+            ? JSON.parse(item['بيانات المشتركين (JSON)'])
+            : makeSubsArray(),
+          home4gData:     item['بيانات Home4G (JSON)']
+            ? JSON.parse(item['بيانات Home4G (JSON)'])
+            : null,
+        });
       }
+      alert('تم استعادة البيانات بنجاح!');
     };
     reader.readAsArrayBuffer(file);
+    // Reset input value لتسمح بـ re-import نفس الملف
     e.target.value = '';
   }, []);
 
   // ─────────────────────────────────────────────────────────────
-  // Stats
+  // Stats Calculations
   // ─────────────────────────────────────────────────────────────
   const getLineStats = useCallback((line) => {
     if (line.network === 'Home4G') {
@@ -273,6 +300,7 @@ export default function TelecomSystem() {
       const s = getLineStats(line);
       totalProfit += s.profit;
       totalDebt   += s.debts;
+      // إضافة تكلفة الفاتورة غير المدفوعة للمديونية (للخطوط العادية فقط)
       if (line.network !== 'Home4G' && !line.billPaid) {
         totalDebt += Number(line.baseCost || 0);
       }
@@ -281,7 +309,7 @@ export default function TelecomSystem() {
   })();
 
   // ─────────────────────────────────────────────────────────────
-  // Search
+  // Search (Client-side على النتائج المفلترة مسبقاً من Firebase)
   // ─────────────────────────────────────────────────────────────
   const filteredLines = masterLines.filter(line => {
     if (!searchTerm) return true;
@@ -303,35 +331,6 @@ export default function TelecomSystem() {
   });
 
   // ─────────────────────────────────────────────────────────────
-  // Helper Components
-  // ─────────────────────────────────────────────────────────────
-  const StatBox = ({ label, value, color }) => (
-    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[80px]">
-      <p className="text-[8px] text-gray-500">{label}</p>
-      <p className={`font-bold text-xs ${color}`}>{value}</p>
-    </div>
-  );
-
-  const ToggleBtn = ({ label, active, onText, offText, onBorder, offBorder, onClick }) => (
-    <div className="flex flex-col items-center">
-      <p className="text-[8px] text-gray-500 mb-1">{label}</p>
-      <button
-        onClick={onClick}
-        className={`px-3 py-1 rounded-lg text-[10px] font-bold border ${active ? onBorder : offBorder} transition-all`}
-      >
-        {active ? onText : offText}
-      </button>
-    </div>
-  );
-
-  const SubField = ({ label, children }) => (
-    <div className="flex flex-col gap-1 w-full">
-      <label className="text-[9px] text-gray-500">{label}</label>
-      {children}
-    </div>
-  );
-
-  // ─────────────────────────────────────────────────────────────
   // Render
   // ─────────────────────────────────────────────────────────────
   return (
@@ -342,8 +341,9 @@ export default function TelecomSystem() {
         <h1 className="text-4xl font-black text-[#ca8a04]">MO CONTROL</h1>
       </header>
 
-      {/* ── Top Controls ── */}
+      {/* ── أزرار التحكم العلوية ── */}
       <div className="flex justify-center gap-3 mb-6">
+        {/* زر عرض/إخفاء الإحصائيات */}
         <button
           onClick={() => setShowStats(v => !v)}
           className="px-6 py-2 rounded-xl font-bold border-2 border-gray-700 text-gray-400
@@ -352,6 +352,7 @@ export default function TelecomSystem() {
           📊 {showStats ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}
         </button>
 
+        {/* 3. زر التحديث اليدوي */}
         <button
           onClick={handleManualRefresh}
           disabled={isRefreshing}
@@ -367,19 +368,17 @@ export default function TelecomSystem() {
           </span>
           {isRefreshing ? 'جاري التحديث...' : 'تحديث'}
         </button>
-        
-        {/* أزرار الإكسيل والإضافة هنا إذا كانت موجودة في الكود الأصلي لديك */}
       </div>
 
-      {/* ── Stats Panel ── */}
+      {/* ── لوحة الإحصائيات ── */}
       {showStats && (
         <div className="max-w-4xl mx-auto mb-8 bg-[#111] border border-gray-800 rounded-3xl p-6">
           <h2 className="text-center text-sm font-bold text-[#ca8a04] mb-5 tracking-widest">ملخص عام</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             {[
               { label: 'اتصالات', count: globalStats.nets.Etisalat, color: 'text-green-400',  border: 'border-green-900' },
-              { label: 'فودافون', count: globalStats.nets.Vodafone,  color: 'text-red-400',   border: 'border-red-900' },
-              { label: 'وي',      count: globalStats.nets.WE,        color: 'text-blue-400',  border: 'border-blue-900' },
+              { label: 'فودافون', count: globalStats.nets.Vodafone,  color: 'text-red-400',    border: 'border-red-900' },
+              { label: 'وي',      count: globalStats.nets.WE,         color: 'text-blue-400',   border: 'border-blue-900' },
               { label: 'Home 4G', count: globalStats.nets.Home4G,    color: 'text-[#ca8a04]', border: 'border-[#ca8a04]/30' },
             ].map(n => (
               <div key={n.label} className={`bg-black/40 border ${n.border} rounded-2xl p-4 text-center`}>
@@ -410,7 +409,7 @@ export default function TelecomSystem() {
           type="text"
           placeholder="البحث باسم العميل أو الرقم..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)} // البحث فقط محلي ولا يؤثر على فايربيز
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full bg-[#111] border border-gray-800 rounded-2xl py-4 px-6 text-sm
                      outline-none focus:border-[#ca8a04] transition-colors"
         />
@@ -452,9 +451,10 @@ export default function TelecomSystem() {
 
       {/* ── Lines List ── */}
       <div className="max-w-7xl mx-auto space-y-4">
+
         {filteredLines.length === 0 && (
           <div className="text-center text-gray-600 py-20">
-            {searchTerm ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد خطوط.'}
+            {searchTerm ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد خطوط. اضغط + لإضافة خط جديد'}
           </div>
         )}
 
@@ -466,11 +466,12 @@ export default function TelecomSystem() {
 
           return (
             <div key={line.id} className="bg-[#111] border border-gray-800 rounded-3xl overflow-hidden shadow-xl">
-              
+
               {/* ── Header Row ── */}
               <div
                 onClick={() => setExpandedLine(isOpen ? null : line.id)}
-                className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row items-center justify-between gap-4 transition-colors"
+                className="p-4 cursor-pointer hover:bg-[#161616] flex flex-col md:flex-row
+                           items-center justify-between gap-4 transition-colors"
               >
                 {/* معلومات الخط */}
                 <div className="bg-black p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right">
@@ -492,7 +493,8 @@ export default function TelecomSystem() {
                 {/* إحصائيات الخط */}
                 {isH4G ? (
                   <div className="flex flex-row gap-2 w-full md:w-auto text-center">
-                    <StatBox label="الربح" value={`${stats.profit} ج`} color={stats.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
+                    <StatBox label="الربح" value={`${stats.profit} ج`}
+                      color={stats.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
                     <StatBox label="ديون" value={`${stats.debts} ج`} color="text-orange-500" />
                     <div className="bg-black/30 p-2 rounded-lg border border-[#ca8a04]/30 min-w-[80px]">
                       <p className="text-[8px] text-gray-500">حالة الدفع</p>
@@ -505,7 +507,8 @@ export default function TelecomSystem() {
                   </div>
                 ) : (
                   <div className="flex flex-row flex-wrap gap-2 w-full md:w-auto text-center items-center">
-                    <StatBox label="الربح"        value={`${stats.profit} ج`} color={stats.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
+                    <StatBox label="الربح"        value={`${stats.profit} ج`}
+                      color={stats.profit >= 0 ? 'text-green-500' : 'text-red-500'} />
                     <StatBox label="ديون"         value={`${stats.debts} ج`}        color="text-orange-500" />
                     <StatBox label="جيجا متبقية"  value={`${stats.remainingGB} GB`}  color="text-blue-400" />
                     <StatBox label="دقائق متبقية" value={`${stats.remainingMins} د`} color="text-green-400" />
@@ -541,7 +544,7 @@ export default function TelecomSystem() {
 
               {/* ── Expanded: Home 4G ── */}
               {isOpen && isH4G && (
-                <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]" onClick={(e) => e.stopPropagation()}>
+                <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
                   <p className="text-xs text-[#ca8a04] font-bold mb-4 flex items-center gap-2">
                     <span>🏠</span> بيانات خط Home 4G
                   </p>
@@ -553,23 +556,20 @@ export default function TelecomSystem() {
                         { label: 'رقم الخصم',    field: 'discountPhone',   cls: 'text-white' },
                         { label: 'اسم المشترك',  field: 'subscriberName',  cls: 'text-white' },
                         { label: 'رقم تواصل',    field: 'contactPhone',    cls: 'text-white' },
-                        { label: 'الباقة',       field: 'package',         cls: 'text-[#ca8a04]' },
+                        { label: 'الباقة',        field: 'package',         cls: 'text-[#ca8a04]' },
                       ].map(({ label, field, cls }) => (
                         <div key={field} className="flex flex-col gap-1">
                           <label className="text-[9px] text-gray-500 text-center">{label}</label>
                           <input
                             defaultValue={h[field] || ''}
-                            onBlur={(e) => {
-                              if (e.target.value !== String(h[field] || '')) {
-                                updateHome4G(line.id, field, e.target.value, h);
-                              }
-                            }}
+                            onChange={(e) => updateHome4G(line.id, field, e.target.value, h)}
                             className={`bg-black border border-gray-800 rounded-lg p-2 text-[12px] ${cls}
                                        outline-none focus:border-[#ca8a04] text-center`}
                           />
                         </div>
                       ))}
 
+                      {/* حالة الدفع */}
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">حالة الدفع</label>
                         <select
@@ -588,31 +588,25 @@ export default function TelecomSystem() {
                         </select>
                       </div>
 
+                      {/* المبلغ المدفوع */}
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">المبلغ المدفوع</label>
                         <input
                           type="number"
                           defaultValue={h.paidAmount}
-                          onBlur={(e) => {
-                             if(e.target.value !== String(h.paidAmount)) {
-                                updateHome4G(line.id, 'paidAmount', e.target.value, h);
-                             }
-                          }}
+                          onChange={(e) => updateHome4G(line.id, 'paidAmount', e.target.value, h)}
                           className="bg-black border border-gray-800 rounded-lg p-2 text-[12px]
                                      text-green-400 outline-none focus:border-[#ca8a04] text-center"
                         />
                       </div>
 
+                      {/* التكلفة */}
                       <div className="flex flex-col gap-1">
                         <label className="text-[9px] text-gray-500 text-center">التكلفة</label>
                         <input
                           type="number"
                           defaultValue={h.baseCost}
-                          onBlur={(e) => {
-                             if(e.target.value !== String(h.baseCost)) {
-                                updateHome4G(line.id, 'baseCost', e.target.value, h);
-                             }
-                          }}
+                          onChange={(e) => updateHome4G(line.id, 'baseCost', e.target.value, h)}
                           className="bg-black border border-gray-800 rounded-lg p-2 text-[12px]
                                      text-orange-400 outline-none focus:border-[#ca8a04] text-center"
                         />
@@ -624,8 +618,8 @@ export default function TelecomSystem() {
 
               {/* ── Expanded: Normal Lines ── */}
               {isOpen && !isH4G && (
-                <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]" onClick={(e) => e.stopPropagation()}>
-                  
+                <div className="p-6 border-t border-gray-800 bg-[#0d0d0d]">
+
                   {/* معلومات الخط الرئيسي */}
                   <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8 bg-[#161616] p-4 rounded-2xl border border-gray-800">
                     {[
@@ -642,11 +636,7 @@ export default function TelecomSystem() {
                           type={t}
                           placeholder={k === 'activationDate' ? 'مثال: 1/4' : ''}
                           defaultValue={line[k] || ''}
-                          onBlur={(e) => {
-                             if(e.target.value !== String(line[k] || '')) {
-                                updateMasterLine(line.id, k, e.target.value);
-                             }
-                          }}
+                          onChange={(e) => updateMasterLine(line.id, k, e.target.value)}
                           className="bg-black border border-gray-800 rounded-lg p-3 text-sm text-white
                                      outline-none focus:border-[#ca8a04] transition-colors"
                         />
@@ -674,7 +664,8 @@ export default function TelecomSystem() {
                       const totalMB  = Number(sub.gb || 0) * 1024;
                       const remainMB = totalMB - Number(sub.sentMB || 0);
                       const debt     = Number(sub.price || 0) - Number(sub.paidAmount || 0);
-                      
+                      const isPaid   = debt <= 0;
+
                       return (
                         <div
                           key={index}
@@ -682,106 +673,102 @@ export default function TelecomSystem() {
                                      bg-[#111] p-3 rounded-2xl border border-gray-800 text-center
                                      hover:border-gray-700 transition-all min-w-[900px]"
                         >
+                          {/* الاسم */}
                           <SubField label="الاسم">
                             <input
                               defaultValue={sub.name}
-                              onBlur={(e) => {
-                                 if(e.target.value !== String(sub.name)) {
-                                   updateSub(line.id, index, 'name', e.target.value, line.subscribers, line.network);
-                                 }
-                              }}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full text-center"
+                              onChange={(e) => updateSub(line.id, index, 'name', e.target.value, line.subscribers, line.network)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
                             />
                           </SubField>
 
+                          {/* الرقم */}
                           <SubField label="الرقم">
                             <input
                               defaultValue={sub.phone}
-                              onBlur={(e) => {
-                                 if(e.target.value !== String(sub.phone)) {
-                                   updateSub(line.id, index, 'phone', e.target.value, line.subscribers, line.network);
-                                 }
-                              }}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full text-center"
+                              onChange={(e) => updateSub(line.id, index, 'phone', e.target.value, line.subscribers, line.network)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
                             />
                           </SubField>
 
-                          <SubField label="GB">
-                            <input
-                              type="number"
+                          {/* باقة GB */}
+                          <SubField label="باقة GB">
+                            <select
                               defaultValue={sub.gb}
-                              onBlur={(e) => {
-                                 if(e.target.value !== String(sub.gb)) {
-                                   updateSub(line.id, index, 'gb', e.target.value, line.subscribers, line.network);
-                                 }
-                              }}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none w-full text-center"
-                            />
+                              onChange={(e) => updateSub(line.id, index, 'gb', e.target.value, line.subscribers, line.network)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none w-full"
+                            >
+                              <option value="0">0</option>
+                              {Object.keys(PRICE_TABLE[line.network] || {}).map(g => (
+                                <option key={g} value={g}>{g}</option>
+                              ))}
+                            </select>
                           </SubField>
 
-                          <SubField label="MB محولة">
-                            <input
-                              type="number"
-                              defaultValue={sub.sentMB}
-                              onBlur={(e) => {
-                                 if(e.target.value !== String(sub.sentMB)) {
-                                   updateSub(line.id, index, 'sentMB', e.target.value, line.subscribers, line.network);
-                                 }
-                              }}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-purple-400 outline-none w-full text-center"
-                            />
-                          </SubField>
-
-                          <SubField label="MB باقية">
-                            <div className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-gray-400 w-full">
-                              {remainMB}
-                            </div>
-                          </SubField>
-
+                          {/* الدقائق */}
                           <SubField label="الدقائق">
                             <input
                               type="number"
                               defaultValue={sub.mins}
-                              onBlur={(e) => {
-                                 if(e.target.value !== String(sub.mins)) {
-                                   updateSub(line.id, index, 'mins', e.target.value, line.subscribers, line.network);
-                                 }
-                              }}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-green-400 outline-none w-full text-center"
+                              onChange={(e) => updateSub(line.id, index, 'mins', e.target.value, line.subscribers, line.network)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
                             />
                           </SubField>
 
+                          {/* إجمالي MB (مخفي على موبايل) */}
+                          <SubField label="إجمالي MB" hidden>
+                            <span className="text-[12px] font-bold p-2 text-gray-500">{totalMB}</span>
+                          </SubField>
+
+                          {/* مُرسل MB */}
+                          <SubField label="مُرسل MB">
+                            <input
+                              type="number"
+                              defaultValue={sub.sentMB}
+                              onChange={(e) => updateSub(line.id, index, 'sentMB', e.target.value, line.subscribers, line.network)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
+                            />
+                          </SubField>
+
+                          {/* متبقي MB (مخفي على موبايل) */}
+                          <SubField label="متبقي MB" hidden>
+                            <span className={`text-[12px] font-bold p-2 ${remainMB < 0 ? 'text-red-500' : 'text-green-500'}`}>
+                              {remainMB}
+                            </span>
+                          </SubField>
+
+                          {/* السعر */}
                           <SubField label="السعر">
                             <input
                               type="number"
                               defaultValue={sub.price}
-                              onBlur={(e) => {
-                                 if(e.target.value !== String(sub.price)) {
-                                   updateSub(line.id, index, 'price', e.target.value, line.subscribers, line.network);
-                                 }
-                              }}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-orange-400 outline-none w-full text-center"
+                              onChange={(e) => updateSub(line.id, index, 'price', e.target.value, line.subscribers, line.network)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
                             />
                           </SubField>
 
+                          {/* المدفوع */}
                           <SubField label="المدفوع">
                             <input
                               type="number"
                               defaultValue={sub.paidAmount}
-                              onBlur={(e) => {
-                                 if(e.target.value !== String(sub.paidAmount)) {
-                                   updateSub(line.id, index, 'paidAmount', e.target.value, line.subscribers, line.network);
-                                 }
-                              }}
-                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-green-400 outline-none w-full text-center"
+                              onChange={(e) => updateSub(line.id, index, 'paidAmount', e.target.value, line.subscribers, line.network)}
+                              className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none w-full"
                             />
                           </SubField>
 
-                          <SubField label="المتبقي">
-                             <div className={`bg-black border border-gray-800 rounded-lg p-2 text-[12px] w-full ${debt > 0 ? 'text-red-400 font-bold' : 'text-gray-500'}`}>
-                                {Math.max(0, debt)}
-                             </div>
-                          </SubField>
+                          {/* 4. زر "الخلاص" — فوري بدون debounce */}
+                          <button
+                            onClick={() => handleClearDebt(line.id, index, line.subscribers, sub.price)}
+                            title={isPaid ? 'تم السداد' : `تسوية الدين: ${debt} ج`}
+                            className={`text-[10px] font-bold mt-4 h-8 rounded-lg transition-all px-1
+                              ${isPaid
+                                ? 'text-green-500 bg-green-500/10 border border-green-900'
+                                : 'text-red-500 bg-red-500/10 border border-red-900 hover:bg-red-500/20'
+                              }`}
+                          >
+                            {isPaid ? 'خالص ✓' : `باقي ${debt}`}
+                          </button>
                         </div>
                       );
                     })}
@@ -792,6 +779,61 @@ export default function TelecomSystem() {
           );
         })}
       </div>
+
+      {/* ── Bottom Action Buttons ── */}
+      <div className="max-w-7xl mx-auto mt-10 pb-8 flex justify-end gap-3">
+        <button
+          onClick={exportToExcel}
+          title="تصدير Excel"
+          className="bg-green-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all"
+        >📥</button>
+
+        <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
+        <label
+          htmlFor="importFile"
+          title="استيراد Excel"
+          className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all"
+        >📤</label>
+
+        <button
+          onClick={addNewLine}
+          title="إضافة خط جديد"
+          className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center"
+        >+</button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Helper Components
+// ─────────────────────────────────────────────────────────────────
+function StatBox({ label, value, color }) {
+  return (
+    <div className="bg-black/30 p-2 rounded-lg border border-gray-800 min-w-[75px]">
+      <p className="text-[8px] text-gray-500">{label}</p>
+      <p className={`font-bold text-xs ${color}`}>{value}</p>
+    </div>
+  );
+}
+
+function ToggleBtn({ label, active, onText, offText, onBorder, offBorder, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`p-2 rounded-lg border min-w-[75px] transition-all ${active ? onBorder : offBorder}`}
+    >
+      <p className="text-[8px] text-gray-500">{label}</p>
+      <p className="font-bold text-xs">{active ? onText : offText}</p>
+    </button>
+  );
+}
+
+function SubField({ label, children, hidden = false }) {
+  return (
+    <div className={`flex flex-col gap-1 ${hidden ? 'hidden md:flex' : ''}`}>
+      <label className="text-[9px] text-gray-500">{label}</label>
+      {children}
     </div>
   );
 }
