@@ -1,7 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebaseConfigV2';
-import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
+
 import * as XLSX from 'xlsx';
 
 export default function TelecomSystem() {
