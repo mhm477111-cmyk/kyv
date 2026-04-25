@@ -1,28 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebaseConfigV2';
-import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
-
-
-
-const IS_FIREBASE_ENABLED = false; // <-- غير هذا إلى false لتعطيل الاتصال فوراً
-
-const updateMasterLine = async (lineId, field, value) => {
-    const val = (['totalGB', 'totalMins', 'baseCost'].includes(field)) ? Number(value) : value;
-    
-    // التحديث المحلي دائماً يعمل
-    updateLocalState(lineId, { [field]: val });
-
-    // لن يتصل بـ Firebase إلا إذا كان المفتاح true
-    if (IS_FIREBASE_ENABLED) {
-        await updateDoc(doc(db, "lines", lineId), { [field]: val });
-    } else {
-        console.log("تم تعطيل الاتصال بـ Firebase - تم التحديث محلياً فقط");
-    }
-};
-
-
 
 export default function TelecomSystem() {
   const [activeTab, setActiveTab] = useState('Etisalat');
@@ -37,42 +15,16 @@ export default function TelecomSystem() {
     'WE': { 20: 250, 25: 280, 30: 310, 40: 360, 50: 410, 60: 520 }
   };
 
-  // دالة لجلب البيانات مع حماية الكوتا (الحد الأقصى)
-  const fetchLines = async (forceRefresh = false) => {
-    // 1. إذا لم نطلب تحديث إجباري، اقرأ من الذاكرة وتوقف فوراً!
-    if (!forceRefresh) {
-      const cachedData = localStorage.getItem('mo_control_data');
-      if (cachedData) {
-        setMasterLines(JSON.parse(cachedData));
-        return; // هذه الكلمة تمنع الكود من إكمال الطريق إلى Firebase واستهلاك الكوتا
-      }
+  useEffect(() => {
+    const cachedData = localStorage.getItem('mo_control_data');
+    if (cachedData) {
+      setMasterLines(JSON.parse(cachedData));
     }
+  }, []);
 
-    // 2. إذا طلبنا تحديث إجباري أو الذاكرة فارغة (أول مرة تفتح الموقع)
-    try {
-      const snapshot = await getDocs(collection(db, "lines"));
-      const newData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMasterLines(newData);
-      localStorage.setItem('mo_control_data', JSON.stringify(newData)); // تحديث الذاكرة
-    } catch (e) {
-      console.error("خطأ في الاتصال بـ Firebase");
-      alert("حدث خطأ أثناء جلب البيانات، تأكد من الإنترنت.");
-    }
-  };
-
-  useEffect(() => { fetchLines(); }, []);
-
-  // دالة زر الريفرش اليدوي
-  const handleManualRefresh = async () => {
-    await fetchLines(true); // إجبار الكود على سحب البيانات من Firebase
-    alert("تم سحب أحدث البيانات من السيرفر بنجاح! 🔄");
-  };
-
-  // تحديث الحالة محلياً وفي المتصفح (صفر استهلاك)
-  const updateLocalState = (lineId, newData) => {
-    const updated = masterLines.map(l => l.id === lineId ? { ...l, ...newData } : l);
-    setMasterLines(updated);
-    localStorage.setItem('mo_control_data', JSON.stringify(updated));
+  const updateLocalState = (newData) => {
+    setMasterLines(newData);
+    localStorage.setItem('mo_control_data', JSON.stringify(newData));
   };
 
   const exportToExcel = () => {
@@ -98,53 +50,51 @@ export default function TelecomSystem() {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = async (evt) => {
+    reader.onload = (evt) => {
       const data = new Uint8Array(evt.target.result);
       const workbook = XLSX.read(data, { type: 'array' });
       const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-      for (const item of jsonData) {
-        await setDoc(doc(db, "lines", item["ID"]), {
-          ownerName: item["صاحب الخط"] || '',
-          masterPhone: item["الرقم"] || '',
-          network: item["الشبكة"] || '',
-          cycle: String(item["السايكل"] || ''),
-          activationDate: item["تاريخ التفعيل"] || '',
-          baseCost: Number(item["التكلفة"]) || 0,
-          totalGB: Number(item["الجيجا"]) || 0,
-          totalMins: Number(item["الدقائق"]) || 0,
-          subscribers: item["بيانات المشتركين (JSON)"] ? JSON.parse(item["بيانات المشتركين (JSON)"]) : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
-        });
-      }
+      const importedData = jsonData.map(item => ({
+        id: item["ID"] || Date.now().toString() + Math.random(),
+        ownerName: item["صاحب الخط"] || '',
+        masterPhone: item["الرقم"] || '',
+        network: item["الشبكة"] || '',
+        cycle: String(item["السايكل"] || ''),
+        activationDate: item["تاريخ التفعيل"] || '',
+        baseCost: Number(item["التكلفة"]) || 0,
+        totalGB: Number(item["الجيجا"]) || 0,
+        totalMins: Number(item["الدقائق"]) || 0,
+        subscribers: item["بيانات المشتركين (JSON)"] ? JSON.parse(item["بيانات المشتركين (JSON)"]) : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
+      }));
+      updateLocalState(importedData);
       alert("تم استعادة البيانات بنجاح!");
-      fetchLines(true);
     };
     reader.readAsArrayBuffer(file);
   };
 
-  const addNewLine = async () => {
-    await addDoc(collection(db, "lines"), {
+  const addNewLine = () => {
+    const newLine = {
+      id: Date.now().toString(),
       network: activeTab, cycle: activeCycle, masterPhone: '', ownerName: 'خط جديد',
       activationDate: '', baseCost: 0, totalGB: 0, totalMins: 0,
       subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
-    });
-    fetchLines(true);
+    };
+    updateLocalState([...masterLines, newLine]);
   };
 
-  const deleteLine = async (e, id) => {
+  const deleteLine = (e, id) => {
     e.stopPropagation();
     if(window.confirm("هل تريد حذف هذا الخط نهائياً؟")) {
-      await deleteDoc(doc(db, "lines", id));
-      fetchLines(true);
+      updateLocalState(masterLines.filter(l => l.id !== id));
     }
   };
 
-  const updateMasterLine = async (lineId, field, value) => {
+  const updateMasterLine = (lineId, field, value) => {
     const val = (['totalGB', 'totalMins', 'baseCost'].includes(field)) ? Number(value) : value;
-    await updateDoc(doc(db, "lines", lineId), { [field]: val }); // Write
-    updateLocalState(lineId, { [field]: val }); // Local
+    updateLocalState(masterLines.map(l => l.id === lineId ? { ...l, [field]: val } : l));
   };
 
-  const updateSub = async (lineId, subIndex, field, value, currentSubscribers) => {
+  const updateSub = (lineId, subIndex, field, value, currentSubscribers) => {
     let newSubs = currentSubscribers ? [...currentSubscribers] : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 });
     const updatedValue = (['gb', 'sentMB', 'mins', 'price', 'paidAmount'].includes(field)) ? Number(value) : value;
     newSubs[subIndex] = { ...newSubs[subIndex], [field]: updatedValue };
@@ -153,8 +103,7 @@ export default function TelecomSystem() {
       const line = masterLines.find(l => l.id === lineId);
       newSubs[subIndex].price = priceTable[line?.network]?.[updatedValue] || 0;
     }
-    await updateDoc(doc(db, "lines", lineId), { subscribers: newSubs }); // Write
-    updateLocalState(lineId, { subscribers: newSubs }); // Local
+    updateLocalState(masterLines.map(l => l.id === lineId ? { ...l, subscribers: newSubs } : l));
   };
 
   const getStats = (line) => {
@@ -271,7 +220,6 @@ export default function TelecomSystem() {
         <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
         <label htmlFor="importFile" title="استعادة" className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
         <button onClick={addNewLine} title="إضافة" className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center">+</button>
-        <button onClick={handleManualRefresh} title="تحديث البيانات" className="bg-gray-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">🔄</button>
       </div>
     </div>
   );
