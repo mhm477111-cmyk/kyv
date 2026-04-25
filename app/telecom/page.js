@@ -12,6 +12,8 @@ export default function TelecomSystem() {
   const [masterLines, setMasterLines] = useState([]);
   const [showStats, setShowStats] = useState(false);
 
+  const defaultSub = { name: '', phone: '', home4g: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 };
+
   const priceTable = {
     'Etisalat': { 20: 260, 25: 300, 30: 340, 40: 420, 50: 500, 60: 640 },
     'Vodafone': { 20: 300, 25: 340, 30: 380, 40: 460, 50: 520, 60: 580 },
@@ -34,12 +36,7 @@ export default function TelecomSystem() {
       usedGB += Number(sub.gb || 0);
       usedMins += Number(sub.mins || 0);
     });
-    return {
-      profit: actualCollected - (line.baseCost || 0),
-      debts: totalPrices - actualCollected,
-      remainingGB: (line.totalGB || 0) - usedGB,
-      remainingMins: (line.totalMins || 0) - usedMins
-    };
+    return { profit: actualCollected - (line.baseCost || 0), debts: totalPrices - actualCollected, remainingGB: (line.totalGB || 0) - usedGB, remainingMins: (line.totalMins || 0) - usedMins };
   };
 
   const totalProfit = masterLines.reduce((acc, line) => acc + getStats(line).profit, 0);
@@ -69,7 +66,7 @@ export default function TelecomSystem() {
       const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
       for (const item of jsonData) {
         await setDoc(doc(db, "lines", item["ID"]), {
-          ownerName: item["صاحب الخط"] || '', masterPhone: item["الرقم"] || '', network: item["الشبكة"] || '', cycle: String(item["السايكل"] || ''), activationDate: item["تاريخ التفعيل"] || '', baseCost: Number(item["التكلفة"]) || 0, totalGB: Number(item["الجيجا"]) || 0, totalMins: Number(item["الدقائق"]) || 0, subscribers: item["بيانات المشتركين (JSON)"] ? JSON.parse(item["بيانات المشتركين (JSON)"]) : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 })
+          ownerName: item["صاحب الخط"] || '', masterPhone: item["الرقم"] || '', network: item["الشبكة"] || '', cycle: String(item["السايكل"] || ''), activationDate: item["تاريخ التفعيل"] || '', baseCost: Number(item["التكلفة"]) || 0, totalGB: Number(item["الجيجا"]) || 0, totalMins: Number(item["الدقائق"]) || 0, subscribers: item["بيانات المشتركين (JSON)"] ? JSON.parse(item["بيانات المشتركين (JSON)"]) : Array(7).fill(defaultSub)
         });
       }
       alert("تم استعادة البيانات بنجاح!");
@@ -79,7 +76,7 @@ export default function TelecomSystem() {
 
   const addNewLine = async () => {
     try {
-      await addDoc(collection(db, "lines"), { network: activeTab, cycle: activeCycle, masterPhone: '', ownerName: 'خط جديد', activationDate: '', baseCost: 0, totalGB: 0, totalMins: 0, subscribers: Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 }) });
+      await addDoc(collection(db, "lines"), { network: activeTab, cycle: activeCycle, masterPhone: '', ownerName: 'خط جديد', activationDate: '', baseCost: 0, totalGB: 0, totalMins: 0, subscribers: Array(7).fill(defaultSub) });
     } catch (err) { alert("خطأ في الاتصال بقاعدة البيانات"); }
   };
 
@@ -94,7 +91,7 @@ export default function TelecomSystem() {
   };
 
   const updateSub = async (lineId, subIndex, field, value, currentSubscribers) => {
-    let newSubs = currentSubscribers ? [...currentSubscribers] : Array(7).fill({ name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 });
+    let newSubs = currentSubscribers ? [...currentSubscribers] : Array(7).fill(defaultSub);
     const updatedValue = (field === 'gb' || field === 'sentMB' || field === 'mins' || field === 'price' || field === 'paidAmount') ? Number(value) : value;
     newSubs[subIndex] = { ...newSubs[subIndex], [field]: updatedValue };
     if (field === 'gb') {
@@ -107,7 +104,7 @@ export default function TelecomSystem() {
   const filteredLines = masterLines.filter(line => {
     const searchLower = searchTerm.toLowerCase();
     const matchesMaster = (line.ownerName?.toLowerCase().includes(searchLower) || line.masterPhone?.includes(searchTerm));
-    const matchesSub = line.subscribers?.some(sub => sub.name?.toLowerCase().includes(searchLower) || sub.phone?.includes(searchTerm));
+    const matchesSub = line.subscribers?.some(sub => sub.name?.toLowerCase().includes(searchLower) || sub.phone?.includes(searchTerm) || sub.home4g?.includes(searchTerm));
     return (line.network === activeTab) && (line.cycle === activeCycle) && (matchesMaster || matchesSub || searchTerm === '');
   });
 
@@ -188,14 +185,15 @@ export default function TelecomSystem() {
                     </div>
                     <div className="space-y-3 overflow-x-auto">
                         {[...Array(7)].map((_, index) => {
-                            const sub = (line.subscribers || [])[index] || { name: '', phone: '', gb: 0, sentMB: 4096, mins: 1500, price: 0, paidAmount: 0 };
+                            const sub = (line.subscribers || [])[index] || defaultSub;
                             const totalMB = (sub.gb || 0) * 1024;
                             const remainingMB = totalMB - (sub.sentMB || 0);
                             const debt = (sub.price || 0) - (sub.paidAmount || 0);
                             return (
-                                <div key={index} className="grid grid-cols-2 md:grid-cols-10 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 text-center hover:border-gray-700 transition-all min-w-[900px]">
+                                <div key={index} className="grid grid-cols-2 md:grid-cols-11 gap-2 items-center bg-[#111] p-3 rounded-2xl border border-gray-800 text-center hover:border-gray-700 transition-all min-w-[1000px]">
                                     <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">الاسم</label><input value={sub.name} onChange={(e) => updateSub(line.id, index, 'name', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
                                     <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">الرقم</label><input value={sub.phone} onChange={(e) => updateSub(line.id, index, 'phone', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
+                                    <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">Home 4G</label><input value={sub.home4g || ''} onChange={(e) => updateSub(line.id, index, 'home4g', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
                                     <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">باقة GB</label><select value={sub.gb} onChange={(e) => updateSub(line.id, index, 'gb', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-blue-400 outline-none"><option value="0">0</option>{Object.keys(priceTable[line.network] || {}).map(g => <option key={g} value={g}>{g}</option>)}</select></div>
                                     <div className="flex flex-col gap-1"><label className="text-[9px] text-gray-500">الدقائق</label><input type="number" value={sub.mins} onChange={(e) => updateSub(line.id, index, 'mins', e.target.value, line.subscribers)} className="bg-black border border-gray-800 rounded-lg p-2 text-[12px] text-white outline-none"/></div>
                                     <div className="hidden md:flex flex-col gap-1"><label className="text-[9px] text-gray-500">إجمالي MB</label><span className="text-[12px] font-bold p-2 text-gray-500">{totalMB}</span></div>
