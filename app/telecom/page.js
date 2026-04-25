@@ -17,27 +17,38 @@ export default function TelecomSystem() {
     'WE': { 20: 250, 25: 280, 30: 310, 40: 360, 50: 410, 60: 520 }
   };
 
-  // دالة لجلب البيانات مع دعم التخزين المؤقت
+  // دالة لجلب البيانات مع حماية الكوتا (الحد الأقصى)
   const fetchLines = async (forceRefresh = false) => {
-    // محاولة جلب البيانات من ذاكرة المتصفح أولاً
-    const cachedData = localStorage.getItem('mo_control_data');
-    if (cachedData && !forceRefresh) {
-      setMasterLines(JSON.parse(cachedData));
+    // 1. إذا لم نطلب تحديث إجباري، اقرأ من الذاكرة وتوقف فوراً!
+    if (!forceRefresh) {
+      const cachedData = localStorage.getItem('mo_control_data');
+      if (cachedData) {
+        setMasterLines(JSON.parse(cachedData));
+        return; // هذه الكلمة تمنع الكود من إكمال الطريق إلى Firebase واستهلاك الكوتا
+      }
     }
-    
+
+    // 2. إذا طلبنا تحديث إجباري أو الذاكرة فارغة (أول مرة تفتح الموقع)
     try {
       const snapshot = await getDocs(collection(db, "lines"));
       const newData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setMasterLines(newData);
-      localStorage.setItem('mo_control_data', JSON.stringify(newData));
+      localStorage.setItem('mo_control_data', JSON.stringify(newData)); // تحديث الذاكرة
     } catch (e) {
       console.error("خطأ في الاتصال بـ Firebase");
+      alert("حدث خطأ أثناء جلب البيانات، تأكد من الإنترنت.");
     }
   };
 
   useEffect(() => { fetchLines(); }, []);
 
-  // تحديث الحالة محلياً وفي المتصفح
+  // دالة زر الريفرش اليدوي
+  const handleManualRefresh = async () => {
+    await fetchLines(true); // إجبار الكود على سحب البيانات من Firebase
+    alert("تم سحب أحدث البيانات من السيرفر بنجاح! 🔄");
+  };
+
+  // تحديث الحالة محلياً وفي المتصفح (صفر استهلاك)
   const updateLocalState = (lineId, newData) => {
     const updated = masterLines.map(l => l.id === lineId ? { ...l, ...newData } : l);
     setMasterLines(updated);
@@ -109,8 +120,8 @@ export default function TelecomSystem() {
 
   const updateMasterLine = async (lineId, field, value) => {
     const val = (['totalGB', 'totalMins', 'baseCost'].includes(field)) ? Number(value) : value;
-    await updateDoc(doc(db, "lines", lineId), { [field]: val });
-    updateLocalState(lineId, { [field]: val });
+    await updateDoc(doc(db, "lines", lineId), { [field]: val }); // Write
+    updateLocalState(lineId, { [field]: val }); // Local
   };
 
   const updateSub = async (lineId, subIndex, field, value, currentSubscribers) => {
@@ -122,8 +133,8 @@ export default function TelecomSystem() {
       const line = masterLines.find(l => l.id === lineId);
       newSubs[subIndex].price = priceTable[line?.network]?.[updatedValue] || 0;
     }
-    await updateDoc(doc(db, "lines", lineId), { subscribers: newSubs });
-    updateLocalState(lineId, { subscribers: newSubs });
+    await updateDoc(doc(db, "lines", lineId), { subscribers: newSubs }); // Write
+    updateLocalState(lineId, { subscribers: newSubs }); // Local
   };
 
   const getStats = (line) => {
@@ -240,7 +251,7 @@ export default function TelecomSystem() {
         <input type="file" id="importFile" className="hidden" onChange={importFromExcel} accept=".xlsx" />
         <label htmlFor="importFile" title="استعادة" className="bg-blue-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-all">📤</label>
         <button onClick={addNewLine} title="إضافة" className="bg-[#ca8a04] text-black w-14 h-14 rounded-full shadow-2xl text-3xl font-bold hover:scale-110 transition-all flex items-center justify-center">+</button>
-        <button onClick={() => fetchLines(true)} title="تحديث البيانات" className="bg-gray-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">🔄</button>
+        <button onClick={handleManualRefresh} title="تحديث البيانات" className="bg-gray-600 text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all">🔄</button>
       </div>
     </div>
   );
