@@ -420,7 +420,7 @@ export default function TelecomSystem() {
       </div>
     );
   }
-  // ── نهاية الحماية ─────────────────────────────────────────────
+  // ──  ─────────────────────────────────────────────
 export default function TelecomSystem() {
   const [activeTab,      setActiveTab]      = useState('Etisalat');
   const [activeCycle,    setActiveCycle]    = useState('1');
