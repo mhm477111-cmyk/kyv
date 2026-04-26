@@ -1,12 +1,8 @@
 'use client';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState } from 'react'; // تمت إضافة useState
 import { db } from '@/lib/firebaseConfigV2';
-import {
-  collection, onSnapshot, doc, updateDoc, addDoc,
-  deleteDoc, setDoc, query, where
-} from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc, setDoc, query, where } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
-
 
 // ─────────────────────────────────────────────────────────────────
 // Hook: Debounce
@@ -395,6 +391,36 @@ function buildFormattedExcel(allLines) {
 // ─────────────────────────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────────────────────────
+export default function TelecomSystem() {
+  // ── إضافة الحماية ─────────────────────────────────────────────
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const ADMIN_PASSWORD = "123"; // قم بتغيير كلمة المرور من هنا
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-gray-200 p-4">
+        <h1 className="text-2xl font-black text-[#ca8a04] mb-6">MO CONTROL - دخول</h1>
+        <input
+          type="password"
+          placeholder="أدخل كلمة المرور"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="bg-[#111] border border-gray-800 rounded-xl py-3 px-6 text-center outline-none focus:border-[#ca8a04] mb-4 w-64"
+        />
+        <button
+          onClick={() => {
+            if (password === ADMIN_PASSWORD) setIsAuthenticated(true);
+            else alert('كلمة المرور غير صحيحة!');
+          }}
+          className="bg-[#ca8a04] text-black font-bold py-2 px-8 rounded-xl hover:bg-yellow-600 transition-all"
+        >
+          دخول
+        </button>
+      </div>
+    );
+  }
+  // ── نهاية الحماية ─────────────────────────────────────────────
 export default function TelecomSystem() {
   const [activeTab,      setActiveTab]      = useState('Etisalat');
   const [activeCycle,    setActiveCycle]    = useState('1');
