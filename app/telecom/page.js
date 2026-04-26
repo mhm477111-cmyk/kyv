@@ -946,9 +946,8 @@ export default function TelecomSystem() {
                 <div onClick={() => setExpandedLine(isOpen?null:line.id)}
                   className="p-3 sm:p-4 cursor-pointer hover:bg-[#161616] transition-colors">
 
-                  {/* ── Mobile: stacked layout ── */}
+                  {/* Header top row: name + delete */}
                   <div className="flex items-start justify-between gap-2 mb-3">
-                    {/* Name block */}
                     <div className="bg-black p-2.5 sm:p-3 rounded-xl border border-gray-800 flex-1 min-w-0">
                       <p className="text-[8px] sm:text-[9px] text-gray-500 uppercase mb-1">{isH4G?'صاحب البرينت / رقم الخط':'صاحب الخط / الرقم / التفعيل'}</p>
                       <p className="font-bold text-white text-xs sm:text-sm truncate">
@@ -958,23 +957,8 @@ export default function TelecomSystem() {
                         {isH4G?`باقة: ${h.package||'غير محددة'}`:`تفعيل: ${line.activationDate||'غير محدد'}`}
                       </p>
                     </div>
-
-                    {/* Seats indicator — only for non-Home4G */}
-                    {!isH4G && (
-                      <div className="flex-shrink-0 hidden sm:flex flex-col items-center justify-center">
-                        <SeatsIndicator subscribers={line.subscribers} />
-                      </div>
-                    )}
-
                     <button onClick={(e)=>deleteLine(e,line.id)} className="text-gray-600 hover:text-red-500 transition-colors flex-shrink-0 text-sm sm:text-base mt-1">🗑️</button>
                   </div>
-
-                  {/* Seats compact badge — mobile only, non-Home4G */}
-                  {!isH4G && (
-                    <div className="flex sm:hidden mb-2">
-                      <SeatsIndicator subscribers={line.subscribers} compact={true} />
-                    </div>
-                  )}
 
                   {/* Stats row */}
                   {isH4G ? (
@@ -995,6 +979,8 @@ export default function TelecomSystem() {
                       <ToggleBtn label="الفاتورة" active={line.billPaid}    onText="مدفوعة ✓"  offText="غير مدفوعة" onBorder="border-green-700 bg-green-900/30 text-green-400"  offBorder="border-red-900 bg-red-900/20 text-red-400"       onClick={(e)=>toggleField(e,line.id,'billPaid',line.billPaid)} />
                       <ToggleBtn label="فواتشر"   active={line.voucherSent} onText="اتباعت ✓" offText="لسه"        onBorder="border-cyan-700 bg-cyan-900/30 text-cyan-400"    offBorder="border-gray-700 bg-gray-900/20 text-gray-500"    onClick={(e)=>toggleField(e,line.id,'voucherSent',line.voucherSent)} />
                       <ToggleBtn label="TOD"      active={line.todSent}     onText="اتباعت ✓" offText="لسه"        onBorder="border-yellow-600 bg-yellow-900/30 text-yellow-400" offBorder="border-gray-700 bg-gray-900/20 text-gray-500"  onClick={(e)=>toggleField(e,line.id,'todSent',line.todSent)} />
+                      {/* Seats badge — inline مع باقي الأزرار */}
+                      <SeatsIndicator subscribers={line.subscribers} compact={true} />
                     </div>
                   )}
                 </div>
