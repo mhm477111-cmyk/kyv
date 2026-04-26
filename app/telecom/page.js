@@ -11,8 +11,8 @@ import * as XLSX from 'xlsx';
 // ⚙️  AUTH — غيّر اليوزر والباسورد هنا
 // ─────────────────────────────────────────────────────────────────
 const CREDENTIALS = [
-  { username: 'mo',    password: 'mo1234' },
-  { username: 'admin', password: 'admin@2025' },
+  { username: 'mo',    password: '732005' },
+  { username: 'admin', password: 'radroda' },
 ];
 const SESSION_KEY = 'mo_control_auth';
 const SESSION_TTL = 8 * 60 * 60 * 1000; // 8 ساعات
