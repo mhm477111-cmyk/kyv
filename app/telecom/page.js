@@ -946,9 +946,11 @@ export default function TelecomSystem() {
                 <div onClick={() => setExpandedLine(isOpen?null:line.id)}
                   className="p-3 sm:p-4 cursor-pointer hover:bg-[#161616] transition-colors">
 
-                  {/* Header top row: name + delete */}
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="bg-black p-2.5 sm:p-3 rounded-xl border border-gray-800 flex-1 min-w-0">
+                  {/* Header Row — اسم الخط + الأزرار + حذف كلهم في نفس السطر */}
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+
+                    {/* Name block */}
+                    <div className="bg-black p-2.5 sm:p-3 rounded-xl border border-gray-800 w-full md:w-60 text-center md:text-right flex-shrink-0">
                       <p className="text-[8px] sm:text-[9px] text-gray-500 uppercase mb-1">{isH4G?'صاحب البرينت / رقم الخط':'صاحب الخط / الرقم / التفعيل'}</p>
                       <p className="font-bold text-white text-xs sm:text-sm truncate">
                         {isH4G?`${h.ownerName||'بدون اسم'} - ${h.linePhone||'0000'}`:`${line.ownerName||'بدون اسم'} - ${line.masterPhone||'0000'}`}
@@ -957,32 +959,32 @@ export default function TelecomSystem() {
                         {isH4G?`باقة: ${h.package||'غير محددة'}`:`تفعيل: ${line.activationDate||'غير محدد'}`}
                       </p>
                     </div>
-                    <button onClick={(e)=>deleteLine(e,line.id)} className="text-gray-600 hover:text-red-500 transition-colors flex-shrink-0 text-sm sm:text-base mt-1">🗑️</button>
-                  </div>
 
-                  {/* Stats row */}
-                  {isH4G ? (
-                    <div className="flex flex-row gap-1.5 sm:gap-2 flex-wrap">
-                      <StatBox label="الربح" value={`${stats.profit} ج`} color={stats.profit>=0?'text-green-500':'text-red-500'} />
-                      <StatBox label="ديون"  value={`${stats.debts} ج`}  color="text-orange-500" />
-                      <div className="bg-black/30 p-2 rounded-lg border border-[#ca8a04]/30 min-w-[75px]">
-                        <p className="text-[8px] text-gray-500">حالة الدفع</p>
-                        <p className={`font-bold text-xs ${h.paymentStatus==='مدفوع'?'text-green-500':h.paymentStatus==='جزئي'?'text-yellow-400':'text-red-400'}`}>{h.paymentStatus||'غير مدفوع'}</p>
+                    {/* Stats + Toggles + Seats — جنب الاسم */}
+                    {isH4G ? (
+                      <div className="flex flex-row gap-1.5 sm:gap-2 flex-wrap items-center flex-1">
+                        <StatBox label="الربح" value={`${stats.profit} ج`} color={stats.profit>=0?'text-green-500':'text-red-500'} />
+                        <StatBox label="ديون"  value={`${stats.debts} ج`}  color="text-orange-500" />
+                        <div className="bg-black/30 p-2 rounded-lg border border-[#ca8a04]/30 min-w-[75px]">
+                          <p className="text-[8px] text-gray-500">حالة الدفع</p>
+                          <p className={`font-bold text-xs ${h.paymentStatus==='مدفوع'?'text-green-500':h.paymentStatus==='جزئي'?'text-yellow-400':'text-red-400'}`}>{h.paymentStatus||'غير مدفوع'}</p>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-row flex-wrap gap-1.5 sm:gap-2 items-center">
-                      <StatBox label="الربح"        value={`${stats.profit} ج`}        color={stats.profit>=0?'text-green-500':'text-red-500'} />
-                      <StatBox label="ديون"         value={`${stats.debts} ج`}         color="text-orange-500" />
-                      <StatBox label="جيجا متبقية"  value={`${stats.remainingGB} GB`}  color="text-blue-400" />
-                      <StatBox label="دقائق متبقية" value={`${stats.remainingMins} د`} color="text-green-400" />
-                      <ToggleBtn label="الفاتورة" active={line.billPaid}    onText="مدفوعة ✓"  offText="غير مدفوعة" onBorder="border-green-700 bg-green-900/30 text-green-400"  offBorder="border-red-900 bg-red-900/20 text-red-400"       onClick={(e)=>toggleField(e,line.id,'billPaid',line.billPaid)} />
-                      <ToggleBtn label="فواتشر"   active={line.voucherSent} onText="اتباعت ✓" offText="لسه"        onBorder="border-cyan-700 bg-cyan-900/30 text-cyan-400"    offBorder="border-gray-700 bg-gray-900/20 text-gray-500"    onClick={(e)=>toggleField(e,line.id,'voucherSent',line.voucherSent)} />
-                      <ToggleBtn label="TOD"      active={line.todSent}     onText="اتباعت ✓" offText="لسه"        onBorder="border-yellow-600 bg-yellow-900/30 text-yellow-400" offBorder="border-gray-700 bg-gray-900/20 text-gray-500"  onClick={(e)=>toggleField(e,line.id,'todSent',line.todSent)} />
-                      {/* Seats badge — inline مع باقي الأزرار */}
-                      <SeatsIndicator subscribers={line.subscribers} compact={true} />
-                    </div>
-                  )}
+                    ) : (
+                      <div className="flex flex-row flex-wrap gap-1.5 sm:gap-2 items-center flex-1">
+                        <StatBox label="الربح"        value={`${stats.profit} ج`}        color={stats.profit>=0?'text-green-500':'text-red-500'} />
+                        <StatBox label="ديون"         value={`${stats.debts} ج`}         color="text-orange-500" />
+                        <StatBox label="جيجا متبقية"  value={`${stats.remainingGB} GB`}  color="text-blue-400" />
+                        <StatBox label="دقائق متبقية" value={`${stats.remainingMins} د`} color="text-green-400" />
+                        <ToggleBtn label="الفاتورة" active={line.billPaid}    onText="مدفوعة ✓"  offText="غير مدفوعة" onBorder="border-green-700 bg-green-900/30 text-green-400"  offBorder="border-red-900 bg-red-900/20 text-red-400"       onClick={(e)=>toggleField(e,line.id,'billPaid',line.billPaid)} />
+                        <ToggleBtn label="فواتشر"   active={line.voucherSent} onText="اتباعت ✓" offText="لسه"        onBorder="border-cyan-700 bg-cyan-900/30 text-cyan-400"    offBorder="border-gray-700 bg-gray-900/20 text-gray-500"    onClick={(e)=>toggleField(e,line.id,'voucherSent',line.voucherSent)} />
+                        <ToggleBtn label="TOD"      active={line.todSent}     onText="اتباعت ✓" offText="لسه"        onBorder="border-yellow-600 bg-yellow-900/30 text-yellow-400" offBorder="border-gray-700 bg-gray-900/20 text-gray-500"  onClick={(e)=>toggleField(e,line.id,'todSent',line.todSent)} />
+                        <SeatsIndicator subscribers={line.subscribers} compact={true} />
+                      </div>
+                    )}
+
+                    <button onClick={(e)=>deleteLine(e,line.id)} className="text-gray-600 hover:text-red-500 transition-colors flex-shrink-0">🗑️</button>
+                  </div>
                 </div>
 
                 {/* ── Expanded: Home4G ── */}
